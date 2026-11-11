@@ -1,0 +1,121 @@
+.shipping-warehouse-page {
+  min-width: 0;
+}
+.shipping-warehouse-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 16px;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--mes-muted);
+}
+.shipping-warehouse-stats strong {
+  color: var(--mes-text);
+}
+.shipping-warehouse-link {
+  color: #a0d4fc;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.shipping-warehouse-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  gap: 10px;
+}
+.shipping-warehouse-inline {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.shipping-warehouse-movements .ui-data-table .ui-field {
+  min-width: 0;
+}
+.shipping-warehouse-movements .ui-data-table input {
+  min-width: 0;
+  width: 100%;
+  padding-inline: 4px;
+}
+.shipping-warehouse-dual {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1 1 0;
+  min-height: 0;
+  gap: 10px;
+}
+.shipping-warehouse-dual-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.shipping-warehouse-panel {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.shipping-warehouse-panel[hidden] {
+  display: none;
+}
+.shipping-warehouse-panel > .surface-fill {
+  flex: 1 1 0;
+}
+.shipping-warehouse-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  height: min(850px, calc(100dvh - 48px));
+  overflow: hidden;
+}
+.shipping-warehouse-dialog > .modal-heading,
+.shipping-warehouse-dialog > .modal-footer {
+  flex-shrink: 0;
+}
+.shipping-warehouse-dialog > .modal-body {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  max-height: none;
+  gap: 8px;
+  overflow-y: auto;
+}
+.shipping-warehouse-dialog .filters-panel {
+  margin: 0;
+}
+.shipping-warehouse-dialog .table-overflow {
+  flex: 1 1 0;
+  min-height: 80px;
+  max-height: none;
+}
+.shipping-warehouse-dialog .ui-tabs,
+.shipping-warehouse-dual .ui-tabs {
+  flex: 0 0 32px;
+  min-height: 32px;
+  height: 32px;
+}
+.shipping-warehouse-dialog .ui-data-table .ui-field {
+  margin: 0;
+}
+.shipping-warehouse-dialog .document-preview {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.shipping-warehouse-dialog .document-preview-frame {
+  height: 100%;
+}
+@media (max-width: 700px) {
+  .shipping-warehouse-stats {
+    gap: 4px 9px;
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  .shipping-warehouse-dialog .shipping-warehouse-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .shipping-warehouse-page .catalog-actions .action-group-picker {
+    width: 130px;
+    flex-shrink: 0;
+  }
+}

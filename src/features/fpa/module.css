@@ -1,0 +1,16 @@
+.fpa-counts {
+  display: block;
+  margin-top: 5px;
+  color: var(--mes-muted);
+  font-size: 10px;
+}
+.fpa-fields {
+  display: grid;
+  gap: 16px;
+}
+.fpa-detail .ui-form-section {
+  margin-top: 20px;
+}
+.fpa-detail .table-overflow {
+  flex: none;
+}

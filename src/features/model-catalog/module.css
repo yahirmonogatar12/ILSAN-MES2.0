@@ -1,0 +1,30 @@
+.model-catalog-module .catalog-actions {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: nowrap;
+}
+.model-catalog-module .model-catalog-search {
+  min-width: 80px;
+  flex: 1 1 140px;
+  max-width: 200px;
+}
+.model-catalog-module .model-catalog-search input {
+  height: 31px;
+  font-size: 12px;
+}
+.model-catalog-fields {
+  display: grid;
+  gap: 16px;
+}
+@container catalog (max-width: 560px) {
+  .model-catalog-module .catalog-actions {
+    flex-wrap: wrap;
+  }
+  .model-catalog-module .model-catalog-search {
+    flex: 1 0 100%;
+    max-width: none;
+  }
+  .model-catalog-module .catalog-actions > .button {
+    flex: 1;
+  }
+}

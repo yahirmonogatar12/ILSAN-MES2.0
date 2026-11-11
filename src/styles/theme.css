@@ -1,0 +1,26 @@
+/* theme styles: edit this layer only. */
+:root {
+  --mes-background: #32323e;
+  --mes-panel: #40424f;
+  --mes-header: #172a46;
+  --mes-accent: #3498db;
+  --mes-accent-hover: #2980b9;
+  --mes-success: #27ae60;
+  --mes-danger: #c34b4b;
+  --mes-text: #ecf0f1;
+  --mes-muted: #a6adb9;
+  --mes-border: #ffffff14;
+}
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #ecf0f1;
+  background: #32323e;
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --ink: #ecf0f1;
+  --muted: #a6adb9;
+  --border: #ffffff14;
+  --accent: #3498db;
+}

@@ -1,0 +1,100 @@
+.administration-scope {
+  color: var(--mes-muted);
+  font-size: 11px;
+}
+.administration-module .administration-search {
+  flex: 1 1 140px;
+  min-width: 80px;
+  max-width: 200px;
+}
+.administration-module .catalog-actions {
+  flex-wrap: nowrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.administration-module .catalog-actions > .button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+@container catalog (max-width: 560px) {
+  .administration-module .administration-scope {
+    display: none;
+  }
+  .administration-module .administration-search {
+    max-width: none;
+  }
+}
+.administration-module .administration-search input {
+  height: 31px;
+  font-size: 12px;
+}
+.administration-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #c5cbd6;
+  background: #555866;
+}
+.administration-status.administration-active {
+  color: #88e5b2;
+  background: #24744840;
+}
+.administration-fields {
+  display: grid;
+  gap: 16px;
+}
+.administration-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 8px 16px;
+}
+.administration-form .ui-form-section > .ui-check {
+  margin-top: 16px;
+}
+.administration-permissions .administration-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.administration-permissions .administration-module-permissions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 16px;
+}
+.administration-permissions .administration-toolbar .ui-field {
+  flex: 1 1 220px;
+}
+.administration-permissions .administration-permission-page {
+  border: 1px solid var(--mes-border);
+  border-radius: 5px;
+  margin: 10px 0;
+}
+.administration-permissions .administration-permission-page > summary {
+  display: list-item;
+  cursor: pointer;
+  padding: 12px;
+  font-weight: 600;
+  background: #252c424d;
+}
+.administration-permissions .administration-permission-page > summary span {
+  margin-left: 10px;
+  color: var(--mes-muted);
+  font-size: 11px;
+}
+.administration-permissions .administration-permission-section {
+  padding: 12px;
+  border-top: 1px solid var(--mes-border);
+}
+.administration-permissions .administration-section-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.administration-permissions .administration-section-heading h3 {
+  font-size: 12px;
+  margin: 0;
+}

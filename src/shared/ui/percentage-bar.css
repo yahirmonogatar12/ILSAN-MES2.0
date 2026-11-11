@@ -1,0 +1,48 @@
+.percentage-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.percentage-bar-track {
+  display: flex;
+  flex: 1 1 0;
+  height: 28px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #182335;
+  box-shadow: inset 0 0 0 1px #ffffff0f;
+}
+.percentage-bar-segment {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+}
+.percentage-bar-positive {
+  background: #5aa469;
+}
+.percentage-bar-negative {
+  background: #d65a5a;
+}
+.percentage-bar-label {
+  padding: 0 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 1px 1px #0006;
+}
+.percentage-bar-side-label {
+  flex: 0 0 52px;
+  color: var(--mes-text);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}

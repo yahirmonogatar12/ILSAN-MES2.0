@@ -1,0 +1,113 @@
+@import "./module.css";
+
+.quality-control-lines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  padding: 10px 12px;
+}
+.quality-control-line-card.button {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 65px;
+}
+.quality-control-line-card span {
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--mes-muted);
+}
+.quality-control-report-panel {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.quality-control-report-panel > .table-overflow {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+}
+.quality-control-report-panel > .ui-tabs,
+.quality-control-page .surface-fill > .ui-tabs {
+  flex: 0 0 32px;
+  height: 32px;
+  min-height: 32px;
+}
+.quality-control-charts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1 1 0;
+  min-height: 0;
+  gap: 10px;
+  padding: 10px;
+}
+.quality-control-charts > .surface {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
+.quality-control-target {
+  display: flex;
+  align-items: end;
+  gap: 7px;
+}
+.quality-control-target .ui-field {
+  max-width: 110px;
+}
+.quality-control-target .ui-field > label {
+  font-size: 9px;
+}
+.quality-control-target .ui-field > input {
+  padding: 5px 7px;
+  height: 30px;
+}
+.quality-control-target .inline-message {
+  max-width: 240px;
+  padding: 5px;
+}
+.quality-control-over-target {
+  color: #ff9b9b;
+  font-weight: 700;
+}
+.quality-control-duplicate > td {
+  color: #ffc18d;
+}
+.quality-control-week-end > td {
+  border-bottom: 2px solid #536b85;
+}
+@media (max-width: 700px) {
+  .quality-control-lines {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    padding: 8px;
+  }
+  .quality-control-line-card.button {
+    min-height: 48px;
+    padding: 5px;
+  }
+  .quality-control-charts {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 6px;
+    gap: 6px;
+  }
+  .quality-control-charts .metric-chart {
+    padding: 6px;
+    gap: 2px;
+  }
+  .quality-control-target .ui-field {
+    max-width: 94px;
+  }
+  .quality-control-charts.quality-control-charts-compact {
+    display: flex;
+    flex-direction: column;
+  }
+  .quality-control-charts-compact > .ui-field {
+    flex-shrink: 0;
+  }
+  .quality-control-charts-compact > .surface {
+    flex: 1 1 0;
+  }
+}

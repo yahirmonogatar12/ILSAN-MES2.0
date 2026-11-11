@@ -1,0 +1,221 @@
+.administration-panel {
+  gap: 14px;
+}
+.administration-panel > .surface {
+  border-color: #ffffff13;
+  border-radius: 13px;
+}
+.administration-panel > .filters-panel {
+  margin-bottom: 0;
+}
+.administration-panel .catalog-heading {
+  padding: 13px 16px;
+  background: #ffffff03;
+}
+.administration-panel .catalog-heading h2 {
+  font-size: 13px;
+}
+.administration-panel .table-overflow {
+  background: #353844;
+}
+.administration-panel .ui-data-table td {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.administration-panel-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  min-width: 0;
+}
+.administration-panel-person > span {
+  flex: 0 0 31px;
+  display: grid;
+  place-items: center;
+  height: 31px;
+  border-radius: 10px;
+  background: #5580a333;
+  color: #b9d8ee;
+  font-weight: 600;
+}
+.administration-panel-person > div {
+  min-width: 0;
+}
+.administration-panel-person strong,
+.administration-panel-person small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.administration-panel-person small {
+  color: var(--mes-muted);
+  font-size: 10px;
+  margin-top: 3px;
+}
+.administration-panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.administration-panel-tags > span {
+  background: #6583aa1c;
+  border: 1px solid #8fa5c126;
+  border-radius: 5px;
+  padding: 3px 6px;
+  color: #cfdaea;
+  font-size: 10px;
+}
+.administration-panel-status {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 20px;
+  background: #ffffff0d;
+  color: #c1c9d6;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.administration-panel-active {
+  color: #8fe5be;
+  background: #35c28a1c;
+}
+.administration-panel-warning {
+  color: #ffd48b;
+  background: #e6a94b1c;
+}
+.administration-panel-role {
+  font-weight: 600;
+  color: #e7eef7;
+}
+.administration-panel-export {
+  color: #57d69b;
+}
+.administration-panel-dialog {
+  width: min(1260px, 96vw);
+  height: min(850px, 92dvh);
+  max-height: 92dvh;
+  overflow: hidden;
+}
+.administration-panel-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.administration-panel-dialog > .modal-heading,
+.administration-panel-dialog > .modal-footer {
+  flex: 0 0 auto;
+}
+.administration-panel-dialog > .modal-body {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+.administration-panel-dialog > .modal-body > .table-overflow {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.administration-panel-area-tools {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.administration-panel-area-tools .ui-field {
+  flex: 1 1 200px;
+}
+.administration-panel-selection {
+  margin-right: auto;
+  color: var(--mes-muted);
+  font-size: 11px;
+}
+.administration-panel-changes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.administration-panel-changes section {
+  min-width: 0;
+}
+.administration-panel-changes h3,
+.administration-panel-live h3 {
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.administration-panel-changes pre {
+  min-height: 90px;
+  padding: 14px;
+  border: 1px solid #ffffff17;
+  border-radius: 8px;
+  background: #282b36;
+  font:
+    12px/1.6 "IBM Plex Mono",
+    monospace;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.administration-panel
+  .administration-panel-audit-table
+  tbody
+  tr:not([aria-hidden="true"]) {
+  height: 42px;
+}
+.administration-panel
+  .administration-panel-audit-table
+  tbody
+  tr:not([aria-hidden="true"])
+  td {
+  height: 42px;
+  max-height: 42px;
+  padding: 6px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.administration-panel-limit {
+  margin: 7px 14px;
+  color: var(--mes-muted);
+  font-size: 11px;
+}
+@container filters (min-width: 1020px) {
+  .administration-panel-audit .filter-bar {
+    gap: 8px;
+    padding: 10px;
+  }
+  .administration-panel-audit .filter-field {
+    flex: 1 1 95px;
+    min-width: 0;
+  }
+  .administration-panel-audit .filter-field input,
+  .administration-panel-audit .filter-field select {
+    width: 100%;
+    min-width: 0;
+  }
+}
+@media (max-height: 760px) {
+  .administration-panel {
+    gap: 10px;
+  }
+}
+@media (max-width: 700px) {
+  .administration-panel .catalog-actions {
+    gap: 5px;
+  }
+  .administration-panel-changes {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) and (max-height: 760px), (max-height: 540px) {
+  .administration-panel-dialog > .modal-body {
+    padding: 10px;
+  }
+  .administration-panel-area-tools {
+    gap: 6px;
+  }
+  .administration-panel-area-tools .ui-field {
+    flex-basis: 120px;
+  }
+}

@@ -1,0 +1,17 @@
+.scrap-control-module {
+  min-width: 0;
+}
+.scrap-control-grid .ui-data-table tr[aria-rowindex] > td {
+  height: 32px;
+  padding: 4px 5px;
+}
+.scrap-control-grid .ui-data-table td > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scrap-control-zero {
+  color: #f6b16c;
+  font-weight: 700;
+}

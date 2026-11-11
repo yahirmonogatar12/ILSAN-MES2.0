@@ -1,0 +1,166 @@
+.rework-module .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.rework-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.rework-badges-compact {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+.rework-badges-compact .rework-badge {
+  padding: 3px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.rework-badges-compact abbr {
+  text-decoration: none;
+}
+.rework-badge {
+  display: inline-block;
+  font-size: 10px;
+  border: 1px solid #ffffff25;
+  border-radius: 4px;
+  padding: 3px 6px;
+  background: #ffffff08;
+  white-space: normal;
+}
+.rework-state-PENDIENTE {
+  color: #f3d58b;
+  background: #a17a1718;
+}
+.rework-state-EN_PROCESO {
+  color: #9ed0ff;
+  background: #4a90e220;
+}
+.rework-state-COMPLETADA {
+  color: #a0e8b8;
+  background: #219f6020;
+}
+.rework-state-CANCELADA {
+  color: #ffaaaa;
+  background: #ce4b4b20;
+}
+.rework-counts {
+  display: flex;
+  flex-shrink: 0;
+  gap: 14px;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--mes-muted);
+}
+.rework-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.rework-form .table-overflow {
+  flex: initial;
+  max-height: 220px;
+  margin-bottom: 8px;
+}
+.rework-form .ui-data-table td {
+  padding: 5px;
+}
+.rework-form .ui-data-table input,
+.rework-form .ui-data-table select {
+  min-width: 0;
+  width: 100%;
+  height: 30px;
+}
+.rework-total {
+  margin: 0;
+}
+.rework-empty {
+  margin: 0;
+  color: var(--mes-muted);
+}
+.rework-programming {
+  display: grid;
+  gap: 8px;
+}
+.rework-programming > div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+.rework-detail[open] {
+  height: min(860px, calc(100dvh - 48px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.rework-detail > .modal-heading,
+.rework-detail > .modal-footer {
+  flex-shrink: 0;
+}
+.rework-detail > .modal-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  overflow: hidden;
+}
+.rework-detail .ui-tabs {
+  flex-shrink: 0;
+  height: 32px;
+  min-height: 32px;
+}
+.rework-information {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--mes-border);
+}
+.rework-information > summary {
+  font-weight: 600;
+  padding: 4px 0 8px;
+  cursor: pointer;
+}
+.rework-information-body {
+  max-height: 28dvh;
+  overflow: auto;
+  padding-bottom: 8px;
+  display: grid;
+  gap: 8px;
+}
+.rework-information-body .detail-grid {
+  margin: 0;
+}
+.rework-information-body p {
+  margin: 0;
+  font-size: 11px;
+}
+.rework-comments {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rework-tab-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rework-tab-content .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+@media (max-width: 600px) {
+  .rework-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rework-programming > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rework-counts {
+    font-size: 10px;
+    gap: 8px;
+  }
+}

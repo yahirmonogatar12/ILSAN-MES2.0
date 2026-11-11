@@ -1,0 +1,99 @@
+.bom-module .catalog-heading {
+  align-items: flex-start;
+}
+.bom-module .catalog-actions {
+  min-width: 0;
+}
+.bom-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+}
+.bom-upload {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.bom-upload > .ui-field {
+  flex: 1 1 210px;
+}
+.bom-detail .ui-form-section,
+.bom-files {
+  margin-top: 20px;
+}
+.bom-files h3 {
+  margin-bottom: 12px;
+}
+.bom-detail .table-overflow {
+  flex: none;
+}
+.bom-detail > .modal-body > .detail-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 0 0 18px;
+}
+.bom-differences > .ui-tabs {
+  height: 30px;
+  margin-top: 12px;
+}
+.bom-differences .bom-diff-before {
+  color: #ffc2ba;
+  background: #c44c4c12;
+}
+.bom-differences .bom-diff-after {
+  color: #a8ecc8;
+  background: #20ad641a;
+  font-weight: 600;
+}
+.bom-diff-added tbody td:first-child {
+  box-shadow: inset 3px 0 #20ad64;
+}
+.bom-diff-removed tbody td:first-child {
+  box-shadow: inset 3px 0 #d46a64;
+}
+@media (max-width: 700px) {
+  .bom-detail > .modal-body > .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.bom-items {
+  margin-top: 16px;
+}
+.bom-items > summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.bom-history .filters-panel {
+  margin-bottom: 12px;
+}
+.bom-history[open] {
+  display: flex;
+  flex-direction: column;
+  height: min(820px, calc(100dvh - 48px));
+  overflow: hidden;
+}
+.bom-history > .modal-heading,
+.bom-history > .modal-footer,
+.bom-history > .modal-body > :not(.table-overflow) {
+  flex-shrink: 0;
+}
+.bom-history > .modal-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+.bom-history .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.bom-preview.modal-wide {
+  width: min(1200px, calc(100vw - 30px));
+}

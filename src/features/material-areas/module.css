@@ -1,0 +1,13 @@
+.material-areas-module .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.material-areas-summary {
+  font-size: 12px;
+  color: var(--mes-muted);
+}
+.material-areas-stock {
+  font-weight: 600;
+  color: #8ee1b5 !important;
+}

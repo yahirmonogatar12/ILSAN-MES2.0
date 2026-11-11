@@ -1,0 +1,33 @@
+.disclosure-menu {
+  position: relative;
+}
+.disclosure-menu > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.disclosure-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.disclosure-menu > summary:focus-visible {
+  outline: 2px solid #69b9f5;
+  outline-offset: 3px;
+}
+.disclosure-menu-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  padding: 6px;
+  border: 1px solid var(--mes-border);
+  border-radius: 0 0 8px 8px;
+  background: var(--mes-panel);
+  box-shadow: 0 8px 24px #0005;
+  z-index: 30;
+}
+.disclosure-menu-right > .disclosure-menu-content {
+  left: auto;
+  right: 0;
+}
+.disclosure-menu:not([open]) > .disclosure-menu-content {
+  display: none;
+}

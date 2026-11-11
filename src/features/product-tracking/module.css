@@ -1,0 +1,212 @@
+.product-tracking-page {
+  gap: 10px;
+}
+.product-tracking-page > .ui-tabs {
+  flex: 0 0 32px;
+  height: 32px;
+  min-height: 32px;
+}
+.product-tracking-panel {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+.product-tracking-panel[hidden] {
+  display: none;
+}
+.product-tracking-panel > .surface-fill {
+  flex: 1 1 0;
+}
+.product-tracking-panel > .filters-panel {
+  margin-bottom: 0;
+}
+.product-tracking-table tbody tr,
+.product-tracking-table tbody td {
+  height: 32px;
+}
+.product-tracking-table tbody td {
+  padding: 4px 7px;
+}
+.product-tracking-cell {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-tracking-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.product-tracking-hecho,
+.product-tracking-ok,
+.product-tracking-active {
+  color: #58c488;
+}
+.product-tracking-pendiente,
+.product-tracking-completed {
+  color: #a6adb9;
+}
+.product-tracking-na {
+  color: #8fa5b5;
+  font-style: italic;
+}
+.product-tracking-nd,
+.product-tracking-rep {
+  color: #e6b558;
+}
+.product-tracking-embarques,
+.product-tracking-assy {
+  color: #6fc1ef;
+}
+.product-tracking-imd {
+  color: #58c488;
+}
+.product-tracking-smt {
+  color: #e6b558;
+}
+.product-tracking-salio {
+  color: #b894ec;
+}
+.product-tracking-scrap,
+.product-tracking-ng {
+  color: #ff8585;
+}
+.product-tracking-stages .table-group-header th {
+  padding: 0;
+  background: #34334e;
+  text-align: left;
+}
+.product-tracking-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 0;
+  padding: 12px;
+}
+.product-tracking-facts > div {
+  min-width: 0;
+  max-width: 100%;
+}
+.product-tracking-facts dt {
+  color: #a6b7c7;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.product-tracking-facts dd {
+  margin: 4px 0 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.product-tracking-notice {
+  margin: 0;
+  padding: 8px 12px;
+  color: #e6c584;
+  background: #b8860b16;
+  border-top: 1px solid #ffffff10;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: normal;
+}
+.product-tracking-stage-cell {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-tracking-upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  padding: 14px 18px;
+}
+.product-tracking-upload .ui-field {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+.product-tracking-upload .ui-field input {
+  width: 100%;
+  min-width: 0;
+}
+.product-tracking-upload[hidden] {
+  display: none;
+}
+.product-tracking-file-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+}
+.product-tracking-file-summary span {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-tracking-counts {
+  padding: 8px 14px;
+  color: var(--mes-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.product-tracking-message {
+  margin: 6px 14px;
+  flex-shrink: 0;
+}
+.product-tracking-dialog {
+  height: min(84dvh, 800px);
+  max-height: 84dvh;
+  overflow: hidden;
+}
+.product-tracking-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.product-tracking-dialog > .modal-heading,
+.product-tracking-dialog > .modal-footer {
+  flex: 0 0 auto;
+}
+.product-tracking-dialog > .modal-body {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  max-height: none;
+}
+.product-tracking-dialog > .modal-body > .surface-fill {
+  flex: 1 1 0;
+}
+.product-tracking-batch .ui-data-table th:nth-child(2),
+.product-tracking-batch .ui-data-table td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #3a3c48;
+}
+.product-tracking-batch .ui-data-table th:nth-child(2) {
+  z-index: 3;
+  background: var(--mes-header);
+}
+@media (max-width: 620px) {
+  .product-tracking-upload {
+    padding: 10px;
+    gap: 8px;
+  }
+  .product-tracking-upload .ui-field {
+    flex-basis: 100%;
+  }
+  .product-tracking-facts {
+    gap: 10px 16px;
+  }
+}

@@ -1,0 +1,72 @@
+.ui-tabs {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #69758d transparent;
+  overscroll-behavior-x: contain;
+}
+.ui-tab-item {
+  display: flex;
+  align-items: stretch;
+  flex: 0 1 180px;
+  min-width: 110px;
+  max-width: 200px;
+  border-right: 1px solid #ffffff24;
+  background: var(--mes-panel);
+  color: #d3d3d3;
+}
+.ui-tab-item:hover {
+  background: #505361;
+}
+.ui-tab-item.ui-tab-active {
+  background: #4a90e2;
+  color: #fff;
+}
+.ui-tabs .ui-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 7px;
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 10px;
+  text-align: left;
+}
+.ui-tabs .ui-tab > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ui-tabs .ui-tab > svg {
+  flex-shrink: 0;
+}
+.ui-tabs .ui-tab:hover {
+  background: transparent;
+}
+.ui-tabs .ui-tab:focus-visible {
+  outline: 1px solid #b2d7ff;
+  outline-offset: -2px;
+}
+.ui-tabs .ui-tab-close {
+  align-self: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 18px;
+  padding: 2px;
+  border-radius: 2px;
+  color: inherit;
+  opacity: 0.7;
+}
+.ui-tabs .ui-tab-close:hover {
+  background: #ffffff24;
+  opacity: 1;
+}

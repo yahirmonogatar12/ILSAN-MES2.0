@@ -1,0 +1,233 @@
+/* material styles: edit this layer only. */
+
+.materials-module .material-cell {
+  min-width: 160px;
+}
+.materials-module .material-code {
+  color: #9ed1fb;
+  font-size: 12px;
+  font-weight: 600;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.materials-module .material-code:hover {
+  color: #d8edff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.materials-module .material-specification {
+  min-width: 265px;
+  max-width: 360px;
+  text-align: left;
+  line-height: 1.5;
+}
+.materials-module .classification-tag,
+.materials-module .property-label,
+.materials-module .unit-value {
+  color: #dce1ea;
+  font-size: 12px;
+}
+.materials-module .classification-tag {
+  white-space: nowrap;
+}
+.materials-module .cell-subtitle {
+  display: block;
+  color: #b0b8c7;
+  font-size: 11px;
+  margin-top: 3px;
+  max-width: 140px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.materials-form .vendor-name {
+  display: block;
+  font-size: 12px;
+  max-width: 135px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: auto;
+}
+.materials-module .cost-value {
+  font-size: 12px;
+  color: #b8dfba;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.materials-module .cost-value > span {
+  color: #a6b7ac;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.materials-module .no-cost {
+  color: #edc995;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.materials-module .material-registration > span {
+  white-space: nowrap;
+  font-size: 12px;
+}
+.materials-module .material-registration .cell-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+}
+.materials-form .vendor-section-title {
+  flex-wrap: wrap;
+}
+.materials-form .vendor-section-title > .button {
+  margin-left: auto;
+}
+.materials-form .vendor-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.materials-form .vendor-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 90px 30px;
+  gap: 9px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #ffffff14;
+  border-radius: 6px;
+  background: #ffffff05;
+}
+.materials-form .vendor-row label {
+  font-size: 11px;
+}
+.materials-form .vendor-row input,
+.materials-form .vendor-row select {
+  width: 100%;
+  font-size: 12px;
+  padding: 8px;
+}
+.materials-form .vendor-row > .icon-button {
+  margin-bottom: 2px;
+}
+.materials-form .vendor-empty {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px;
+  border: 1px dashed #697c95;
+  border-radius: 5px;
+  color: #9bbada;
+}
+.materials-form .vendor-empty p {
+  color: #bbc5d4;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.materials-detail .detail-description {
+  background: #3498db10;
+  border: 1px solid #3498db33;
+  border-radius: 6px;
+  padding: 15px;
+  color: #d5e8f9;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.materials-detail .detail-heading {
+  color: #d9e7f6;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+.materials-detail .detail-costs {
+  border: 1px solid #ffffff1a;
+  border-radius: 5px;
+}
+.materials-detail .detail-costs > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px;
+  border-bottom: 1px solid #ffffff14;
+  font-size: 12px;
+}
+.materials-detail .detail-costs > div:last-child {
+  border-bottom: 0;
+}
+.materials-detail .detail-costs strong {
+  color: #b8dfba;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.materials-history .history-filter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+.materials-history .history-filter > .ui-field {
+  min-width: 230px;
+}
+.materials-history .history-filter > span {
+  padding-bottom: 9px;
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .materials-form .vendor-section-title > .button {
+    margin-left: 38px;
+  }
+  .materials-form .vendor-row {
+    grid-template-columns: minmax(0, 1fr) 85px 30px;
+    gap: 8px;
+  }
+  .materials-form .vendor-row > .ui-field:first-child {
+    grid-column: span 3;
+  }
+  .materials-history .history-filter {
+    gap: 10px;
+  }
+  .materials-history .history-filter > .ui-field {
+    min-width: 0;
+    flex: 1;
+  }
+  .materials-history .history-filter > span {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .materials-detail .detail-costs > div {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+.materials-module .material-specification {
+  min-width: 265px;
+  max-width: 360px;
+  text-align: left;
+  line-height: 1.5;
+}
+.materials-module .material-vendors,
+.materials-module .material-costs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.materials-module .material-registration {
+  white-space: nowrap;
+}
+.materials-form .vendor-row > .ui-field {
+  min-width: 0;
+}
+.materials-history .history-filter > .ui-field {
+  min-width: 230px;
+}
+@media (max-width: 700px) {
+  .materials-form .vendor-row > .ui-field:first-child {
+    grid-column: span 3;
+  }
+  .materials-history .history-filter > .ui-field {
+    min-width: 0;
+    flex: 1;
+  }
+}

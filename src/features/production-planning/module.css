@@ -1,0 +1,179 @@
+.production-planning-module .table-overflow,
+.production-planning-dialog .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.production-planning-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 12px;
+}
+.production-planning-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  height: min(820px, calc(100dvh - 48px));
+  overflow: hidden;
+}
+.production-planning-dialog > .modal-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  gap: 10px;
+}
+.production-planning-dialog > .modal-heading,
+.production-planning-dialog > .modal-footer {
+  flex-shrink: 0;
+}
+.production-planning-dialog .ui-tabs {
+  height: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
+}
+.production-planning-result {
+  max-height: 120px;
+  padding: 8px 12px;
+  overflow: auto;
+  flex-shrink: 0;
+}
+.production-planning-result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.production-planning-result p {
+  margin: 0 0 4px;
+}
+.production-planning-negative {
+  color: #ff9b9b;
+  font-weight: 600;
+}
+.production-planning-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  min-width: 40px;
+  font-size: inherit;
+  line-height: 16px;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #a7d8ff;
+  cursor: pointer;
+}
+.production-planning-cell:hover:not(:disabled) {
+  background: #4a90e230;
+}
+.production-planning-cell:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.production-planning-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+.production-planning-summary span {
+  padding: 5px 9px;
+  background: #ffffff08;
+  border: 1px solid var(--mes-border);
+  font-size: 11px;
+  border-radius: 4px;
+}
+.production-planning-p {
+  color: #9bcaff;
+  font-weight: 600;
+}
+.production-planning-s {
+  color: #ffe49d;
+  font-weight: 600;
+}
+.production-planning-i {
+  color: #9ae1b2;
+  font-weight: 600;
+}
+.production-planning-dialog-form {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+.production-planning-dialog-form > .modal-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 10px;
+  max-height: none;
+}
+.production-planning-controls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.production-planning-controls > .ui-field {
+  min-width: 140px;
+  flex: 1;
+}
+.production-planning-capture {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--mes-border);
+}
+.production-planning-capture .ui-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.production-planning-capture .ui-field label {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.production-planning-capture input,
+.production-planning-capture select {
+  height: 25px;
+  min-width: 0;
+  width: 175px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .production-planning-capture {
+    gap: 6px;
+    padding: 4px 8px;
+  }
+  .production-planning-capture .ui-field {
+    flex: 1;
+    display: block;
+  }
+  .production-planning-capture input,
+  .production-planning-capture select {
+    width: 100%;
+  }
+}
+
+.production-planning-pivot .ui-data-table td {
+  height: 26px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 3px 5px;
+  font-size: 11px;
+}

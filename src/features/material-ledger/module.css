@@ -1,0 +1,15 @@
+.material-ledger-tabs {
+  height: 30px;
+  flex-shrink: 0;
+}
+.material-ledger-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+.material-ledger-panel > .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}

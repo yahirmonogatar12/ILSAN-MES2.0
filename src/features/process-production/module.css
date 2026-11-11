@@ -1,0 +1,300 @@
+.process-production-module .table-overflow,
+.process-production-dialog .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.process-production-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+}
+.process-production-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  flex-shrink: 0;
+  height: 40px;
+  white-space: nowrap;
+}
+.process-production-order-controls {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+}
+.process-production-order-controls[data-dirty="false"] {
+  visibility: hidden;
+}
+.process-production-order-notice {
+  display: inline-flex;
+  align-items: center;
+  width: 115px;
+  height: 20px;
+  flex-shrink: 0;
+  gap: 5px;
+  color: #bddcff;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.process-production-order-dot {
+  color: #edc76c;
+}
+.process-production-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.process-production-count .process-production-order-notice {
+  width: 12px;
+  height: 16px;
+}
+.process-production-count .process-production-order-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.process-production-controls .button {
+  height: 28px;
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.process-production-controls .ui-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+}
+.process-production-controls input {
+  width: 60px;
+  height: 28px;
+}
+.process-production-controls label {
+  margin: 0;
+}
+.process-production-status {
+  font-size: 10px;
+  border-radius: 4px;
+  background: #4a90e220;
+  padding: 3px 5px;
+}
+.process-production-cancelled {
+  color: #ff9f9f;
+  background: #c9454520;
+}
+.process-production-overtime {
+  background: #c5575720;
+}
+.process-production-result {
+  flex-shrink: 0;
+  max-height: 100px;
+  overflow: auto;
+  padding: 6px 12px;
+}
+.process-production-result p {
+  margin: 3px 0;
+}
+.process-production-summary {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 8px;
+  padding: 8px 12px;
+}
+.process-production-summary span {
+  padding: 4px 8px;
+  border: 1px solid var(--mes-border);
+  font-size: 11px;
+}
+.process-production-dialog[open],
+.process-production-sheet[open] {
+  height: min(860px, calc(100dvh - 48px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.process-production-dialog > .modal-body,
+.process-production-sheet > .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+.process-production-dialog > .modal-heading,
+.process-production-dialog > .modal-footer,
+.process-production-sheet > .modal-heading,
+.process-production-sheet > .modal-footer {
+  flex-shrink: 0;
+}
+.process-production-dialog .ui-tabs {
+  height: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
+}
+.process-production-compact {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 11px;
+}
+.process-production-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.process-production-plans .ui-data-table td {
+  font-size: 10px;
+  padding: 5px 4px;
+}
+.process-production-plans .ui-data-table tr[draggable] > td {
+  height: 28px;
+  padding: 2px 4px;
+  line-height: 1.2;
+}
+.process-production-plans .row-actions .icon-button {
+  height: 22px;
+  min-height: 22px;
+  min-width: 24px;
+  padding: 3px;
+}
+.process-production-plans .process-production-status {
+  padding: 2px 4px;
+  line-height: 1.2;
+}
+.process-production-plans .ui-data-table th {
+  font-size: 9px;
+}
+.process-production-plans .table-overflow {
+  container-type: inline-size;
+}
+.process-production-plans .table-group-header > th {
+  background: #2c3e50;
+  color: #ecf0f1;
+  border: 2px solid #20688c;
+  font-size: 12px;
+  padding: 8px;
+}
+.process-production-group-heading {
+  position: sticky;
+  left: 8px;
+  width: calc(100cqw - 20px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.process-production-group-heading > strong {
+  font-size: 14px;
+}
+.process-production-group-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.process-production-group-state {
+  background: #27ae60;
+  color: #fff;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.process-production-group-state.process-production-group-extra {
+  background: #e74c3c;
+}
+.process-production-plans .process-production-group-drop > td {
+  background: #34495e;
+  border: 2px dashed #20688c;
+  color: #bdc3c7;
+  padding: 8px;
+  font-size: 11px;
+  font-style: italic;
+}
+.process-production-group[aria-disabled="false"]:hover > th,
+.process-production-group-drop[aria-disabled="false"]:hover > td {
+  background: #20688c;
+}
+.process-production-group-empty {
+  display: block;
+  position: sticky;
+  left: 8px;
+  width: calc(100cqw - 20px);
+  text-align: center;
+}
+.process-production-plans .process-production-sequence {
+  background: #3498db;
+  color: #fff;
+  font-weight: 700;
+}
+.process-production-assy .process-production-sequence {
+  background: #e74c3c;
+}
+.process-production-plans .process-production-row-cancelled > td {
+  background: #6c6c6c;
+  color: #ccc;
+  text-decoration: line-through;
+}
+.process-production-plans .process-production-overtime > td {
+  background: #8e2e2e;
+  color: #fff;
+}
+@media (max-width: 700px) {
+  .process-production-controls {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+  .process-production-controls .ui-field {
+    gap: 4px;
+  }
+  .process-production-controls input {
+    width: 36px;
+    padding-inline: 4px;
+  }
+  .process-production-controls label,
+  .process-production-controls .button {
+    font-size: 10px;
+  }
+  .process-production-controls .button {
+    padding-inline: 6px;
+  }
+  .process-production-order-controls {
+    gap: 4px;
+  }
+  .process-production-order-notice {
+    width: 12px;
+  }
+  .process-production-order-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .process-production-order-suffix {
+    display: none;
+  }
+  .process-production-group-heading > strong {
+    font-size: 12px;
+  }
+  .process-production-group-summary {
+    font-size: 10px;
+    gap: 6px;
+  }
+}
+@container catalog (max-width: 560px) {
+  .process-production-module .catalog-actions .action-group-picker {
+    width: 125px;
+    flex-shrink: 0;
+  }
+}

@@ -1,0 +1,89 @@
+.document-preview {
+  min-width: 0;
+}
+.spreadsheet-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+.spreadsheet-preview .table-overflow {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.spreadsheet-active-sheet {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+.worksheet-overflow {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: #fff;
+  color: #1f2933;
+}
+.worksheet-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: max-content;
+  font:
+    12px Arial,
+    sans-serif;
+}
+.worksheet-table td,
+.worksheet-table th {
+  border: 1px solid #ccd3dc;
+  padding: 5px 8px;
+  min-width: 40px;
+  max-width: 800px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+.worksheet-table th {
+  background: #e8edf3;
+  font-weight: normal;
+  color: #516071;
+  text-align: center;
+}
+.worksheet-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.worksheet-table tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.spreadsheet-sheets {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.spreadsheet-sheets .ui-tabs {
+  flex: 1;
+  min-width: 0;
+}
+.spreadsheet-sheets .ui-field {
+  width: 220px;
+  max-width: 40%;
+}
+.document-preview-frame {
+  display: block;
+  width: 100%;
+  height: min(65dvh, 700px);
+  border: 0;
+  background: white;
+}
+.document-preview-slides {
+  min-width: 0;
+  overflow: auto;
+  max-height: 65dvh;
+}
