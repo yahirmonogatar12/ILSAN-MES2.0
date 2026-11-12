@@ -90,7 +90,7 @@ const blobs = new Map<number, Blob>([
   ],
 ]);
 let nextFile = 2;
-const clone = structuredClone;
+
 function csv(name: string, rows: unknown[]) {
   saveDownload(
     new Blob(
@@ -116,7 +116,7 @@ export const demoApi: BomApi = {
     ];
   },
   async list(filters) {
-    return clone(
+    return structuredClone(
       items
         .filter(
           (item) =>
@@ -146,7 +146,7 @@ export const demoApi: BomApi = {
     );
     const active = Object.values(filters).some(Boolean);
     return {
-      data: clone(
+      data: structuredClone(
         rows.slice(
           active ? (page - 1) * pageSize : 0,
           active ? page * pageSize : 200,
@@ -167,7 +167,7 @@ export const demoApi: BomApi = {
   async detail(row) {
     const eco = ecos.find((eco) => eco.id === row.id);
     if (!eco) throw new Error("ECO no encontrado.");
-    return clone(eco);
+    return structuredClone(eco);
   },
   async diff(id) {
     if (!ecos.some((eco) => eco.id === id))
@@ -260,7 +260,7 @@ export const demoApi: BomApi = {
     }
   },
   async files(id) {
-    return clone(files.get(id) || []);
+    return structuredClone(files.get(id) || []);
   },
   async paperwork(part) {
     const eco =
@@ -268,8 +268,8 @@ export const demoApi: BomApi = {
         (eco) => eco.part_no === part && files.get(Number(eco.id))?.length,
       ) || null;
     return {
-      eco: eco ? clone(eco) : null,
-      files: clone(eco ? files.get(Number(eco.id)) || [] : []),
+      eco: eco ? structuredClone(eco) : null,
+      files: structuredClone(eco ? files.get(Number(eco.id)) || [] : []),
     };
   },
   async upload(id, file) {

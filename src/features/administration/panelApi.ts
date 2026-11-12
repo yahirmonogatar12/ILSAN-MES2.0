@@ -1,3 +1,4 @@
+import { isRecord as object } from "@/shared/lib/parse";
 import { request } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import { createAdministrationApi } from "./api";
@@ -14,8 +15,7 @@ import type {
 } from "./panelTypes";
 
 const BASE = "/admin";
-const object = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === "object" && !Array.isArray(value);
+
 const records = (value: unknown): value is Record<string, unknown>[] =>
   Array.isArray(value) && value.every(object);
 function validId(id: number) {

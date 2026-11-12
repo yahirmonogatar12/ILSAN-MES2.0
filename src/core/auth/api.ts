@@ -1,10 +1,8 @@
+import { isRecord as object } from "@/shared/lib/parse";
 import { ApiError, backendFetch, ensureResponse, request } from "../http";
 import type { RuntimeMode } from "../runtime";
 import type { AuthGateway, PermissionSnapshot, Profile } from "./types";
 
-function object(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 function snapshot(value: unknown): value is PermissionSnapshot {
   return (
     object(value) &&

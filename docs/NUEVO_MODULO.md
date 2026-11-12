@@ -29,6 +29,8 @@ El generador admite las secciones `informacion-basica`, `material`, `produccion`
 
 Las acciones generales de una tabla se entregan a `FilterBar.actions`. Para una captura o filtros propios, usar `TableToolbar` con `children` y `actions`. La tabla se contiene en `Card fill label="Nombre del listado"`, con su etiqueta accesible en `DataGrid` o `DataTable`. La plantilla del generador aplica esta distribución.
 
+Antes de agregar funciones de fechas, números, objetos o búsquedas, consultar `@/shared/lib/date`, `@/shared/lib/parse` y `@/shared/lib/text`. Seleccionar el calendario de planta con `today` o el calendario del operador con `localDate`, y mantener las restricciones del proceso en `model.ts`. Compartir únicamente conversiones equivalentes y usar `structuredClone` directamente. Los contratos disponibles se describen en la arquitectura. [Utilidades compartidas](ARQUITECTURA.md#utilidades-compartidas).
+
 ```ts
 export const clientesModule: ModuleDefinition = {
   id: "clientes",

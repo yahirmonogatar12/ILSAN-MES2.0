@@ -1,3 +1,10 @@
+import { jsonText as text } from "@/shared/lib/text";
+import { isRecord as object } from "@/shared/lib/parse";
+import {
+  rangeIssue as dateRangeIssue,
+  localDate as localToday,
+} from "@/shared/lib/date";
+
 import type {
   DataRow,
   InvoiceFilters,
@@ -5,13 +12,10 @@ import type {
   PurchaseFilters,
   ValuationFilters,
 } from "./types";
+
+export { text, object, localToday };
 export const EMPTY_ROWS: DataRow[] = [];
-export const text = (value: unknown): string =>
-  value == null
-    ? ""
-    : typeof value === "object"
-      ? JSON.stringify(value)
-      : String(value);
+
 export const amount = (value: unknown) => Number(value ?? 0);
 export const enabled = (value: unknown) =>
   value === true || value === 1 || value === "1";
@@ -19,9 +23,7 @@ export const enabled = (value: unknown) =>
 export const invoiceIsOpen = (row: DataRow) =>
   !enabled(row.cerrado_manual) &&
   !["APLICADA", "CANCELADA"].includes(text(row.estado));
-export function object(value: unknown): value is DataRow {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
+
 export function rows(value: unknown): DataRow[] {
   if (!Array.isArray(value) || !value.every(object))
     throw new Error("El servidor no devolvió una lista válida.");
@@ -33,10 +35,7 @@ export function record(value: unknown): DataRow {
   if (value.error) throw new Error(text(value.error));
   return value;
 }
-export function localToday() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
+
 export const invoiceDefaults = (): InvoiceFilters => ({
   q: "",
   estado: "",
@@ -58,12 +57,8 @@ export const valuationDefaults = (): ValuationFilters => ({
   include_zero_stock: "",
 });
 export function dateIssue(filters: InvoiceFilters) {
-  return filters.estado !== "PENDIENTES" &&
-    filters.fecha_inicio &&
-    filters.fecha_fin &&
-    filters.fecha_inicio > filters.fecha_fin
-    ? "La fecha inicial no puede ser posterior a la final."
-    : "";
+  if (filters.estado === "PENDIENTES") return "";
+  return dateRangeIssue(filters.fecha_inicio, filters.fecha_fin);
 }
 export function listParams(filters: InvoiceFilters | PurchaseFilters) {
   const params = new URLSearchParams();

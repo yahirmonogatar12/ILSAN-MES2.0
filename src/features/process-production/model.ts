@@ -1,12 +1,17 @@
+import {
+  today,
+  validDate,
+  rangeIssue as dateRangeIssue,
+} from "@/shared/lib/date";
+import { jsonText as text } from "@/shared/lib/text";
+import { isRecord } from "@/shared/lib/parse";
+
 import type { Field, Filters, Kind, Row, Spec } from "./types";
-export const text = (value: unknown): string =>
-  value == null
-    ? ""
-    : typeof value === "object"
-      ? JSON.stringify(value)
-      : String(value);
+
+export { today, validDate, text };
+
 export function record(value: unknown): Row {
-  if (!value || typeof value !== "object" || Array.isArray(value))
+  if (!isRecord(value))
     throw new Error("El servidor devolvió una respuesta inválida.");
   return value as Row;
 }
@@ -28,17 +33,7 @@ const LINE_NAMES: Record<Kind, Record<string, string>> = {
 };
 export const lineName = (kind: Kind, value: unknown) =>
   LINE_NAMES[kind][text(value)] || text(value);
-export function today() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-  return ["year", "month", "day"]
-    .map((key) => parts.find((p) => p.type === key)!.value)
-    .join("-");
-}
+
 export function defaults(): Filters {
   return {
     start: today(),
@@ -49,16 +44,11 @@ export function defaults(): Filters {
     part_number: "",
   };
 }
-export const validDate = (value: string) =>
-  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-  Number.isFinite(Date.parse(value)) &&
-  new Date(value).toISOString().slice(0, 10) === value;
+
 export function rangeIssue(filters: Pick<Filters, "start" | "end">) {
-  return !validDate(filters.start) || !validDate(filters.end)
-    ? "Selecciona ambas fechas."
-    : filters.start > filters.end
-      ? "La fecha inicial no puede ser posterior a la final."
-      : "";
+  if (!validDate(filters.start) || !validDate(filters.end))
+    return "Selecciona ambas fechas.";
+  return dateRangeIssue(filters.start, filters.end);
 }
 export function planParams(filters: Filters) {
   const issue = rangeIssue(filters);

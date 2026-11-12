@@ -15,6 +15,7 @@ Este es un frontend independiente. Trabajar dentro de esta carpeta; el backend F
 - Usar `Button`, `IconButton`, campos, `Modal`, `ConfirmDialog`, `DataGrid`, `DataTable`, `Pagination`, `FilterBar`, `Card` y `Page` de `@/shared/ui`. `DataGrid` agrega filtros por columna al mismo estilo de tabla; no sustituir el tema ILSAN al ampliar su comportamiento.
 - No introducir `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` o `<table>` nativos fuera de sus componentes propietarios compartidos. Una variante nueva se agrega al componente común.
 - La lógica de negocio pertenece al módulo; extender los componentes con propiedades/composición, sin importar tipos de Materiales en `shared`.
+- Consultar `shared/lib/date`, `parse` y `text` antes de agregar utilidades. Compartir las conversiones equivalentes y conservar las validaciones específicas del dominio en su módulo. Usar `structuredClone` directamente para las copias profundas.
 - Conservar la identidad ILSAN: tema oscuro gris/azul y logo/iconos existentes. `styles/theme.css` concentra los tokens.
 - Estilos específicos bajo `.<nombre-carpeta>-...`. En Materiales: `.materials-module`, `.materials-form`, `.materials-detail` y `.materials-history`.
 

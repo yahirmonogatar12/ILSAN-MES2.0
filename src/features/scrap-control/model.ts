@@ -1,3 +1,8 @@
+import {
+  validDate,
+  rangeIssue as dateRangeIssue,
+  today,
+} from "@/shared/lib/date";
 import type { ColumnSearches, ScrapFilters, ScrapRecord } from "./types";
 
 /** Filter identifiers match Flask's cf_* parameters. Fields match the returned records. */
@@ -40,28 +45,13 @@ export const scrapAreas = [
 ];
 
 export function defaultFilters(): ScrapFilters {
-  const date = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Monterrey",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+  const date = today();
   return { start: date, end: date, area: "" };
-}
-
-function validDate(value: string) {
-  return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    Number.isFinite(Date.parse(value)) &&
-    new Date(value).toISOString().slice(0, 10) === value
-  );
 }
 
 export function rangeIssue({ start, end }: ScrapFilters) {
   if (!validDate(start) || !validDate(end)) return "Selecciona ambas fechas.";
-  return start > end
-    ? "La fecha desde debe ser anterior o igual a la fecha hasta."
-    : "";
+  return dateRangeIssue(start, end);
 }
 
 export function decodeSearches(value: unknown): ColumnSearches {

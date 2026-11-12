@@ -1,4 +1,10 @@
+import { today, rangeIssue as dateRangeIssue } from "@/shared/lib/date";
+import { number } from "@/shared/lib/parse";
+import { jsonText as text } from "@/shared/lib/text";
+
 import type { Filters, ListKind, MovementType, Row } from "./types";
+
+export { today, number, text };
 
 export const ROOT = "/api/almacen-embarques";
 export const paths: Record<ListKind, string> = {
@@ -10,13 +16,7 @@ export const paths: Record<ListKind, string> = {
   inventory: "inventario-general",
   catalog: "catalogo",
 };
-export const today = () =>
-  new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+
 export function filtersFor(kind: ListKind | "qa"): Filters {
   const date = kind === "returns" || kind === "qa" ? today() : "";
   return {
@@ -29,11 +29,7 @@ export function filtersFor(kind: ListKind | "qa"): Filters {
   };
 }
 export function rangeError(filters: Filters) {
-  return filters.fecha_desde &&
-    filters.fecha_hasta &&
-    filters.fecha_desde > filters.fecha_hasta
-    ? "La fecha desde debe ser anterior o igual a la fecha hasta."
-    : "";
+  return dateRangeIssue(filters.fecha_desde, filters.fecha_hasta);
 }
 export function filterParams(kind: ListKind | "qa", filters: Filters) {
   const issue = rangeError(filters);
@@ -54,15 +50,7 @@ export function filterParams(kind: ListKind | "qa", filters: Filters) {
   if (kind === "audit" && filters.accion) params.set("accion", filters.accion);
   return params;
 }
-export function text(value: unknown): string {
-  if (value == null) return "";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-}
-export function number(value: unknown) {
-  const valueAsNumber = Number(value);
-  return Number.isFinite(valueAsNumber) ? valueAsNumber : 0;
-}
+
 export const formatQuantity = (value: unknown) =>
   number(value).toLocaleString("es-MX");
 export function integer(value: unknown, min = 1): number | null {

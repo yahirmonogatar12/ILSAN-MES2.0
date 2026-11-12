@@ -1,3 +1,11 @@
+import {
+  today,
+  validDate,
+  rangeIssue as dateRangeIssue,
+} from "@/shared/lib/date";
+import { number, record as object } from "@/shared/lib/parse";
+import { text } from "@/shared/lib/text";
+
 import type {
   ColumnSpec,
   HistoryConfig,
@@ -7,6 +15,8 @@ import type {
   StationDraft,
   StationFilters,
 } from "./types";
+
+export { today, number, text, object };
 
 const col = (key: string, title: string, width: number): ColumnSpec => ({
   key,
@@ -267,35 +277,19 @@ export const histories: Record<HistoryKind, HistoryConfig> = {
   },
 };
 
-export const text = (value: unknown) => (value == null ? "" : String(value));
-export function object(value: unknown): Row {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new Error("El servidor devolvió un registro inválido.");
-  return value as Row;
-}
 export function rows(value: unknown): Row[] {
   if (!Array.isArray(value))
     throw new Error("El servidor no devolvió una lista válida.");
   return value.map(object);
 }
-export function number(value: unknown): number {
-  const result = Number(value);
-  return Number.isFinite(result) ? result : 0;
-}
+
 export function id(value: unknown) {
   const result = Number(value);
   if (!Number.isSafeInteger(result) || result < 1)
     throw new Error("El identificador del registro no es válido.");
   return result;
 }
-export function today() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
+
 export function defaultFilters(kind: HistoryKind): HistoryFilters {
   const date = today();
   return Object.fromEntries(
@@ -309,18 +303,12 @@ export function defaultFilters(kind: HistoryKind): HistoryFilters {
     ]),
   );
 }
-function validDate(value: string) {
-  return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    Number.isFinite(Date.parse(value)) &&
-    new Date(value).toISOString().slice(0, 10) === value
-  );
-}
+
 export function filterIssue(filters: HistoryFilters) {
   if (!validDate(filters.fecha_desde) || !validDate(filters.fecha_hasta))
     return "Selecciona ambas fechas.";
-  if (filters.fecha_desde > filters.fecha_hasta)
-    return "La fecha desde debe ser anterior o igual a la fecha hasta.";
+  const issue = dateRangeIssue(filters.fecha_desde, filters.fecha_hasta);
+  if (issue) return issue;
   if (
     filters.min_seg?.trim() &&
     (!Number.isFinite(Number(filters.min_seg)) || Number(filters.min_seg) < 0)

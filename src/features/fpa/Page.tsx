@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/core/auth/AuthProvider";
 import { usePermission } from "@/core/auth/usePermission";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
+import { rangeIssue } from "@/shared/lib/date";
 import {
   Alert,
   Button,
@@ -186,14 +187,9 @@ export default function FpaPage() {
           setFilters((previous) => ({ ...previous, ...patch }))
         }
         onSubmit={() => {
-          if (
-            filters.dateFrom &&
-            filters.dateTo &&
-            filters.dateFrom > filters.dateTo
-          ) {
-            setFilterError(
-              "La fecha inicial no puede ser posterior a la final.",
-            );
+          const issue = rangeIssue(filters.dateFrom, filters.dateTo);
+          if (issue) {
+            setFilterError(issue);
             return;
           }
           setFilterError("");

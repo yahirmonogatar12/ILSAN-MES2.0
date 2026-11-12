@@ -21,7 +21,7 @@ src/
     ui/                   Componentes reutilizables sin tipos de negocio
       table/              Tabla, filtros por columna, paginación y orden local
     hooks/                Formularios, debounce, preferencias y overlays
-    lib/                  Persistencia de preferencias
+    lib/                  Calendario, conversiones, búsquedas y preferencias
   features/
     materials/
       module.ts           Metadatos: ruta, sección, icono y permiso
@@ -51,6 +51,14 @@ Reglas:
 - El layout recibe descriptores; no conoce los campos, APIs ni reglas de Materiales.
 
 `npm run check:architecture` inspecciona imports y JSX con un parser, comprueba namespaces CSS, rutas/IDs duplicados y componentes nativos repetidos. Un módulo real con `permission: null` se rechaza; ese valor solo se admite en ejemplos `demoOnly`. Es una comprobación de estructura, no una auditoría de seguridad del backend.
+
+## Utilidades compartidas
+
+`shared/lib/date.ts` concentra `PLANT_TIME_ZONE`, `today(date?)`, `localDate(date?)`, `validDate(value)` y `rangeIssue(start?, end?, maxDays?)`. `today` obtiene el día de planta y `localDate` usa el calendario del operador. `validDate` comprueba formato ISO y existencia del día, incluido el año cero admitido por los validadores generales existentes. `rangeIssue` compara límites presentes y aplica un máximo opcional de días transcurridos. Cada módulo conserva la obligatoriedad de fechas, la validación de sus campos y sus excepciones. LQC mantiene el corte operativo de las 07:30, Material por áreas exige un año positivo en sus historiales y Facturas permite consultar pendientes sin fechas.
+
+`shared/lib/parse.ts` expone `number`, `isRecord` y `record`. `number` usa la conversión nativa de `Number` y devuelve cero para resultados no finitos. `isRecord` admite objetos no nulos y excluye arreglos. `record` devuelve ese objeto o lanza el mensaje común de registro inválido. Los decodificadores con errores o restricciones propios conservan sus adaptadores.
+
+`shared/lib/text.ts` ofrece `text` para conversión simple, `jsonText` para serializar objetos, `containsText(value, search, locale?)` para coincidencias que conservan acentos y `normalizeSearch` para búsquedas sin acentos. Los consumidores deciden el recorte de espacios y la serialización previa. Los modelos mantienen sus exportaciones públicas mediante reexportaciones de estas utilidades. Las copias profundas usan `structuredClone` directamente.
 
 ## Recorrido de un módulo
 

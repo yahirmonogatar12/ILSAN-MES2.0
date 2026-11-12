@@ -1,3 +1,4 @@
+import { containsText as contains } from "@/shared/lib/text";
 import { exportSpreadsheet } from "@/shared/lib/spreadsheet";
 import { histories, id, number, object, text, today } from "./model";
 import type { HistoryKind, Row, Station } from "./types";
@@ -243,8 +244,7 @@ const historyRows: Record<HistoryKind, Row[]> = {
     },
   ],
 };
-const contains = (value: unknown, search: string) =>
-  text(value).toLocaleLowerCase("es").includes(search.toLocaleLowerCase("es"));
+
 const starts = (value: unknown, search: string) =>
   text(value)
     .toLocaleLowerCase("es")
@@ -273,9 +273,9 @@ function filteredHistory(kind: HistoryKind, params: URLSearchParams) {
       } else if (key === "parte" || key === "material") {
         if (!starts(row[key], term)) return false;
       } else if (key === "barcode_like") {
-        if (!contains(row.barcode, term)) return false;
+        if (!contains(row.barcode, term, "es")) return false;
       } else if (key === "contenedor") {
-        if (!contains(row.contenedor, term)) return false;
+        if (!contains(row.contenedor, term, "es")) return false;
       } else if (key === "codigo") {
         const codes =
           kind === "mask"
@@ -283,7 +283,7 @@ function filteredHistory(kind: HistoryKind, params: URLSearchParams) {
             : kind === "squeegee"
               ? [row.squeegee, row.squeegee_2]
               : [row.codigo];
-        if (!codes.some((code) => contains(code, term))) return false;
+        if (!codes.some((code) => contains(code, term, "es"))) return false;
       } else if (key === "busqueda") {
         const keys =
           kind === "pasta"
@@ -293,7 +293,8 @@ function filteredHistory(kind: HistoryKind, params: URLSearchParams) {
               : kind === "vision"
                 ? ["codigo", "motivo"]
                 : ["lote", "parte", "modelo"];
-        if (!keys.some((field) => contains(row[field], term))) return false;
+        if (!keys.some((field) => contains(row[field], term, "es")))
+          return false;
       } else if (row[key] !== term) return false;
     }
     if (
@@ -317,7 +318,7 @@ function filteredHistory(kind: HistoryKind, params: URLSearchParams) {
         return text(row[key])
           .replace(/\D/g, "")
           .includes(term.replace(/\D/g, ""));
-      return contains(row[key], term);
+      return contains(row[key], term, "es");
     });
   });
 }
@@ -332,7 +333,7 @@ function filteredStations(params: URLSearchParams) {
         row.station_name,
         row.host_name,
         row.station_type,
-      ].some((value) => contains(value, search)),
+      ].some((value) => contains(value, search, "es")),
   );
 }
 function historyRoute(path: string) {

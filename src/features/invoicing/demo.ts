@@ -1,3 +1,4 @@
+import { containsText as contains } from "@/shared/lib/text";
 import { saveDownload } from "@/core/http";
 import { spreadsheetEngine } from "@/shared/lib/spreadsheet";
 import { amount, invoiceIsOpen, localToday, text } from "./model";
@@ -13,11 +14,7 @@ import type {
   ValuationApi,
   ValuationFilters,
 } from "./types";
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
-const contains = (value: unknown, search: string) =>
-  text(value).toLocaleLowerCase().includes(search.toLocaleLowerCase());
+
 const invoices = new Map<number, InvoiceDetail>();
 const files = new Map<number, File>();
 let sequence = 300;
@@ -159,10 +156,10 @@ export const demoInvoices: InvoiceApi = {
                   (!filters.fecha_fin ||
                     text(row.fecha_carga).slice(0, 10) <= filters.fecha_fin)))),
       );
-    return { records: clone(records), total: records.length };
+    return { records: structuredClone(records), total: records.length };
   },
   async detail(scope, id) {
-    return clone(invoice(scope, id));
+    return structuredClone(invoice(scope, id));
   },
   async preview(scope, upload) {
     const number =
@@ -182,7 +179,7 @@ export const demoInvoices: InvoiceApi = {
       warnings: [
         "Vista previa simulada. El parser real de Excel se ejecuta en Flask.",
       ],
-      lines: clone(sample.lines),
+      lines: structuredClone(sample.lines),
       duplicado: duplicate
         ? { motivo: "NUMERO_INVOICE", invoice_id: duplicate.invoice.id }
         : null,
@@ -321,7 +318,7 @@ export const demoInvoices: InvoiceApi = {
   async partial(scope, id, code) {
     return {
       codigo_material_recibido: code,
-      records: clone(
+      records: structuredClone(
         invoice(scope, id)
           .packing.filter(
             (row) => row.id && Number(row.tiene_part_system) === 1,
@@ -532,7 +529,7 @@ function previewPurchase(upload: PurchaseUpload): PurchasePreview {
 export const demoPurchases: PurchaseApi = {
   async loads(type) {
     const records = purchaseLoads.filter((row) => !type || row.tipo === type);
-    return { records: clone(records), total: records.length };
+    return { records: structuredClone(records), total: records.length };
   },
   async file(id) {
     const original = purchaseFiles.get(id);
@@ -576,23 +573,23 @@ export const demoPurchases: PurchaseApi = {
       };
       return (!filters.tipo || row.tipo === filters.tipo) &&
         (!filters.estado || row.estado === filters.estado) &&
-        (!filters.q || contains(JSON.stringify(value), filters.q)) &&
+        (!filters.q || contains(text(JSON.stringify(value)), filters.q)) &&
         (!filters.fecha_inicio ||
           text(row.fecha_compra) >= filters.fecha_inicio) &&
         (!filters.fecha_fin || text(row.fecha_compra) <= filters.fecha_fin)
         ? [row]
         : [];
     });
-    return { records: clone(records), total: records.length };
+    return { records: structuredClone(records), total: records.length };
   },
   async detail(number, type) {
-    return clone(purchase(number, type));
+    return structuredClone(purchase(number, type));
   },
   async initial() {
-    return clone(initial);
+    return structuredClone(initial);
   },
   async preview(upload) {
-    return clone(previewPurchase(upload));
+    return structuredClone(previewPurchase(upload));
   },
   async upload(upload) {
     if (upload.modo === "INICIAL" && initial[upload.tipo])
@@ -682,10 +679,10 @@ function filteredValuation(filters: ValuationFilters) {
     (row) =>
       (filters.include_zero_stock === "1" || amount(row.stock_actual) > 0) &&
       (!filters.numero_parte ||
-        contains(row.numero_parte_sistema, filters.numero_parte)) &&
+        contains(text(row.numero_parte_sistema), filters.numero_parte)) &&
       (!filters.codigo_material_recibido ||
         contains(
-          row.codigo_material_recibido,
+          text(row.codigo_material_recibido),
           filters.codigo_material_recibido,
         )) &&
       (!filters.pallet_no || row.pallet_no === filters.pallet_no) &&
@@ -696,7 +693,7 @@ export const demoValuation: ValuationApi = {
   async list(filters, page, size) {
     const all = filteredValuation(filters);
     return {
-      records: clone(all.slice((page - 1) * size, page * size)),
+      records: structuredClone(all.slice((page - 1) * size, page * size)),
       total: all.length,
       limit: size,
       offset: (page - 1) * size,
@@ -718,7 +715,7 @@ export const demoValuation: ValuationApi = {
       group.valor_total = amount(group.valor_total) + amount(row.valor_total);
       groups.set(key, group);
     }
-    return clone([...groups.values()]);
+    return structuredClone([...groups.values()]);
   },
   async export(filters) {
     const { exportRows } = await import("./components");
@@ -749,7 +746,7 @@ export const demoValuation: ValuationApi = {
       }
     return {
       total_lotes: withStock.length,
-      preview_records: dryRun ? clone(preview.slice(0, 5000)) : [],
+      preview_records: dryRun ? structuredClone(preview.slice(0, 5000)) : [],
       preview_total: preview.length,
       preview_truncated: false,
       procesados_lotes: dryRun ? 0 : Math.min(500, candidates.length),

@@ -1,3 +1,8 @@
+import {
+  rangeIssue as dateRangeIssue,
+  validDate,
+  PLANT_TIME_ZONE,
+} from "@/shared/lib/date";
 import { number, object, rows, text, today } from "./model";
 import type {
   LqcFilters,
@@ -13,7 +18,7 @@ import type { Row } from "./types";
 /** LQC's operating day starts at 07:30 Mexico time and ends at the next day's cutoff. */
 export function operationalDate(now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
+    timeZone: PLANT_TIME_ZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -50,13 +55,7 @@ export function ppmDefaults(): PpmFilters {
     group_by: "month",
   };
 }
-function validDate(value: string) {
-  return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    Number.isFinite(Date.parse(value)) &&
-    new Date(value).toISOString().slice(0, 10) === value
-  );
-}
+
 export function reportDateIssue(from: string, to: string, required = true) {
   if (
     (required && (!from || !to)) ||
@@ -64,9 +63,7 @@ export function reportDateIssue(from: string, to: string, required = true) {
     (to && !validDate(to))
   )
     return "Selecciona fechas válidas.";
-  return from && to && from > to
-    ? "La fecha desde debe ser anterior o igual a la fecha hasta."
-    : "";
+  return dateRangeIssue(from, to);
 }
 export function lqcParams(filters: LqcFilters) {
   const issue = reportDateIssue(filters.fecha_inicio, filters.fecha_fin);

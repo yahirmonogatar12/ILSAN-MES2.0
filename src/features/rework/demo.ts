@@ -28,9 +28,7 @@ const programmingOptions: ProgrammingOption[] = [
 const records = new Map<number, ReworkDetail>(),
   keys = new Map<string, number>();
 let sequence = 510;
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
+
 function areas(payload: RequestPayload): Area[] {
   const amount = payload.origenes.reduce((sum, row) => sum + row.cantidad, 0),
     out: Area[] = [];
@@ -82,8 +80,8 @@ function make(
     cancelado_por: "",
     cancelado_at: "",
     created_at: `${date} 08:00:00`,
-    origenes: clone(payload.origenes),
-    componentes: clone(payload.componentes),
+    origenes: structuredClone(payload.origenes),
+    componentes: structuredClone(payload.componentes),
     programaciones: payload.programaciones.map((p, index) => ({
       ...p,
       micom_part_no:
@@ -196,18 +194,18 @@ function selected(filters: Filters, limit: number) {
 }
 export const demoReworkApi: ReworkApi = {
   async list(filters) {
-    return clone(selected(filters, 500));
+    return structuredClone(selected(filters, 500));
   },
   async detail(id) {
     const row = records.get(id);
     if (!row) throw new Error("Solicitud no encontrada.");
-    return clone(row);
+    return structuredClone(row);
   },
   async models() {
     return ["EBR11111111", "EBR22222222", "EBR23966228"];
   },
   async programming(part) {
-    return part === "EBR23966228" ? [] : clone(programmingOptions);
+    return part === "EBR23966228" ? [] : structuredClone(programmingOptions);
   },
   async create(payload, key) {
     const prior = keys.get(key);
@@ -215,7 +213,7 @@ export const demoReworkApi: ReworkApi = {
     const row = make(++sequence, payload);
     records.set(row.id, row);
     keys.set(key, row.id);
-    return clone(row);
+    return structuredClone(row);
   },
   async cancel(id) {
     const row = records.get(id);
@@ -226,7 +224,7 @@ export const demoReworkApi: ReworkApi = {
     row.estado = "CANCELADA";
     row.cancelado_por = "demo";
     row.cancelado_at = `${mexicoDate()} 10:00:00`;
-    return { record: clone(row), avisos: [] };
+    return { record: structuredClone(row), avisos: [] };
   },
   async export(filters) {
     await exportSpreadsheet("solicitudes_retrabajo_demo.xlsx", [

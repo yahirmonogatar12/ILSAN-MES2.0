@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Eye } from "lucide-react";
+import { rangeIssue } from "@/shared/lib/date";
 import {
   Alert,
   Button,
@@ -175,12 +176,9 @@ export function EcoHistory({
             setFilters((previous) => ({ ...previous, ...patch }))
           }
           onSubmit={() => {
-            if (
-              filters.date_from &&
-              filters.date_to &&
-              filters.date_from > filters.date_to
-            ) {
-              setError("La fecha inicial no puede ser posterior a la final.");
+            const issue = rangeIssue(filters.date_from, filters.date_to);
+            if (issue) {
+              setError(issue);
               return;
             }
             setError("");

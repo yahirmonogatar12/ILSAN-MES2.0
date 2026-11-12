@@ -1,3 +1,4 @@
+import { isRecord as object } from "@/shared/lib/parse";
 import { request } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import type {
@@ -11,8 +12,7 @@ import type {
 
 const USERS = "/api/admin-usuarios-depto";
 const ROLES = "/api/gestion-roles-depto";
-const object = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === "object" && !Array.isArray(value);
+
 const strings = (value: unknown) =>
   Array.isArray(value) && value.every((item) => typeof item === "string");
 const ids = (value: unknown) =>

@@ -1,3 +1,4 @@
+import { containsText as contains } from "@/shared/lib/text";
 import { saveDownload } from "@/core/http";
 import { todayIso } from "./config";
 import { csvCell, displayValue } from "./model";
@@ -37,11 +38,7 @@ const lots: LedgerRow[] = Array.from({ length: 12 }, (_, index) => {
     usuario_salida: "Operador demo",
   };
 });
-function contains(value: unknown, query: string) {
-  return String(value ?? "")
-    .toLocaleLowerCase()
-    .includes(query.trim().toLocaleLowerCase());
-}
+
 function bySearches(rows: LedgerRow[], searches: Searches) {
   return rows.filter((row) =>
     Object.entries(searches).every(([key, value]) =>
@@ -49,7 +46,7 @@ function bySearches(rows: LedgerRow[], searches: Searches) {
         ["in_quarantine", "cancelado"].includes(key)
           ? displayValue(row[key], key).replace("Sí", "Si")
           : row[key],
-        value.replace("Sí", "Si"),
+        value.replace("Sí", "Si").trim(),
       ),
     ),
   );
@@ -130,7 +127,9 @@ function historyRows(
         (!filters.fecha_inicio || date >= filters.fecha_inicio) &&
         (!filters.fecha_fin || date <= filters.fecha_fin) &&
         (!filters.texto ||
-          Object.values(row).some((value) => contains(value, filters.texto)))
+          Object.values(row).some((value) =>
+            contains(value, filters.texto.trim()),
+          ))
       );
     }),
     searches,
@@ -175,12 +174,12 @@ function lotRows(
   return bySearches(
     rows.filter(
       (row) =>
-        contains(row.numero_parte, filters.numero_parte) &&
-        contains(row.ubicacion, filters.ubicacion) &&
+        contains(row.numero_parte, filters.numero_parte.trim()) &&
+        contains(row.ubicacion, filters.ubicacion.trim()) &&
         (summary ||
           contains(
             row.codigo_material_recibido,
-            filters.codigo_material_recibido,
+            filters.codigo_material_recibido.trim(),
           )) &&
         (summary ||
           filters.only_na !== "true" ||

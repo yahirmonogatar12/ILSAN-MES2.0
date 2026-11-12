@@ -1,3 +1,7 @@
+import { today, rangeIssue as dateRangeIssue } from "@/shared/lib/date";
+import { text } from "@/shared/lib/text";
+import { number as numeric, record } from "@/shared/lib/parse";
+
 import type {
   BatchResult,
   Filters,
@@ -7,6 +11,8 @@ import type {
   TraceRow,
   TraceView,
 } from "./types";
+
+export { today, text, numeric, record };
 
 export const stageNames = [
   "SMT",
@@ -39,16 +45,7 @@ export const traceKeys: Record<TraceView, readonly string[]> = {
   ],
   por_proveedor: ["proceso", "material", "fecha_inicio", "fecha_fin"],
 };
-export const text = (value: unknown) => (value == null ? "" : String(value));
-export function numeric(value: unknown) {
-  const result = Number(value);
-  return Number.isFinite(result) ? result : 0;
-}
-export function record(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new Error("El servidor devolvió un registro inválido.");
-  return value as Record<string, unknown>;
-}
+
 function string(data: Record<string, unknown>, key: string) {
   const value = data[key];
   if (value == null) return "";
@@ -149,13 +146,7 @@ export function validateTrace(view: TraceView, filters: Filters) {
     return "Escanea o escribe un QR / barcode.";
   if (view === "por_proveedor" && !filters.material?.trim())
     return "Ingresa un lote de proveedor o material.";
-  if (
-    filters.fecha_inicio &&
-    filters.fecha_fin &&
-    filters.fecha_inicio > filters.fecha_fin
-  )
-    return "La fecha desde debe ser anterior o igual a la fecha hasta.";
-  return "";
+  return dateRangeIssue(filters.fecha_inicio, filters.fecha_fin);
 }
 export function validateFile(file: File | null) {
   if (!file) return "Selecciona un archivo Excel.";
@@ -165,14 +156,7 @@ export function validateFile(file: File | null) {
   if (file.size > 10 * 1024 * 1024) return "El archivo supera 10 MB.";
   return "";
 }
-export function today() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
+
 export function pieceNotice(item: Piece) {
   if (item.reemplazado_por)
     return (

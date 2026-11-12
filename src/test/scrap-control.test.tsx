@@ -182,7 +182,7 @@ describe("Control de Scrap", () => {
     });
     await userEvent.click(screen.getByRole("button", { name: "Consultar" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "La fecha desde debe ser anterior o igual a la fecha hasta.",
+      "La fecha inicial no puede ser posterior a la final.",
     );
     expect(
       fetcher.mock.calls.filter(([url]) => url.startsWith(root)),

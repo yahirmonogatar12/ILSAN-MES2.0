@@ -68,9 +68,7 @@ const inventory = new Map<string, Row>(),
   proposals = new Map<string, Row>();
 const imports: Row[] = [];
 const previews = new Map<string, Upload>();
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
+
 function matches(row: Row, filters: OrderFilters, dateKey: string) {
   const date = text(row[dateKey]).slice(0, 10);
   return (
@@ -130,7 +128,7 @@ function lotResult(date: string): Row {
     line.lotes = Number(line.lotes) + 1;
     line.excede = key !== "SIN LINEA" && Number(line.horas) > 9;
   }
-  return clone({
+  return structuredClone({
     fecha: date,
     lotes: records,
     lineas: summary,
@@ -157,7 +155,7 @@ function positive(value: unknown) {
 export const demoPlanningApi: PlanningApi = {
   async orders(kind, filters, signal) {
     signal?.throwIfAborted();
-    return clone(
+    return structuredClone(
       (kind === "po" ? po : wo).filter((row) =>
         matches(
           row,
@@ -236,7 +234,7 @@ export const demoPlanningApi: PlanningApi = {
             ([date, value]) => date >= today() && Number(value) < 0,
           )),
     );
-    return clone({
+    return structuredClone({
       dates,
       rows: all.slice((page - 1) * size, page * size),
       total_parts: all.length,
@@ -252,7 +250,7 @@ export const demoPlanningApi: PlanningApi = {
   },
   async history(signal) {
     signal?.throwIfAborted();
-    return clone(imports);
+    return structuredClone(imports);
   },
   async action(action: Action, data: Row) {
     if (action === "create-po") {
@@ -429,8 +427,12 @@ export const demoPlanningApi: PlanningApi = {
           },
         ],
       };
-      proposals.set(id, { ...clone(result), revision, status: "PENDING" });
-      return clone(result);
+      proposals.set(id, {
+        ...structuredClone(result),
+        revision,
+        status: "PENDING",
+      });
+      return structuredClone(result);
     }
     if (action === "apply-proposal" || action === "reject-proposal") {
       const proposal = proposals.get(text(data.proposal_id));

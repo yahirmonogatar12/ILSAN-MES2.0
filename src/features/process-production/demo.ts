@@ -10,9 +10,7 @@ import {
   today,
 } from "./model";
 import type { Api, Filters, Kind, Row } from "./types";
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
+
 let sequence = 20;
 const store: Record<Kind, Row[]> = { ASSY: [], IMT: [], SMT: [] };
 for (const kind of ["ASSY", "IMT", "SMT"] as const)
@@ -139,10 +137,10 @@ function create(kind: Kind, data: Row): Row {
 }
 export const demoApi: Api = {
   async plans(kind, filters) {
-    return clone(select(kind, filters));
+    return structuredClone(select(kind, filters));
   },
   async pending(kind, filters) {
-    return clone(
+    return structuredClone(
       select(kind, filters).filter(
         (row) =>
           row.status !== "CANCELADO" &&
@@ -207,7 +205,7 @@ export const demoApi: Api = {
     ];
   },
   async extra(name, payload) {
-    if (name === "wos") return clone(workOrders);
+    if (name === "wos") return structuredClone(workOrders);
     if (name === "import-wos") {
       const plans: Row[] = [],
         errors: string[] = [];
@@ -248,7 +246,7 @@ export const demoApi: Api = {
               },
             ]
           : [],
-        plan_options: clone(store.ASSY),
+        plan_options: structuredClone(store.ASSY),
       };
     if (name === "assign-scan") {
       const row = store.ASSY.find(
@@ -412,7 +410,7 @@ export const demoApi: Api = {
               .includes(value.toLowerCase()),
           ),
         );
-      return { rows: clone(result), summary: {} };
+      return { rows: structuredClone(result), summary: {} };
     }
     const data = [
       {

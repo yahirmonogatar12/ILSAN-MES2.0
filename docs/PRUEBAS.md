@@ -13,6 +13,8 @@
 
 ## Pruebas incluidas
 
+- Utilidades compartidas y sus adaptadores de módulos. Se comprueban medianoche de planta, calendario del operador, años bisiestos, corte LQC, fechas opcionales/obligatorias y límite de 120 días. También se cubren consultas por código y pendientes, errores propios, cantidades no finitas, texto plano/JSON y búsquedas con acentos, espacios y locale.
+
 - Secciones visuales compartidas: orden dentro de grupos antes de paginar, totales del conjunto filtrado, encabezados repetidos sin contar como registros, destinos vacíos, índices/eventos de fila. ASSY comprueba total productivo sin cancelados, estado EXTRA, arrastre a un grupo vacío sin escritura inmediata, guardado explícito y rechazo de fechas distintas. IMT/SMT conservan sus bandas por línea y 500 filas predeterminadas.
 
 - Retrabajo: búsqueda histórica por QR/caja preservando caso, cantidades/orígenes/áreas, programación por IC, invalidación de selección al cambiar NP, aborto y respuestas tardías del BOM, clave idempotente por payload, doble envío, componentes, trazabilidad y avisos tras cancelar.

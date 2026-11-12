@@ -116,7 +116,7 @@ describe("Contratos de Control de calidad", () => {
         },
         {},
       ),
-    ).toThrow("fecha desde");
+    ).toThrow("fecha inicial");
   });
   it("usa PUT y conserva la línea al editar y el estado explícito al activar", async () => {
     const draft: StationDraft = {

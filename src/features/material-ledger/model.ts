@@ -1,3 +1,4 @@
+import { rangeIssue as dateRangeIssue } from "@/shared/lib/date";
 import type {
   CellValue,
   HistoryFilters,
@@ -12,9 +13,7 @@ export function validateDates(
 ): string {
   if (required && (!start || !end))
     return "Captura ambas fechas para consultar el periodo.";
-  if (start && end && start > end)
-    return "La fecha inicial no puede ser posterior a la final.";
-  return "";
+  return dateRangeIssue(start, end);
 }
 export function historyParams(filters: HistoryFilters, searches: Searches) {
   const params = new URLSearchParams();

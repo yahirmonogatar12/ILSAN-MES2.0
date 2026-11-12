@@ -136,9 +136,7 @@ const audit: AuditRecord[] = [
     datos_despues: { permisos: [1] },
   },
 ];
-function copy<T>(value: T): T {
-  return structuredClone(value);
-}
+
 const saved = (): Saved => ({
   success: true,
   mensaje: "Cambios guardados en demostración.",
@@ -148,10 +146,10 @@ async function saveUser(payload: UserPayload) {
     throw new Error("El administrador está protegido.");
   const { password: _password, ...values } = payload;
   const record = users.find((row) => row.username === payload.username);
-  if (record) Object.assign(record, copy(values));
+  if (record) Object.assign(record, structuredClone(values));
   else
     users.push({
-      ...copy(values),
+      ...structuredClone(values),
       id: Math.max(0, ...users.map((row) => row.id)) + 1,
       ultimo_acceso: "",
       bloqueado: false,
@@ -199,10 +197,10 @@ export const panelDemo: PanelApi = {
     roles: roles.map((row) => row.nombre),
     cargos: ["Operador", "Supervisor", "Administrador"],
   }),
-  users: async () => copy(users),
+  users: async () => structuredClone(users),
   saveUser,
   roles: async () =>
-    copy(
+    structuredClone(
       roles.map((row) => ({
         ...row,
         total_usuarios: users.filter((user) => user.roles.includes(row.nombre))
@@ -250,7 +248,7 @@ export const panelDemo: PanelApi = {
   },
   synchronize: async () => "Catálogo actualizado en demostración.",
   departments: async () =>
-    copy(
+    structuredClone(
       departments.map((row) => ({
         ...row,
         total_usuarios: users.filter((user) => user.departamento === row.nombre)
@@ -286,7 +284,7 @@ export const panelDemo: PanelApi = {
       throw new Error("Hay usuarios asignados al departamento.");
     departments = departments.filter((row) => row.id !== id);
   },
-  areas: async () => copy(areas),
+  areas: async () => structuredClone(areas),
   assignAreas: async (ids, department, action) => {
     areas = areas.map((row) =>
       !ids.includes(row.id)
@@ -314,17 +312,20 @@ export const panelDemo: PanelApi = {
             row.fecha_hora.slice(0, 10) <= filters.fecha_fin),
       )
       .slice(0, Number(filters.limite));
-    return { registros: copy(records), total_encontrados: records.length };
+    return {
+      registros: structuredClone(records),
+      total_encontrados: records.length,
+    };
   },
   auditDetail: async (id) => {
     const row = audit.find((record) => record.id === id);
     if (!row) throw new Error("Registro no encontrado.");
-    return copy(row);
+    return structuredClone(row);
   },
   recent: async () => ({
     usuarios_activos: [
       { usuario: "admin", ultima_accion: "consulta", hace: "5s" },
     ],
-    ultimas_acciones: copy(audit),
+    ultimas_acciones: structuredClone(audit),
   }),
 };

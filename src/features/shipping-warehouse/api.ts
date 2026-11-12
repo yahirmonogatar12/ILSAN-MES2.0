@@ -1,3 +1,5 @@
+import { record as object } from "@/shared/lib/parse";
+
 import { request, requestFile, saveDownload } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import {
@@ -22,11 +24,8 @@ import type {
   Row,
 } from "./types";
 
-export function object(value: unknown): Row {
-  if (value && typeof value === "object" && !Array.isArray(value))
-    return value as Row;
-  throw new Error("El servidor devolvió un registro inválido.");
-}
+export { object };
+
 export function optionalObject(value: unknown): Row {
   return value == null ? {} : object(value);
 }

@@ -1,3 +1,9 @@
+import {
+  today as todayMexico,
+  rangeIssue as dateRangeIssue,
+  validDate,
+} from "@/shared/lib/date";
+
 import { AREA_CONFIG, COLUMNS } from "./config";
 import type {
   Area,
@@ -9,6 +15,8 @@ import type {
   Searches,
   SearchesByView,
 } from "./types";
+
+export { todayMexico };
 export const EXPORT_LIMIT = 50000;
 export const REMOTE_PAGE_SIZES = [100, 200, 500, 1000] as const;
 export const isInventory = (view: string) => view.startsWith("inventario");
@@ -16,33 +24,22 @@ export const effectiveView = (filters: AreaFilters): AreaView =>
   isInventory(filters.consulta) && filters.modo === "general"
     ? (`${filters.consulta}_general` as AreaView)
     : filters.consulta;
-export function todayMexico(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  return ["year", "month", "day"]
-    .map((key) => parts.find((part) => part.type === key)!.value)
-    .join("-");
-}
+
 export function defaults(): AreaFilters {
   const date = todayMexico();
   return { consulta: "inventario", modo: "general", start: date, end: date };
 }
 export function dateIssue(filters: AreaFilters) {
   if (isInventory(filters.consulta)) return "";
-  const validDate = (value: string) =>
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    Number(value.slice(0, 4)) > 0 &&
-    Number.isFinite(Date.parse(`${value}T00:00:00Z`)) &&
-    new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
-  if (!validDate(filters.start) || !validDate(filters.end))
+  // Material-area histories additionally require a positive calendar year.
+  if (
+    !validDate(filters.start) ||
+    !validDate(filters.end) ||
+    filters.start.startsWith("0000-") ||
+    filters.end.startsWith("0000-")
+  )
     return "Selecciona ambas fechas.";
-  return filters.start > filters.end
-    ? "La fecha inicial no puede ser posterior a la final."
-    : "";
+  return dateRangeIssue(filters.start, filters.end);
 }
 export function validateArea(area: Area, filters: AreaFilters) {
   if (!["smd", "micom", "imd", "ipm"].includes(area))

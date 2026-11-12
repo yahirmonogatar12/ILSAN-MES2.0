@@ -1,3 +1,4 @@
+import { PLANT_TIME_ZONE } from "@/shared/lib/date";
 import { ApiError, saveDownload } from "@/core/http";
 import { readStorage, writeStorage } from "@/shared/lib/storage";
 import { csvCell, normalizePayload } from "./model";
@@ -205,7 +206,7 @@ function putRows(rows: Material[]) {
 }
 function now() {
   return new Date().toLocaleString("sv-SE", {
-    timeZone: "America/Mexico_City",
+    timeZone: PLANT_TIME_ZONE,
   });
 }
 

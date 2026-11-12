@@ -1,3 +1,4 @@
+import { rangeIssue as dateRangeIssue, localDate } from "@/shared/lib/date";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Activity, Eye, RefreshCw } from "lucide-react";
@@ -23,12 +24,7 @@ import { panelKeys, usePanel } from "./usePanel";
 import type { AuditFilters, AuditRecord, PanelApi } from "./panelTypes";
 
 export function auditDefaults(): AuditFilters {
-  const now = new Date();
-  const date = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("-");
+  const date = localDate();
   return {
     fecha_inicio: date,
     fecha_fin: date,
@@ -40,11 +36,7 @@ export function auditDefaults(): AuditFilters {
   };
 }
 export function auditFilterIssue(filters: AuditFilters) {
-  return filters.fecha_inicio &&
-    filters.fecha_fin &&
-    filters.fecha_inicio > filters.fecha_fin
-    ? "La fecha inicial debe ser anterior o igual a la final."
-    : "";
+  return dateRangeIssue(filters.fecha_inicio, filters.fecha_fin);
 }
 /** Audit can contain JSON strings or parsed objects, including historical records. */
 export function auditData(value: unknown): string {

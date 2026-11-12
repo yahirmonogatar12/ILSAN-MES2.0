@@ -176,9 +176,7 @@ const assigned = new Map<number, number[]>([
   [2, [4, 5]],
   [3, []],
 ]);
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
+
 export const demoAdministration: AdministrationApi = {
   async userContext() {
     return {
@@ -190,7 +188,7 @@ export const demoAdministration: AdministrationApi = {
     };
   },
   async users() {
-    return clone(users);
+    return structuredClone(users);
   },
   async saveUser(payload) {
     if (payload.username === "admin")
@@ -205,7 +203,7 @@ export const demoAdministration: AdministrationApi = {
     const { password: discarded, ...record } = payload;
     void discarded;
     const saved: UserRecord = {
-      ...clone(record),
+      ...structuredClone(record),
       id: previous?.id ?? Math.max(0, ...users.map((user) => user.id)) + 1,
       ultimo_acceso: previous?.ultimo_acceso || "",
     };
@@ -221,7 +219,7 @@ export const demoAdministration: AdministrationApi = {
     return { es_superadmin: true, departamento: null };
   },
   async roles() {
-    return clone(
+    return structuredClone(
       roles.map((role) => ({
         ...role,
         total_usuarios: users.filter((user) => user.roles.includes(role.nombre))
@@ -267,7 +265,7 @@ export const demoAdministration: AdministrationApi = {
     };
   },
   async availablePermissions() {
-    return clone(available);
+    return structuredClone(available);
   },
   async rolePermissions(id) {
     if (!assigned.has(id)) throw new Error("El rol no existe.");

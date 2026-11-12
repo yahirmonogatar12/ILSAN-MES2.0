@@ -205,7 +205,7 @@ describe("Contratos de Product Tracking", () => {
         fecha_inicio: "2026-11-11",
         fecha_fin: "2026-11-01",
       }),
-    ).toContain("fecha desde");
+    ).toContain("fecha inicial");
     expect(validateTrace("materiales", {})).toBe("");
   });
   it("respeta los formatos y límites del importador original", () => {

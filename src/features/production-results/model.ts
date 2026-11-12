@@ -1,14 +1,13 @@
+import { today, rangeIssue as dateRangeIssue } from "@/shared/lib/date";
+import { number, isRecord } from "@/shared/lib/parse";
+import { text } from "@/shared/lib/text";
+
 import type { Closure, Filters, Row, ViewSpec } from "./types";
 
-export function text(value: unknown): string {
-  return value == null ? "" : String(value);
-}
-export function number(value: unknown): number {
-  const result = Number(value);
-  return Number.isFinite(result) ? result : 0;
-}
+export { today, number, text };
+
 export function object(value: unknown): Row {
-  if (!value || typeof value !== "object" || Array.isArray(value))
+  if (!isRecord(value))
     throw new Error("El servidor devolvió un registro inválido.");
   const result = value as Row;
   if (result.status === "error")
@@ -20,19 +19,12 @@ export function rows(value: unknown): Row[] {
     throw new Error("El servidor devolvió una lista inválida.");
   return value.map(object);
 }
-export function today(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
+
 export function filterIssue(filters: Filters): string {
   const from = filters.fecha_desde || filters.fecha_inicio || filters.desde;
   const to = filters.fecha_hasta || filters.fecha_fin || filters.hasta;
-  if (from && to && from > to)
-    return "La fecha desde debe ser anterior o igual a la fecha hasta.";
+  const issue = dateRangeIssue(from, to);
+  if (issue) return issue;
   for (const key of ["hora_desde", "hora_hasta"]) {
     if (
       filters[key] &&

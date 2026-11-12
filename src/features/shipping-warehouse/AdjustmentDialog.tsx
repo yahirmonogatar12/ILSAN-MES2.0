@@ -1,3 +1,4 @@
+import { PLANT_TIME_ZONE } from "@/shared/lib/date";
 import { useState } from "react";
 import { useForm } from "@/shared/hooks/useForm";
 import {
@@ -24,7 +25,7 @@ import type { BatchPreview, Row } from "./types";
 
 const now = () =>
   new Date()
-    .toLocaleString("sv-SE", { timeZone: "America/Mexico_City" })
+    .toLocaleString("sv-SE", { timeZone: PLANT_TIME_ZONE })
     .replace(" ", "T")
     .slice(0, 16);
 const previewColumns = columnsFor([

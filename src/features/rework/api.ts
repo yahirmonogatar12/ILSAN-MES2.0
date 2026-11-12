@@ -1,5 +1,6 @@
 import { request, downloadFile } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
+import { isRecord } from "@/shared/lib/parse";
 import { filterParams } from "./model";
 import type {
   Area,
@@ -13,7 +14,7 @@ import type {
 } from "./types";
 type Json = Record<string, unknown>;
 function object(value: unknown): Json {
-  if (!value || typeof value !== "object" || Array.isArray(value))
+  if (!isRecord(value))
     throw new Error("La respuesta de retrabajo no tiene el formato esperado.");
   return value as Json;
 }

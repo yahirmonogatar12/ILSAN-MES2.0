@@ -1,3 +1,9 @@
+import {
+  validDate,
+  today as mexicoDate,
+  rangeIssue as dateRangeIssue,
+} from "@/shared/lib/date";
+
 import type {
   Area,
   Filters,
@@ -5,6 +11,8 @@ import type {
   RequestDraft,
   RequestPayload,
 } from "./types";
+
+export { mexicoDate };
 export const ORIGINS = [
   { value: "EMBARQUES", label: "Embarques" },
   { value: "SMD", label: "SMD" },
@@ -24,17 +32,7 @@ export const STAGES: Record<string, string> = {
 export const validPart = (part: string) =>
   /^[A-Z]{3}\d{8}$/.test(part.trim().toUpperCase());
 export const normalizePart = (part: string) => part.trim().toUpperCase();
-export function mexicoDate() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-  return ["year", "month", "day"]
-    .map((key) => parts.find((p) => p.type === key)!.value)
-    .join("-");
-}
+
 export function defaultFilters(): Filters {
   const hasta = mexicoDate(),
     start = new Date(`${hasta}T12:00:00Z`);
@@ -46,10 +44,7 @@ export function defaultFilters(): Filters {
     estado: "",
   };
 }
-const validDate = (value: string) =>
-  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-  Number.isFinite(Date.parse(value)) &&
-  new Date(value).toISOString().slice(0, 10) === value;
+
 export function filterIssue(filters: Filters) {
   if (filters.codigo.trim()) return "";
   if (
@@ -57,9 +52,7 @@ export function filterIssue(filters: Filters) {
     (filters.hasta && !validDate(filters.hasta))
   )
     return "Captura fechas válidas.";
-  return filters.desde && filters.hasta && filters.desde > filters.hasta
-    ? "La fecha inicial no puede ser posterior a la final."
-    : "";
+  return dateRangeIssue(filters.desde, filters.hasta);
 }
 export function filterParams(filters: Filters) {
   const issue = filterIssue(filters);

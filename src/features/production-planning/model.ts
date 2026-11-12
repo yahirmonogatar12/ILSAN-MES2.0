@@ -1,5 +1,15 @@
+import {
+  today,
+  validDate,
+  rangeIssue as dateRangeIssue,
+} from "@/shared/lib/date";
+import { jsonText as text } from "@/shared/lib/text";
+import { isRecord as object } from "@/shared/lib/parse";
+
 import type { OrderFilters, PivotFilters, Row, Spec } from "./types";
 import type { TableColumn } from "@/shared/ui";
+
+export { today, validDate, text, object };
 export const TURNOS = ["DIA", "TIEMPO EXTRA", "NOCHE"] as const;
 export function cellInteger(value: string, minimum?: number): number {
   const raw = value.trim();
@@ -27,14 +37,7 @@ export const INV_FIELDS = [
   "smt",
   "imd",
 ] as const;
-export const text = (value: unknown): string =>
-  value == null
-    ? ""
-    : typeof value === "object"
-      ? JSON.stringify(value)
-      : String(value);
-export const object = (value: unknown): value is Row =>
-  !!value && typeof value === "object" && !Array.isArray(value);
+
 export function record(value: unknown): Row {
   if (!object(value))
     throw new Error("La respuesta no tiene el formato esperado.");
@@ -45,17 +48,7 @@ export function rows(value: unknown): Row[] {
     throw new Error("El servidor no devolvió registros válidos.");
   return value;
 }
-export function today() {
-  const p = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-  return ["year", "month", "day"]
-    .map((key) => p.find((v) => v.type === key)!.value)
-    .join("-");
-}
+
 export function dayAfter(value: string, count: number) {
   const day = new Date(`${value}T12:00:00Z`);
   day.setUTCDate(day.getUTCDate() + count);
@@ -82,19 +75,10 @@ export function orderDefaults(): OrderFilters {
     modelo: "",
   };
 }
-export function validDate(value: string) {
-  return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    Number.isFinite(Date.parse(value)) &&
-    new Date(value).toISOString().slice(0, 10) === value
-  );
-}
+
 export function rangeIssue(start: string, end: string, maxDays?: number) {
   if (!validDate(start) || !validDate(end)) return "Selecciona ambas fechas.";
-  if (start > end) return "La fecha inicial no puede ser posterior a la final.";
-  if (maxDays && (Date.parse(end) - Date.parse(start)) / 86400000 > maxDays)
-    return `El rango máximo es de ${maxDays} días.`;
-  return "";
+  return dateRangeIssue(start, end, maxDays);
 }
 export function pivotParams(filters: PivotFilters) {
   const issue = rangeIssue(filters.date_from, filters.date_to, 120);
