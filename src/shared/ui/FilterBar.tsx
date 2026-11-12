@@ -9,7 +9,7 @@ import {
   SelectField,
   type SelectOption,
 } from "./Fields";
-import { Card } from "./Layout";
+import { TableToolbar } from "./TableToolbar";
 import { DialogBody, Modal } from "./Modal";
 
 export interface FilterField<T> {
@@ -35,6 +35,7 @@ export interface FilterBarProps<T> {
   onReset: () => void;
   pending?: boolean;
   title?: string;
+  actions?: ReactNode;
 }
 /** String-valued filters, injected by each module. Persistence and queries are external. */
 export function FilterBar<T extends object>({
@@ -46,6 +47,7 @@ export function FilterBar<T extends object>({
   onReset,
   pending,
   title,
+  actions,
 }: FilterBarProps<T>) {
   const compact = useMediaQuery(
     "(max-height: 500px), (max-width: 560px) and (max-height: 700px)",
@@ -71,10 +73,7 @@ export function FilterBar<T extends object>({
       }}
     >
       {fields.map((field) => (
-        <div
-          className={`filter-field ${field.type === "search" ? "filter-search" : ""}`}
-          key={field.key}
-        >
+        <div className={`filter-field filter-${field.type}`} key={field.key}>
           {field.type === "checkbox" ? (
             <CheckboxField
               label={field.label}
@@ -143,6 +142,7 @@ export function FilterBar<T extends object>({
         </div>
       ))}
       <Button
+        size="sm"
         variant="primary"
         type="submit"
         icon={<Search size={15} />}
@@ -150,63 +150,68 @@ export function FilterBar<T extends object>({
       >
         Consultar
       </Button>
-      <Button onClick={onReset}>Limpiar</Button>
+      <Button size="sm" onClick={onReset}>
+        Limpiar
+      </Button>
     </form>
   );
   return (
     <>
-      <Card
+      <TableToolbar
         title={compact ? undefined : title}
-        icon={<Filter size={16} />}
-        className="filters-panel"
-      >
-        {compact ? (
-          <div className="filter-compact-toolbar">
-            <Button
-              size="sm"
-              icon={<Filter size={14} />}
-              aria-haspopup="dialog"
-              aria-expanded={expanded}
-              onClick={() => setExpanded(true)}
-            >
-              {title || "Filtros"}
-              {active.length ? ` (${active.length})` : ""}
-            </Button>
-            {active.length > 0 && (
-              <Button size="sm" onClick={onReset}>
-                Limpiar filtros
+        actions={actions}
+        footer={
+          !compact &&
+          active.length > 0 && (
+            <div className="active-filters">
+              <Filter size={13} />
+              <span>Filtros activos</span>
+              {active.map((field) => (
+                <span className="filter-chip" key={field.key}>
+                  {field.type === "checkbox"
+                    ? field.label
+                    : field.options?.find(
+                        (option) => option.value === String(values[field.key]),
+                      )?.label || String(values[field.key])}
+                  <IconButton
+                    label={`Quitar filtro ${field.label}`}
+                    icon={<X size={12} />}
+                    onClick={() =>
+                      update(field.key, String(defaults[field.key] ?? ""))
+                    }
+                  />
+                </span>
+              ))}
+              <Button variant="plain" className="text-button" onClick={onReset}>
+                Limpiar todos
               </Button>
-            )}
-          </div>
-        ) : (
-          form
-        )}
-        {!compact && active.length > 0 && (
-          <div className="active-filters">
-            <Filter size={13} />
-            <span>Filtros activos</span>
-            {active.map((field) => (
-              <span className="filter-chip" key={field.key}>
-                {field.type === "checkbox"
-                  ? field.label
-                  : field.options?.find(
-                      (option) => option.value === String(values[field.key]),
-                    )?.label || String(values[field.key])}
-                <IconButton
-                  label={`Quitar filtro ${field.label}`}
-                  icon={<X size={12} />}
-                  onClick={() =>
-                    update(field.key, String(defaults[field.key] ?? ""))
-                  }
-                />
-              </span>
-            ))}
-            <Button variant="plain" className="text-button" onClick={onReset}>
-              Limpiar todos
-            </Button>
-          </div>
-        )}
-      </Card>
+            </div>
+          )
+        }
+      >
+        {!!fields.length &&
+          (compact ? (
+            <div className="filter-compact-toolbar">
+              <Button
+                size="sm"
+                icon={<Filter size={14} />}
+                aria-haspopup="dialog"
+                aria-expanded={expanded}
+                onClick={() => setExpanded(true)}
+              >
+                {title || "Filtros"}
+                {active.length ? ` (${active.length})` : ""}
+              </Button>
+              {active.length > 0 && (
+                <Button size="sm" onClick={onReset}>
+                  Limpiar filtros
+                </Button>
+              )}
+            </div>
+          ) : (
+            form
+          ))}
+      </TableToolbar>
       {compact && expanded && (
         <Modal
           title={title || "Filtros"}

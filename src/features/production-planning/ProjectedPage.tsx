@@ -245,33 +245,6 @@ export default function ProjectedPage() {
   return (
     <Page className="production-planning-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onSubmit={() => {
-          if (!validDate(draft.fecha)) {
-            setError("Selecciona la fecha del plan.");
-            return;
-          }
-          setError("");
-          setApplied({ ...draft });
-          if (draft.fecha === applied.fecha) void query.refetch();
-        }}
-        onReset={() => {
-          const next = { fecha: today() };
-          setDraft(next);
-          setApplied(next);
-          setError("");
-        }}
-        pending={query.isFetching}
-      />
-      <Card
-        fill
-        title="Plan proyectado · Lotes del día"
-        badge={records.length}
         actions={
           <>
             <Button
@@ -311,7 +284,30 @@ export default function ProjectedPage() {
             />
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onSubmit={() => {
+          if (!validDate(draft.fecha)) {
+            setError("Selecciona la fecha del plan.");
+            return;
+          }
+          setError("");
+          setApplied({ ...draft });
+          if (draft.fecha === applied.fecha) void query.refetch();
+        }}
+        onReset={() => {
+          const next = { fecha: today() };
+          setDraft(next);
+          setApplied(next);
+          setError("");
+        }}
+        pending={query.isFetching}
+      />
+      <Card fill label="Plan proyectado · Lotes del día">
         {(error || exported.error) && (
           <Alert tone="warning" className="table-notice">
             {error || exported.error?.message}

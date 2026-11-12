@@ -94,31 +94,6 @@ export function TracePanel({
   return (
     <div className="product-tracking-panel">
       <FilterBar
-        fields={spec.fields}
-        values={draft}
-        defaults={defaults}
-        pending={query.isFetching}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }) as Filters)
-        }
-        onReset={reset}
-        onSubmit={() => {
-          const error = validateTrace(view, draft);
-          setIssue(error);
-          if (error) return;
-          const next = Object.fromEntries(
-            Object.entries(draft).map(([key, value]) => [key, value.trim()]),
-          );
-          if (queried && JSON.stringify(next) === JSON.stringify(applied))
-            void query.refetch();
-          setApplied(next);
-          setQueried(true);
-        }}
-      />
-      <Card
-        fill
-        title={spec.title}
-        badge={queried ? query.data?.items.length : undefined}
         actions={
           <>
             {first && (
@@ -142,7 +117,28 @@ export function TracePanel({
             />
           </>
         }
-      >
+        fields={spec.fields}
+        values={draft}
+        defaults={defaults}
+        pending={query.isFetching}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }) as Filters)
+        }
+        onReset={reset}
+        onSubmit={() => {
+          const error = validateTrace(view, draft);
+          setIssue(error);
+          if (error) return;
+          const next = Object.fromEntries(
+            Object.entries(draft).map(([key, value]) => [key, value.trim()]),
+          );
+          if (queried && JSON.stringify(next) === JSON.stringify(applied))
+            void query.refetch();
+          setApplied(next);
+          setQueried(true);
+        }}
+      />
+      <Card fill label={spec.title}>
         {(issue || exportForm.error || exportForm.errors[0]) && (
           <Alert tone="danger" className="product-tracking-message">
             {issue || exportForm.error?.message || exportForm.errors[0]}

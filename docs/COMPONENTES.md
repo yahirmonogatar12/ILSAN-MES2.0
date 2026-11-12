@@ -144,6 +144,16 @@ La sesión conserva borradores, errores y escrituras pendientes cuando una fila 
 
 ## Filtros
 
+### Acciones junto a los filtros
+
+`FilterBar.actions` coloca las acciones de la tabla en la misma superficie que los criterios y los botones Consultar y Limpiar. Las acciones quedan fuera del formulario de consulta y conservan sus estados, eventos y formularios propios. Los criterios activos se muestran debajo de ambos grupos.
+
+`TableToolbar` compone la misma distribución para tablas sin criterios y para capturas o filtros propios. Recibe `children`, `actions`, `footer` y `title` opcionales. Los filtros se adaptan al ancho disponible después de reservar el espacio de las acciones. En pantallas reducidas los controles pueden ocupar varias filas dentro de esa barra.
+
+Los campos de fecha usan 126 px en la barra, los selectores ajustan su ancho al contenido hasta 190 px y los botones de consulta y acciones tienen 28 px de alto. Las búsquedas, textos y cantidades tienen anchos propios según su tipo. La distribución flexible evita que los campos de fecha o Consultar/Limpiar se estiren para llenar columnas vacías. El diálogo compacto conserva su distribución para la captura de filtros.
+
+Los listados usan `Card fill label="Nombre del listado"` y conservan el nombre de la tabla en `DataGrid.label` o `DataTable.label`. `Card.label` asigna el nombre accesible de la sección. Los botones del listado se entregan a la barra superior.
+
 `FilterBar<T>` recibe `fields`, `values`, `defaults`, `onChange`, `onSubmit`, `onReset` y `pending`. `title` permite agregar un encabezado cuando se necesite. Los valores de sus campos son cadenas y admite los tipos search, text, select, date, number y checkbox. Un campo define `key`, `label`, opciones o placeholder, icono y longitud máxima. Los campos numéricos admiten `min` y `step`. El checkbox usa las cadenas `"1"` y `"0"` para sus estados marcado y desmarcado. `suggestions` conecta un datalist al campo de texto o búsqueda, admite texto libre y conserva las sugerencias en el diálogo compacto.
 
 Los campos se distribuyen según el ancho disponible de la tarjeta mediante consultas de contenedor, incluyendo el espacio que deja la barra lateral. En ventanas de hasta 500 px de alto, o de hasta 560 px de ancho y 700 px de alto, aparece el botón **Filtros**: abre los mismos campos en un diálogo, conserva sus valores y cierra al consultar. Esto reserva altura para las filas sin quitar acceso a filtros o limpieza. Al volver a una ventana más amplia reaparece el formulario normal.

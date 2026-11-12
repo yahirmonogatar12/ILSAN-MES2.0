@@ -85,11 +85,13 @@ export function SearchBar({
   state,
   pending,
   refresh,
+  actions,
 }: {
   kind: ListKind | "qa";
   state: FilterState;
   pending?: boolean;
   refresh?: () => void;
+  actions?: ReactNode;
 }) {
   const fields: FilterField<Filters>[] = [
     {
@@ -151,6 +153,7 @@ export function SearchBar({
   return (
     <>
       <FilterBar
+        actions={actions}
         fields={fields}
         values={state.draft}
         defaults={state.defaults}
@@ -274,45 +277,49 @@ export function ListingCard({
   const { filters, query } = state;
   const rows = query.data?.rows ?? [];
   return (
-    <Card
-      fill
-      title={title}
-      badge={rows.length}
-      actions={
-        <>
-          <Button
-            size="sm"
-            icon={<RefreshCw size={14} />}
-            disabled={query.isFetching}
-            onClick={() => void query.refetch()}
-          >
-            Actualizar
-          </Button>
-          <ExportAction
-            run={() => warehouse.api.exportList(kind, filters.applied)}
-            disabled={query.isFetching || !rows.length}
-          />
-          {actions?.length ? (
-            <ActionGroup label="Acciones de almacén" actions={actions} />
-          ) : null}
-        </>
-      }
-    >
-      <DataGrid
-        label={title}
-        rows={rows}
-        columns={columns}
-        rowKey={rowKey}
-        loading={query.isPending}
-        error={query.error}
-        onRetry={() => void query.refetch()}
-        fetching={query.isFetching}
-        layout="fixed"
-        minWidth={width ?? 950}
-        resetKey={JSON.stringify(filters.applied)}
-        summary={summary}
+    <>
+      <SearchBar
+        kind={kind}
+        state={filters}
+        pending={query.isFetching}
+        refresh={() => void query.refetch()}
+        actions={
+          <>
+            <Button
+              size="sm"
+              icon={<RefreshCw size={14} />}
+              disabled={query.isFetching}
+              onClick={() => void query.refetch()}
+            >
+              Actualizar
+            </Button>
+            <ExportAction
+              run={() => warehouse.api.exportList(kind, filters.applied)}
+              disabled={query.isFetching || !rows.length}
+            />
+            {actions?.length ? (
+              <ActionGroup label="Acciones de almacén" actions={actions} />
+            ) : null}
+          </>
+        }
       />
-    </Card>
+      <Card fill label={title}>
+        <DataGrid
+          label={title}
+          rows={rows}
+          columns={columns}
+          rowKey={rowKey}
+          loading={query.isPending}
+          error={query.error}
+          onRetry={() => void query.refetch()}
+          fetching={query.isFetching}
+          layout="fixed"
+          minWidth={width ?? 950}
+          resetKey={JSON.stringify(filters.applied)}
+          summary={summary}
+        />
+      </Card>
+    </>
   );
 }
 

@@ -101,6 +101,28 @@ export function ReportsPage({ kind }: { kind: "operations" | "outputs" }) {
   return (
     <Page className="process-production-module" banner={<DemoBanner />}>
       <FilterBar
+        actions={
+          <>
+            <Button
+              size="sm"
+              disabled={query.isFetching}
+              onClick={() => void query.refetch()}
+            >
+              Actualizar
+            </Button>
+            <ExportButton
+              size="sm"
+              loading={exportForm.pending}
+              disabled={query.isPending || query.isError}
+              title={
+                kind === "operations"
+                  ? "Exporta hasta 5,000 registros con los mismos filtros de consulta y encabezados."
+                  : "Exporta hasta 5,000 registros con fechas y número de parte; los filtros de columna se usan en la tabla."
+              }
+              onClick={() => void exportForm.submit()}
+            />
+          </>
+        }
         fields={fields}
         values={draft}
         defaults={initial}
@@ -126,33 +148,10 @@ export function ReportsPage({ kind }: { kind: "operations" | "outputs" }) {
       />
       <Card
         fill
-        title={
+        label={
           kind === "operations"
             ? "Historial de operación por proceso"
             : "Producción / OQC / Almacén"
-        }
-        badge={data.length}
-        actions={
-          <>
-            <Button
-              size="sm"
-              disabled={query.isFetching}
-              onClick={() => void query.refetch()}
-            >
-              Actualizar
-            </Button>
-            <ExportButton
-              size="sm"
-              loading={exportForm.pending}
-              disabled={query.isPending || query.isError}
-              title={
-                kind === "operations"
-                  ? "Exporta hasta 5,000 registros con los mismos filtros de consulta y encabezados."
-                  : "Exporta hasta 5,000 registros con fechas y número de parte; los filtros de columna se usan en la tabla."
-              }
-              onClick={() => void exportForm.submit()}
-            />
-          </>
         }
       >
         {(error || exportForm.error) && (

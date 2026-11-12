@@ -277,72 +277,71 @@ export default function ReturnsPage() {
     const rows = exit ? exits : entries;
     const title = exit ? "Salidas de retorno" : "Entradas de retorno";
     return (
-      <Card
-        fill
-        title={title}
-        badge={rows.length}
-        actions={
-          <>
-            {exit ? (
-              <Button size="sm" onClick={() => setDialog("print")}>
-                Imprimir
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="success"
-                onClick={() => setDialog("capture")}
-              >
-                Registrar retorno
-              </Button>
+      <>
+        <Card fill label={title}>
+          <DataGrid
+            label={title}
+            rows={rows}
+            columns={exit ? exitColumns : entryColumns}
+            rowKey={rowKey}
+            layout="fixed"
+            minWidth={820}
+            loading={query.isPending}
+            error={query.error}
+            onRetry={() => void query.refetch()}
+            resetKey={JSON.stringify(filters.applied)}
+            summary={(items) => (
+              <Stats
+                items={[
+                  ["Movimientos", items.length],
+                  [
+                    "Piezas",
+                    items.reduce(
+                      (sum, row) =>
+                        sum +
+                        number(exit ? row.loss_quantity : row.return_quantity),
+                      0,
+                    ),
+                  ],
+                ]}
+              />
             )}
-            <ExportAction
-              run={() =>
-                warehouse.api.exportList(
-                  "returns",
-                  filters.applied,
-                  exit ? "exit" : "entry",
-                )
-              }
-              disabled={query.isFetching || !rows.length}
-            />
-          </>
-        }
-      >
-        <DataGrid
-          label={title}
-          rows={rows}
-          columns={exit ? exitColumns : entryColumns}
-          rowKey={rowKey}
-          layout="fixed"
-          minWidth={820}
-          loading={query.isPending}
-          error={query.error}
-          onRetry={() => void query.refetch()}
-          resetKey={JSON.stringify(filters.applied)}
-          summary={(items) => (
-            <Stats
-              items={[
-                ["Movimientos", items.length],
-                [
-                  "Piezas",
-                  items.reduce(
-                    (sum, row) =>
-                      sum +
-                      number(exit ? row.loss_quantity : row.return_quantity),
-                    0,
-                  ),
-                ],
-              ]}
-            />
-          )}
-        />
-      </Card>
+          />
+        </Card>
+      </>
     );
   }
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
       <SearchBar
+        actions={
+          <>
+            <Button
+              size="sm"
+              variant="success"
+              onClick={() => setDialog("capture")}
+            >
+              Registrar retorno
+            </Button>
+            <Button size="sm" onClick={() => setDialog("print")}>
+              Imprimir salidas
+            </Button>
+            <ExportAction
+              label="Exportar entradas"
+              run={() =>
+                warehouse.api.exportList("returns", filters.applied, "entry")
+              }
+              disabled={query.isFetching || !entries.length}
+            />
+            <ExportAction
+              label="Exportar salidas"
+              run={() =>
+                warehouse.api.exportList("returns", filters.applied, "exit")
+              }
+              disabled={query.isFetching || !exits.length}
+            />
+          </>
+        }
         kind="returns"
         state={filters}
         pending={query.isFetching}

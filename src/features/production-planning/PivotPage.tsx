@@ -347,30 +347,6 @@ export function PivotPage({ projection = false }: { projection?: boolean }) {
       banner={<DemoBanner />}
     >
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onSubmit={submit}
-        onReset={() => {
-          const next = week();
-          setDraft(next);
-          setApplied(next);
-          setPage(1);
-          setError("");
-        }}
-        pending={query.isFetching}
-      />
-      <Card
-        fill
-        title={
-          projection
-            ? "Proyección · Plan / Schedule / Inventario"
-            : "Plan de producción LG"
-        }
-        badge={query.data?.total_parts ?? "—"}
         actions={
           <>
             <Button
@@ -431,6 +407,29 @@ export function PivotPage({ projection = false }: { projection?: boolean }) {
               ]}
             />
           </>
+        }
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onSubmit={submit}
+        onReset={() => {
+          const next = week();
+          setDraft(next);
+          setApplied(next);
+          setPage(1);
+          setError("");
+        }}
+        pending={query.isFetching}
+      />
+      <Card
+        fill
+        label={
+          projection
+            ? "Proyección · Plan / Schedule / Inventario"
+            : "Plan de producción LG"
         }
       >
         {(error || exported.error) && (

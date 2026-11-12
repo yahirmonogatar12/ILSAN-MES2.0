@@ -133,25 +133,6 @@ export default function ReworkPage() {
   return (
     <Page className="rework-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={defaults}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onSubmit={submit}
-        onReset={() => {
-          const next = defaultFilters();
-          setDraft(next);
-          setApplied(next);
-          setError("");
-        }}
-        pending={query.isFetching}
-      />
-      <Card
-        fill
-        title="Solicitudes de retrabajo"
-        badge={query.data?.length ?? "—"}
         actions={
           <>
             <Button
@@ -178,7 +159,22 @@ export default function ReworkPage() {
             </Button>
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={defaults}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onSubmit={submit}
+        onReset={() => {
+          const next = defaultFilters();
+          setDraft(next);
+          setApplied(next);
+          setError("");
+        }}
+        pending={query.isFetching}
+      />
+      <Card fill label="Solicitudes de retrabajo">
         {(error || exported.error) && (
           <Alert tone="danger" className="table-notice">
             {error || exported.error?.message}

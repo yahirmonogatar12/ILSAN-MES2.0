@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FileSpreadsheet, RefreshCw, Trash2 } from "lucide-react";
+import { RefreshCw, Trash2 } from "lucide-react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { exportSpreadsheet } from "@/shared/lib/spreadsheet";
 import {
@@ -199,6 +199,23 @@ export function InvoicesPage({ scope }: { scope: InvoiceScope }) {
         list={
           <>
             <FilterBar
+              actions={
+                <>
+                  <Button
+                    size="sm"
+                    icon={<RefreshCw size={15} />}
+                    disabled={query.isFetching}
+                    onClick={() => void query.refetch()}
+                  >
+                    Actualizar
+                  </Button>
+                  <ExportButton
+                    name={`invoices_${scope.toLowerCase()}`}
+                    specs={INVOICES_EXPORT}
+                    rows={records}
+                  />
+                </>
+              }
               fields={fields}
               values={draft}
               defaults={defaults}
@@ -220,27 +237,8 @@ export function InvoicesPage({ scope }: { scope: InvoiceScope }) {
             />
             <Card
               fill
-              title={
+              label={
                 scope === "ALMACEN" ? "Invoice Almacén" : "Invoice Embarques"
-              }
-              icon={<FileSpreadsheet size={18} />}
-              badge={query.data?.total ?? "—"}
-              actions={
-                <>
-                  <Button
-                    size="sm"
-                    icon={<RefreshCw size={15} />}
-                    disabled={query.isFetching}
-                    onClick={() => void query.refetch()}
-                  >
-                    Actualizar
-                  </Button>
-                  <ExportButton
-                    name={`invoices_${scope.toLowerCase()}`}
-                    specs={INVOICES_EXPORT}
-                    rows={records}
-                  />
-                </>
               }
             >
               {(error || template.error) && (

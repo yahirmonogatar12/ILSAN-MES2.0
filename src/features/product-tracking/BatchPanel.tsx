@@ -10,6 +10,7 @@ import {
   EmptyState,
   ExportButton,
   TextField,
+  TableToolbar,
 } from "@/shared/ui";
 import { batchColumns, type BatchRow } from "./columns";
 import { stageNames, validateFile } from "./model";
@@ -54,7 +55,16 @@ export function BatchPanel({ active }: { active: boolean }) {
   });
   return (
     <div className="product-tracking-panel">
-      <Card>
+      <TableToolbar
+        actions={
+          <ExportButton
+            size="sm"
+            loading={exportForm.pending}
+            disabled={!file || query.isFetching}
+            onClick={() => void exportForm.submit()}
+          />
+        }
+      >
         {collapsed && (
           <div className="product-tracking-file-summary">
             <span title={file?.name}>{file?.name}</span>
@@ -108,55 +118,45 @@ export function BatchPanel({ active }: { active: boolean }) {
             Limpiar
           </Button>
         </form>
-      </Card>
-      <Card
-        fill
-        title="Tracking por lote"
-        badge={query.data?.total}
-        actions={
-          <ExportButton
-            size="sm"
-            loading={exportForm.pending}
-            disabled={!file || query.isFetching}
-            onClick={() => void exportForm.submit()}
+      </TableToolbar>
+      <>
+        <Card fill label="Tracking por lote">
+          {(issue || exportForm.error || exportForm.errors[0]) && (
+            <Alert className="product-tracking-message" tone="danger">
+              {issue || exportForm.error?.message || exportForm.errors[0]}
+            </Alert>
+          )}
+          {applied && query.data && (
+            <div className="product-tracking-counts">
+              {query.data.total} códigos · {query.data.encontrados} con
+              historial · {query.data.no_encontrados} sin historial
+            </div>
+          )}
+          <DataGrid
+            label="Tracking por lote"
+            rows={applied ? rows : []}
+            columns={columns}
+            rowKey={(row) => row.sequence}
+            minWidth={
+              950 + (query.data?.etapas.length || stageNames.length) * 150
+            }
+            layout="fixed"
+            virtualRows={{ rowHeight: 32 }}
+            className="product-tracking-table product-tracking-batch"
+            resetKey={applied?.id}
+            loading={!!applied && query.isPending}
+            fetching={query.isFetching}
+            error={query.error}
+            onRetry={() => void query.refetch()}
+            emptyState={
+              <EmptyState
+                title="Selecciona un archivo"
+                message="Consulta un Excel con QR y barcodes para revisar sus etapas."
+              />
+            }
           />
-        }
-      >
-        {(issue || exportForm.error || exportForm.errors[0]) && (
-          <Alert className="product-tracking-message" tone="danger">
-            {issue || exportForm.error?.message || exportForm.errors[0]}
-          </Alert>
-        )}
-        {applied && query.data && (
-          <div className="product-tracking-counts">
-            {query.data.total} códigos · {query.data.encontrados} con historial
-            · {query.data.no_encontrados} sin historial
-          </div>
-        )}
-        <DataGrid
-          label="Tracking por lote"
-          rows={applied ? rows : []}
-          columns={columns}
-          rowKey={(row) => row.sequence}
-          minWidth={
-            950 + (query.data?.etapas.length || stageNames.length) * 150
-          }
-          layout="fixed"
-          virtualRows={{ rowHeight: 32 }}
-          className="product-tracking-table product-tracking-batch"
-          resetKey={applied?.id}
-          loading={!!applied && query.isPending}
-          fetching={query.isFetching}
-          error={query.error}
-          onRetry={() => void query.refetch()}
-          emptyState={
-            <EmptyState
-              title="Selecciona un archivo"
-              message="Consulta un Excel con QR y barcodes para revisar sus etapas."
-            />
-          }
-        />
-      </Card>
+        </Card>
+      </>
     </div>
   );
 }

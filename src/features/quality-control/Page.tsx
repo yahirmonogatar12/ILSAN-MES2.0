@@ -183,27 +183,6 @@ export default function QualityStationsPage() {
   return (
     <Page className="quality-control-page" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        pending={query.isFetching}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onReset={() => {
-          setDraft(initial);
-          setFilters(initial);
-        }}
-        onSubmit={() => {
-          if (JSON.stringify(filters) === JSON.stringify(draft))
-            void query.refetch();
-          else setFilters({ ...draft });
-        }}
-      />
-      <Card
-        fill
-        title="Máquinas de calidad"
-        badge={rows.length}
         actions={
           <>
             <Button
@@ -225,7 +204,24 @@ export default function QualityStationsPage() {
             </Button>
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        pending={query.isFetching}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onReset={() => {
+          setDraft(initial);
+          setFilters(initial);
+        }}
+        onSubmit={() => {
+          if (JSON.stringify(filters) === JSON.stringify(draft))
+            void query.refetch();
+          else setFilters({ ...draft });
+        }}
+      />
+      <Card fill label="Máquinas de calidad">
         {download.error && (
           <Alert tone="danger" className="table-notice">
             {download.error.message}

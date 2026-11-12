@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { BadgeDollarSign } from "lucide-react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
   Alert,
@@ -86,6 +85,28 @@ export default function ValuationPage() {
   return (
     <Page className="invoicing-module" banner={<DemoBanner />}>
       <FilterBar
+        actions={
+          <>
+            <Button size="sm" disabled={query.isFetching} onClick={refresh}>
+              Actualizar
+            </Button>
+            <ExportButton
+              size="sm"
+              loading={download.isPending}
+              disabled={query.isFetching || !query.isSuccess}
+              onClick={() => download.mutate()}
+            >
+              Exportar Excel
+            </ExportButton>
+            <Button
+              size="sm"
+              loading={simulation.isPending}
+              onClick={() => simulation.mutate()}
+            >
+              Simular costos históricos
+            </Button>
+          </>
+        }
         fields={fields}
         values={draft}
         defaults={defaults}
@@ -120,34 +141,7 @@ export default function ValuationPage() {
         }}
         pending={query.isFetching}
       />
-      <Card
-        fill
-        title="Valorización de inventario"
-        icon={<BadgeDollarSign size={18} />}
-        badge={query.data?.total ?? "—"}
-        actions={
-          <>
-            <Button size="sm" disabled={query.isFetching} onClick={refresh}>
-              Actualizar
-            </Button>
-            <ExportButton
-              size="sm"
-              loading={download.isPending}
-              disabled={query.isFetching || !query.isSuccess}
-              onClick={() => download.mutate()}
-            >
-              Exportar Excel
-            </ExportButton>
-            <Button
-              size="sm"
-              loading={simulation.isPending}
-              onClick={() => simulation.mutate()}
-            >
-              Simular costos históricos
-            </Button>
-          </>
-        }
-      >
+      <Card fill label="Valorización de inventario">
         {(simulation.error || download.error) && (
           <Alert tone="danger" className="table-notice">
             {simulation.error?.message || download.error?.message}

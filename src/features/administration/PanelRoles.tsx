@@ -207,27 +207,6 @@ export default function PanelRoles() {
   return (
     <PanelLayout>
       <FilterBar
-        fields={[
-          {
-            key: "search",
-            label: "Buscar rol",
-            type: "search",
-            placeholder: "Rol, descripción o departamento…",
-          },
-        ]}
-        values={search}
-        defaults={{ search: "" }}
-        onChange={(patch) => setSearch((value) => ({ ...value, ...patch }))}
-        onSubmit={() => setApplied(search)}
-        onReset={() => {
-          setSearch({ search: "" });
-          setApplied({ search: "" });
-        }}
-      />
-      <Card
-        fill
-        title="Roles del sistema"
-        badge={roles.data?.length ?? "—"}
         actions={
           <>
             <Button
@@ -267,7 +246,24 @@ export default function PanelRoles() {
             </Button>
           </>
         }
-      >
+        fields={[
+          {
+            key: "search",
+            label: "Buscar rol",
+            type: "search",
+            placeholder: "Rol, descripción o departamento…",
+          },
+        ]}
+        values={search}
+        defaults={{ search: "" }}
+        onChange={(patch) => setSearch((value) => ({ ...value, ...patch }))}
+        onSubmit={() => setApplied(search)}
+        onReset={() => {
+          setSearch({ search: "" });
+          setApplied({ search: "" });
+        }}
+      />
+      <Card fill label="Roles del sistema">
         {departments.error && (
           <ErrorState
             error={departments.error}

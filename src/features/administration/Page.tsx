@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pencil, Plus, RefreshCw, Users } from "lucide-react";
+import { Pencil, Plus, RefreshCw } from "lucide-react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
   Alert,
@@ -11,6 +11,7 @@ import {
   Page,
   TextField,
   type TableColumn,
+  TableToolbar,
 } from "@/shared/ui";
 import { useUsers } from "./useAdministration";
 import { canManage, normalizeSearch, userEditIssue } from "./model";
@@ -105,78 +106,77 @@ export default function UsersPage() {
   );
   return (
     <Page className="administration-module" banner={<DemoBanner />}>
-      <Card
-        fill
-        title="Usuarios registrados"
-        icon={<Users size={18} />}
-        badge={list.isSuccess ? list.data.length : "—"}
-        actions={
-          <>
-            <TextField
-              type="search"
-              aria-label="Buscar usuarios"
-              placeholder="Buscar usuario o nombre…"
-              containerClassName="administration-search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
+      <>
+        <TableToolbar
+          actions={
+            <>
+              <TextField
+                type="search"
+                aria-label="Buscar usuarios"
+                placeholder="Buscar usuario o nombre…"
+                containerClassName="administration-search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              <span className="administration-scope">
+                {context.data?.es_superadmin
+                  ? "Todos los departamentos"
+                  : context.data?.departamento_propio}
+              </span>
+              <Button
+                size="sm"
+                icon={<RefreshCw size={16} />}
+                disabled={context.isFetching || list.isFetching}
+                onClick={() => {
+                  void context.refetch();
+                  void list.refetch();
+                }}
+              >
+                Actualizar
+              </Button>
+              <Button
+                size="sm"
+                variant="success"
+                icon={<Plus size={15} />}
+                disabled={!ready || !allowed}
+                onClick={() => setDialog({ record: null })}
+              >
+                Nuevo usuario
+              </Button>
+            </>
+          }
+        />
+        <Card fill label="Usuarios registrados">
+          {context.error ? (
+            <ErrorState
+              error={context.error}
+              onRetry={() => void context.refetch()}
             />
-            <span className="administration-scope">
-              {context.data?.es_superadmin
-                ? "Todos los departamentos"
-                : context.data?.departamento_propio}
-            </span>
-            <Button
-              size="sm"
-              icon={<RefreshCw size={16} />}
-              disabled={context.isFetching || list.isFetching}
-              onClick={() => {
-                void context.refetch();
-                void list.refetch();
-              }}
-            >
-              Actualizar
-            </Button>
-            <Button
-              size="sm"
-              variant="success"
-              icon={<Plus size={15} />}
-              disabled={!ready || !allowed}
-              onClick={() => setDialog({ record: null })}
-            >
-              Nuevo usuario
-            </Button>
-          </>
-        }
-      >
-        {context.error ? (
-          <ErrorState
-            error={context.error}
-            onRetry={() => void context.refetch()}
-          />
-        ) : (
-          <>
-            {context.data && !allowed && (
-              <Alert tone="warning" className="table-notice">
-                Tu usuario no tiene departamento asignado. Solicita la
-                asignación para administrar usuarios.
-              </Alert>
-            )}
-            <DataGrid
-              label="Usuarios registrados"
-              rows={rows}
-              columns={columns}
-              rowKey={(row) => row.id}
-              itemLabel="usuarios"
-              resetKey={search}
-              minWidth={850}
-              initialSort={{ columnId: "username", direction: "asc" }}
-              loading={context.isPending || list.isPending}
-              error={list.error}
-              onRetry={() => void list.refetch()}
-            />
-          </>
-        )}
-      </Card>
+          ) : (
+            <>
+              {context.data && !allowed && (
+                <Alert tone="warning" className="table-notice">
+                  Tu usuario no tiene departamento asignado. Solicita la
+                  asignación para administrar usuarios.
+                </Alert>
+              )}
+              <DataGrid
+                label="Usuarios registrados"
+                rows={rows}
+                columns={columns}
+                rowKey={(row) => row.id}
+                itemLabel="usuarios"
+                resetKey={search}
+                minWidth={850}
+                initialSort={{ columnId: "username", direction: "asc" }}
+                loading={context.isPending || list.isPending}
+                error={list.error}
+                onRetry={() => void list.refetch()}
+              />
+            </>
+          )}
+        </Card>
+      </>
       {dialog && context.data && (
         <UserForm
           record={dialog.record}

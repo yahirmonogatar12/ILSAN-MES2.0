@@ -346,6 +346,33 @@ export default function PanelAudit() {
   return (
     <PanelLayout className="administration-panel-audit">
       <FilterBar
+        actions={
+          <>
+            <Button
+              size="sm"
+              icon={<Activity size={15} />}
+              onClick={() => setDialog("recent")}
+            >
+              Actividad reciente
+            </Button>
+            <Button
+              size="sm"
+              icon={<RefreshCw size={15} />}
+              disabled={list.isFetching}
+              onClick={() => void list.refetch()}
+            >
+              Actualizar
+            </Button>
+            <ExportButton
+              size="sm"
+              loading={exporter.isPending}
+              disabled={!list.isSuccess || list.isFetching || !rows.length}
+              onClick={() => exporter.mutate()}
+            >
+              Exportar consulta
+            </ExportButton>
+          </>
+        }
         fields={[
           { key: "fecha_inicio", label: "Fecha desde", type: "date" },
           { key: "fecha_fin", label: "Fecha hasta", type: "date" },
@@ -407,38 +434,7 @@ export default function PanelAudit() {
         pending={list.isFetching}
       />
       {issue && <Alert tone="warning">{issue}</Alert>}
-      <Card
-        fill
-        title="Registro de actividad"
-        badge={list.data?.total_encontrados ?? "—"}
-        actions={
-          <>
-            <Button
-              size="sm"
-              icon={<Activity size={15} />}
-              onClick={() => setDialog("recent")}
-            >
-              Actividad reciente
-            </Button>
-            <Button
-              size="sm"
-              icon={<RefreshCw size={15} />}
-              disabled={list.isFetching}
-              onClick={() => void list.refetch()}
-            >
-              Actualizar
-            </Button>
-            <ExportButton
-              size="sm"
-              loading={exporter.isPending}
-              disabled={!list.isSuccess || list.isFetching || !rows.length}
-              onClick={() => exporter.mutate()}
-            >
-              Exportar consulta
-            </ExportButton>
-          </>
-        }
-      >
+      <Card fill label="Registro de actividad">
         {exporter.error && <ErrorState error={exporter.error} />}
         {rows.length >= Number(applied.limite) && (
           <p className="administration-panel-limit">

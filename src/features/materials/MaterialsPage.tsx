@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import {
   Download,
-  Package,
   PackageSearch,
   Plus,
   RefreshCw,
@@ -72,23 +71,6 @@ export default function MaterialsPage() {
   return (
     <Page className="materials-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={state.filters}
-        defaults={DEFAULT_FILTERS}
-        onChange={state.updateFilters}
-        onSubmit={state.submitFilters}
-        onReset={state.clearFilters}
-        pending={state.list.isFetching}
-      />
-      <Card
-        fill
-        title="Materiales Registrados"
-        icon={<Package size={18} />}
-        badge={
-          state.list.isPending || state.list.isError
-            ? "—"
-            : rows.length.toLocaleString("es-MX")
-        }
         actions={
           <>
             <Button
@@ -133,7 +115,15 @@ export default function MaterialsPage() {
             </Button>
           </>
         }
-      >
+        fields={fields}
+        values={state.filters}
+        defaults={DEFAULT_FILTERS}
+        onChange={state.updateFilters}
+        onSubmit={state.submitFilters}
+        onReset={state.clearFilters}
+        pending={state.list.isFetching}
+      />
+      <Card fill label="Materiales Registrados">
         {state.catalogs.error && (
           <Alert tone="warning" className="table-notice">
             No se pudieron cargar las opciones de los catálogos.{" "}

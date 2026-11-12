@@ -14,6 +14,8 @@ El grupo **Almacén de Embarques** se registra en **Control de proceso** mediant
 
 ## Integración
 
+`ListingCard` compone su propio `SearchBar` con las acciones del listado en `FilterBar.actions`. Sus consumidores entregan el estado y las acciones adicionales. Retornos concentra registro, impresión y exportaciones de entradas y salidas en la barra común sobre ambos listados.
+
 - `api.ts` usa el transporte autenticado común y conserva los contratos de Flask bajo `/api/almacen-embarques`. La captura de retornos usa `/api/shipping/material/returns`. Las exportaciones consultan al servidor con los filtros generales vigentes.
 - Confirmar un invoice requiere el permiso **Invoice Embarques** de **Control de material**. La recepción envía todas sus partes y sus identificadores de packing en una sola solicitud. La cantidad se puede confirmar completa o capturar explícitamente, incluido cero.
 - Los ajustes por CSV o Excel y el cierre por CSV validan el archivo antes de confirmar. Se envía el identificador del borrador devuelto por el servidor. El historial de cierres permite recuperar el borrador disponible de la sesión. Flask aplica las reglas de existencias, auditoría y períodos.

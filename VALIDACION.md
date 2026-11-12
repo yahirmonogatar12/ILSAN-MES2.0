@@ -1,5 +1,21 @@
 # Validación local
 
+## Controles compactos de tablas · 12 de noviembre de 2026
+
+- Las barras compartidas distribuyen los campos según su tipo. Las fechas ocupan 126 px y los botones de consulta y acciones tienen 28 px de alto. Los selectores ajustan su ancho al contenido y las búsquedas, textos y cantidades usan tamaños propios.
+- En Control de producción ASSY, fechas, consulta y acciones comparten una fila en 1666×900 y 1920×1080, con una barra de 68 px. En 390×640 la barra ocupa 79 px y deja 287 px para la tabla.
+- Se revisaron los 76 módulos en 1366×768 y 390×640. Las 152 combinaciones conservaron el documento dentro del viewport y todos los controles dentro de sus barras. El navegador terminó con cero errores JavaScript.
+- `npm run check` aprobado con 544 pruebas en 54 archivos, 11 pruebas de herramientas y compilación del módulo generado. Compilación y formato aprobados. Las comprobaciones visuales usaron datos de demostración. Evidencia en `output/toolbar-density-check.log`, `output/toolbar-density-build.log` y `output/playwright/toolbar-density-*.log`.
+
+## Filtros y acciones de tablas · 12 de noviembre de 2026
+
+- Las acciones de los listados se integraron en `FilterBar.actions` y `TableToolbar`. Los encabezados visibles de las tablas se sustituyeron por `Card.label`, conservando nombres accesibles de sección. La plantilla del generador aplica la misma composición.
+- Los listados de embarques componen sus filtros y acciones desde `ListingCard`. Retornos reúne registro, impresión y las exportaciones de entradas y salidas en la barra superior. Las exportaciones del historial ECO y de la comparación ICT se ubican junto a sus criterios.
+- `npm run check` aprobado con 544 pruebas de frontend en 54 archivos, 11 pruebas de herramientas y compilación del módulo generado. Arquitectura aprobada con 349 archivos y 76 módulos. Compilación y formato aprobados.
+- El navegador revisó los 76 módulos en 1366×768 y 390×640. Las 152 combinaciones conservaron el documento dentro del viewport y los controles de las barras dentro de sus límites. Las tablas visibles carecieron de encabezados duplicados. El recorrido terminó con cero errores JavaScript.
+- Materiales se revisó también en 1920×1080. El recorrido funcional comprobó consulta, actualización, apertura de alta y exportación. Los diálogos ECO y comparación ICT se revisaron en escritorio y móvil, con 244 px y 294 px de tabla visible respectivamente en móvil. Ambas exportaciones quedaron en la barra superior y se descargaron correctamente.
+- Las comprobaciones utilizaron datos de demostración. Evidencia en `output/table-toolbar-check.log`, `output/table-toolbar-build.log`, `output/playwright/table-toolbar-audit-*.log`, `output/playwright/table-toolbar-flows.log` y `output/playwright/table-toolbar-dialogs.log`.
+
 ## Panel de Administración modernizado · 11 de noviembre de 2026
 
 - Se integraron usuarios globales, roles y permisos, departamentos, áreas N:M y auditoría en cuatro módulos de la sección Panel de Administración. Los formularios de usuario y permisos se reutilizan con Información básica.

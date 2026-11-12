@@ -212,6 +212,33 @@ export default function PanelUsers() {
   return (
     <PanelLayout>
       <FilterBar
+        actions={
+          <>
+            <Button
+              size="sm"
+              icon={<RefreshCw size={15} />}
+              disabled={
+                users.isFetching || context.isFetching || roleList.isFetching
+              }
+              onClick={() => {
+                void users.refetch();
+                void context.refetch();
+                void roleList.refetch();
+              }}
+            >
+              Actualizar
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              icon={<Plus size={16} />}
+              disabled={!ready}
+              onClick={() => setEdit({ record: null })}
+            >
+              Nuevo usuario
+            </Button>
+          </>
+        }
         fields={[
           {
             key: "search",
@@ -260,38 +287,7 @@ export default function PanelUsers() {
           setApplied(defaults);
         }}
       />
-      <Card
-        fill
-        title="Directorio de usuarios"
-        badge={users.data?.length ?? "—"}
-        actions={
-          <>
-            <Button
-              size="sm"
-              icon={<RefreshCw size={15} />}
-              disabled={
-                users.isFetching || context.isFetching || roleList.isFetching
-              }
-              onClick={() => {
-                void users.refetch();
-                void context.refetch();
-                void roleList.refetch();
-              }}
-            >
-              Actualizar
-            </Button>
-            <Button
-              size="sm"
-              variant="primary"
-              icon={<Plus size={16} />}
-              disabled={!ready}
-              onClick={() => setEdit({ record: null })}
-            >
-              Nuevo usuario
-            </Button>
-          </>
-        }
-      >
+      <Card fill label="Directorio de usuarios">
         {context.error && (
           <ErrorState
             error={context.error}

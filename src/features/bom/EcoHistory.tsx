@@ -158,6 +158,16 @@ export function EcoHistory({
     >
       <DialogBody>
         <FilterBar
+          actions={
+            <ExportButton
+              icon={<Download size={15} />}
+              disabled={!query.data || query.isError}
+              loading={exportFile.isPending}
+              onClick={() => exportFile.mutate()}
+            >
+              {demo ? "Exportar ejemplo" : "Exportar Excel"}
+            </ExportButton>
+          }
           fields={fields}
           values={filters}
           defaults={ECO_FILTERS}
@@ -240,14 +250,6 @@ export function EcoHistory({
         )}
       </DialogBody>
       <DialogFooter>
-        <ExportButton
-          icon={<Download size={15} />}
-          disabled={!query.data || query.isError}
-          loading={exportFile.isPending}
-          onClick={() => exportFile.mutate()}
-        >
-          {demo ? "Exportar ejemplo" : "Exportar Excel"}
-        </ExportButton>
         <Button onClick={onClose}>Cerrar</Button>
       </DialogFooter>
       {detail && (

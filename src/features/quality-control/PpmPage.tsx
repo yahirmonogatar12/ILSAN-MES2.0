@@ -139,30 +139,6 @@ export function PpmPage({ stage }: { stage: PpmStage }) {
   return (
     <Page className="quality-control-page" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        pending={query.isFetching}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onReset={() => {
-          setDraft(initial);
-          setFilters(initial);
-          setIssue("");
-        }}
-        onSubmit={() => {
-          const error = reportDateIssue(draft.fecha_inicio, draft.fecha_fin);
-          setIssue(error);
-          if (error) return;
-          if (JSON.stringify(filters) === JSON.stringify(draft))
-            void query.refetch();
-          else setFilters({ ...draft });
-        }}
-      />
-      <Card
-        fill
-        title={"PPM's " + label}
         actions={
           <>
             <Button
@@ -186,7 +162,28 @@ export function PpmPage({ stage }: { stage: PpmStage }) {
             )}
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        pending={query.isFetching}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onReset={() => {
+          setDraft(initial);
+          setFilters(initial);
+          setIssue("");
+        }}
+        onSubmit={() => {
+          const error = reportDateIssue(draft.fecha_inicio, draft.fecha_fin);
+          setIssue(error);
+          if (error) return;
+          if (JSON.stringify(filters) === JSON.stringify(draft))
+            void query.refetch();
+          else setFilters({ ...draft });
+        }}
+      />
+      <Card fill label={"PPM's " + label}>
         {issue && (
           <Alert tone="danger" className="table-notice">
             {issue}

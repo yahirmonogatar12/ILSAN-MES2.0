@@ -17,7 +17,6 @@ import {
   ExportAction,
   ListingCard,
   MutationDialog,
-  SearchBar,
   Stats,
   useListing,
   useWarehouse,
@@ -165,12 +164,6 @@ export function HistoryPage({ kind }: { kind: "entries" | "exits" }) {
   );
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
-      <SearchBar
-        kind={kind}
-        state={state.filters}
-        pending={state.query.isFetching}
-        refresh={() => void state.query.refetch()}
-      />
       <ListingCard
         warehouse={warehouse}
         state={state}

@@ -68,7 +68,6 @@ const columns: TableColumn<ScrapRecord>[] = scrapColumns.map(
   }),
 );
 const empty: ScrapRecord[] = [];
-const numberFormat = new Intl.NumberFormat("es-MX");
 const virtualRows = { rowHeight: 32 };
 
 export default function ScrapControlPage() {
@@ -96,10 +95,25 @@ export default function ScrapControlPage() {
     validate: () => [],
     onSubmit: () => exportScrap(mode, applied, searches),
   });
-  const pieces = rows.reduce((total, row) => total + quantity(row), 0);
   return (
     <Page className="scrap-control-module" banner={<DemoBanner />}>
       <FilterBar
+        actions={
+          <>
+            {Object.keys(searches).length > 0 && (
+              <Button size="sm" onClick={() => setSearches({})}>
+                Limpiar columnas
+              </Button>
+            )}
+            <ExportButton
+              size="sm"
+              title="Exporta con los mismos filtros de fecha, área y columna de la consulta."
+              loading={exportForm.pending}
+              disabled={query.isFetching || query.isError}
+              onClick={() => void exportForm.submit()}
+            />
+          </>
+        }
         fields={fields}
         values={draft}
         defaults={initial}
@@ -126,27 +140,7 @@ export default function ScrapControlPage() {
           setError("");
         }}
       />
-      <Card
-        fill
-        title="Registros de scrap"
-        badge={`${numberFormat.format(rows.length)} registros · ${numberFormat.format(pieces)} piezas`}
-        actions={
-          <>
-            {Object.keys(searches).length > 0 && (
-              <Button size="sm" onClick={() => setSearches({})}>
-                Limpiar columnas
-              </Button>
-            )}
-            <ExportButton
-              size="sm"
-              title="Exporta con los mismos filtros de fecha, área y columna de la consulta."
-              loading={exportForm.pending}
-              disabled={query.isFetching || query.isError}
-              onClick={() => void exportForm.submit()}
-            />
-          </>
-        }
-      >
+      <Card fill label="Registros de scrap">
         {(error || exportForm.error) && (
           <Alert tone="danger" className="table-notice">
             {error || exportForm.error?.message}

@@ -4,6 +4,7 @@ export * from "./ActionGroup";
 export * from "./Fields";
 export * from "./Feedback";
 export * from "./FilterBar";
+export * from "./TableToolbar";
 export * from "./Layout";
 export * from "./Modal";
 export * from "./Toast";

@@ -27,6 +27,8 @@ El generador admite las secciones `informacion-basica`, `material`, `produccion`
 6. Declarar el permiso exacto de Flask en `module.ts`; comprobar la autorización del endpoint de cada escritura.
 7. Verificar contratos y flujo con un entorno de pruebas; retirar `demoOnly` cuando el módulo real esté listo.
 
+Las acciones generales de una tabla se entregan a `FilterBar.actions`. Para una captura o filtros propios, usar `TableToolbar` con `children` y `actions`. La tabla se contiene en `Card fill label="Nombre del listado"`, con su etiqueta accesible en `DataGrid` o `DataTable`. La plantilla del generador aplica esta distribución.
+
 ```ts
 export const clientesModule: ModuleDefinition = {
   id: "clientes",

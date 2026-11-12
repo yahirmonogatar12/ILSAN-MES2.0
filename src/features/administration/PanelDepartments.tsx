@@ -21,6 +21,7 @@ import {
   TableRowActions,
   TextField,
   type TableColumn,
+  TableToolbar,
 } from "@/shared/ui";
 import { PanelLayout } from "./PanelLayout";
 import { PermissionAreas } from "./PermissionAreas";
@@ -184,53 +185,53 @@ export default function PanelDepartments() {
   );
   return (
     <PanelLayout>
-      <Card
-        fill
-        title="Organización"
-        badge={list.data?.length ?? "—"}
-        actions={
-          <>
-            <Button
-              size="sm"
-              icon={<RefreshCw size={15} />}
-              disabled={list.isFetching}
-              onClick={() => void list.refetch()}
-            >
-              Actualizar
-            </Button>
-            <Button
-              size="sm"
-              icon={<SlidersHorizontal size={16} />}
-              disabled={!list.isSuccess}
-              onClick={() => setDialog({ kind: "areas" })}
-            >
-              Áreas de permisos
-            </Button>
-            <Button
-              size="sm"
-              variant="primary"
-              icon={<Plus size={16} />}
-              disabled={!list.isSuccess}
-              onClick={() => setDialog({ kind: "edit", row: null })}
-            >
-              Nuevo departamento
-            </Button>
-          </>
-        }
-      >
-        <DataGrid
-          label="Departamentos"
-          rows={records}
-          columns={columns}
-          rowKey={(row) => row.id}
-          minWidth={620}
-          layout="fixed"
-          itemLabel="departamentos"
-          loading={list.isPending}
-          error={list.error}
-          onRetry={() => void list.refetch()}
+      <>
+        <TableToolbar
+          actions={
+            <>
+              <Button
+                size="sm"
+                icon={<RefreshCw size={15} />}
+                disabled={list.isFetching}
+                onClick={() => void list.refetch()}
+              >
+                Actualizar
+              </Button>
+              <Button
+                size="sm"
+                icon={<SlidersHorizontal size={16} />}
+                disabled={!list.isSuccess}
+                onClick={() => setDialog({ kind: "areas" })}
+              >
+                Áreas de permisos
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Plus size={16} />}
+                disabled={!list.isSuccess}
+                onClick={() => setDialog({ kind: "edit", row: null })}
+              >
+                Nuevo departamento
+              </Button>
+            </>
+          }
         />
-      </Card>
+        <Card fill label="Organización">
+          <DataGrid
+            label="Departamentos"
+            rows={records}
+            columns={columns}
+            rowKey={(row) => row.id}
+            minWidth={620}
+            layout="fixed"
+            itemLabel="departamentos"
+            loading={list.isPending}
+            error={list.error}
+            onRetry={() => void list.refetch()}
+          />
+        </Card>
+      </>
       {dialog?.kind === "edit" && (
         <DepartmentForm
           record={dialog.row}

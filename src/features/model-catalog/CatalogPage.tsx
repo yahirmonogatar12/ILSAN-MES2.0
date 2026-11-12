@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cpu, Layers, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
@@ -16,6 +16,7 @@ import {
   TextField,
   useToast,
   type TableColumn,
+  TableToolbar,
 } from "@/shared/ui";
 import { createCatalogApi } from "./api";
 import { CatalogForm, FamilyLines } from "./CatalogForm";
@@ -103,78 +104,82 @@ export function CatalogPage({ kind }: { kind: CatalogKind }) {
   );
   return (
     <Page className="model-catalog-module" banner={<DemoBanner />}>
-      <Card
-        fill
-        title={
-          kind === "smt" ? "Configuraciones SMT por línea" : "Modelos base RAW"
-        }
-        icon={kind === "smt" ? <Cpu size={18} /> : <Layers size={18} />}
-        badge={list.data?.rows.length ?? "—"}
-        actions={
-          <>
-            <TextField
-              type="search"
-              aria-label="Buscar modelos"
-              placeholder="Parte, modelo o proyecto…"
-              containerClassName="model-catalog-search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            <Button
-              size="sm"
-              icon={<RefreshCw size={15} />}
-              disabled={list.isFetching}
-              onClick={() => void list.refetch()}
-            >
-              Actualizar
-            </Button>
-            {kind === "models" && (
+      <>
+        <TableToolbar
+          actions={
+            <>
+              <TextField
+                type="search"
+                aria-label="Buscar modelos"
+                placeholder="Parte, modelo o proyecto…"
+                containerClassName="model-catalog-search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
               <Button
                 size="sm"
-                disabled={!ready}
-                onClick={() => setDialog({ type: "family" })}
+                icon={<RefreshCw size={15} />}
+                disabled={list.isFetching}
+                onClick={() => void list.refetch()}
               >
-                Líneas por familia
+                Actualizar
               </Button>
-            )}
-            <Button
-              size="sm"
-              variant="success"
-              icon={<Plus size={15} />}
-              disabled={!ready}
-              onClick={() => setDialog({ type: "create" })}
-            >
-              Registrar
-            </Button>
-          </>
-        }
-      >
-        {list.data &&
-          ((list.data.total > rows.length && kind === "models") ||
-            list.data.rows.length >= LIMIT) && (
-            <Alert className="table-notice" tone="warning">
-              La consulta carga hasta {LIMIT.toLocaleString("es-MX")} modelos.{" "}
-              {kind === "models"
-                ? `Hay ${list.data.total.toLocaleString("es-MX")} coincidencias; usa el buscador para acotar. Los filtros de columna operan sobre las filas cargadas.`
-                : "El servidor limita el catálogo a ese conjunto."}
-            </Alert>
-          )}
-        <DataGrid
-          label={kind === "smt" ? "Modelos SMT" : "Modelos base"}
-          columns={columns}
-          rows={rows}
-          rowKey={rowKey}
-          itemLabel="modelos"
-          minWidth={Math.max(
-            800,
-            (list.data?.columns.filter(visibleColumn).length || 6) * 125,
-          )}
-          resetKey={query || search}
-          loading={list.isPending}
-          error={list.error}
-          onRetry={() => void list.refetch()}
+              {kind === "models" && (
+                <Button
+                  size="sm"
+                  disabled={!ready}
+                  onClick={() => setDialog({ type: "family" })}
+                >
+                  Líneas por familia
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="success"
+                icon={<Plus size={15} />}
+                disabled={!ready}
+                onClick={() => setDialog({ type: "create" })}
+              >
+                Registrar
+              </Button>
+            </>
+          }
         />
-      </Card>
+        <Card
+          fill
+          label={
+            kind === "smt"
+              ? "Configuraciones SMT por línea"
+              : "Modelos base RAW"
+          }
+        >
+          {list.data &&
+            ((list.data.total > rows.length && kind === "models") ||
+              list.data.rows.length >= LIMIT) && (
+              <Alert className="table-notice" tone="warning">
+                La consulta carga hasta {LIMIT.toLocaleString("es-MX")} modelos.{" "}
+                {kind === "models"
+                  ? `Hay ${list.data.total.toLocaleString("es-MX")} coincidencias; usa el buscador para acotar. Los filtros de columna operan sobre las filas cargadas.`
+                  : "El servidor limita el catálogo a ese conjunto."}
+              </Alert>
+            )}
+          <DataGrid
+            label={kind === "smt" ? "Modelos SMT" : "Modelos base"}
+            columns={columns}
+            rows={rows}
+            rowKey={rowKey}
+            itemLabel="modelos"
+            minWidth={Math.max(
+              800,
+              (list.data?.columns.filter(visibleColumn).length || 6) * 125,
+            )}
+            resetKey={query || search}
+            loading={list.isPending}
+            error={list.error}
+            onRetry={() => void list.refetch()}
+          />
+        </Card>
+      </>
       {(dialog?.type === "create" || dialog?.type === "edit") && list.data && (
         <CatalogForm
           kind={kind}

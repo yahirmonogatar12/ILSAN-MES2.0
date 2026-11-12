@@ -247,7 +247,7 @@ export function ClosureView({ onClose }: { onClose: () => void }) {
         )}
         {data &&
           (tab === "history" ? (
-            <Card fill title="Historial de cierres" badge={history.length}>
+            <Card fill label="Historial de cierres">
               <DataGrid
                 label="Historial de cierres de exceso"
                 rows={history}
@@ -271,11 +271,7 @@ export function ClosureView({ onClose }: { onClose: () => void }) {
               ) : (
                 capture
               )}
-              <Card
-                fill
-                title="Comparación del cierre"
-                badge={data.rows.length}
-              >
+              <Card fill label="Comparación del cierre">
                 <div
                   className="production-results-stats"
                   aria-label="Resumen del cierre"

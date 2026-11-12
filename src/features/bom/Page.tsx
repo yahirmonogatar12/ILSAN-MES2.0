@@ -1,13 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Download,
-  Files,
-  GitBranch,
-  History,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { Download, Files, History, Plus, RefreshCw } from "lucide-react";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { usePermission } from "@/core/auth/usePermission";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
@@ -201,47 +194,6 @@ export default function BomPage() {
   return (
     <Page className="bom-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={filters}
-        defaults={DEFAULT_FILTERS}
-        onChange={(patch) =>
-          setFilters((previous) => ({
-            ...previous,
-            ...patch,
-            ...(patch.modelo !== undefined ? { bom_revision: "" } : {}),
-          }))
-        }
-        onSubmit={() => {
-          const modelo = filters.modelo.trim().toUpperCase();
-          if (!modelo || modelo === "TODOS") {
-            setError("Selecciona un modelo específico para consultar su BOM.");
-            return;
-          }
-          setError("");
-          void client.invalidateQueries({
-            queryKey: ["bom", scope, "list"],
-            refetchType: "none",
-          });
-          if (
-            JSON.stringify({ ...filters, modelo }) === JSON.stringify(applied)
-          )
-            void list.refetch();
-          setApplied({ ...filters, modelo });
-        }}
-        onReset={() => {
-          setFilters({ ...DEFAULT_FILTERS });
-          setApplied({ ...DEFAULT_FILTERS });
-          setError("");
-        }}
-        pending={list.isFetching}
-      />
-      <Card
-        fill
-        title={
-          applied.modelo ? `Componentes · ${applied.modelo}` : "Componentes BOM"
-        }
-        icon={<GitBranch size={18} />}
-        badge={list.data?.length ?? "—"}
         actions={
           <>
             <Button
@@ -290,6 +242,45 @@ export default function BomPage() {
               {mode === "demo" ? "Exportar ejemplo" : "Exportar Excel"}
             </ExportButton>
           </>
+        }
+        fields={fields}
+        values={filters}
+        defaults={DEFAULT_FILTERS}
+        onChange={(patch) =>
+          setFilters((previous) => ({
+            ...previous,
+            ...patch,
+            ...(patch.modelo !== undefined ? { bom_revision: "" } : {}),
+          }))
+        }
+        onSubmit={() => {
+          const modelo = filters.modelo.trim().toUpperCase();
+          if (!modelo || modelo === "TODOS") {
+            setError("Selecciona un modelo específico para consultar su BOM.");
+            return;
+          }
+          setError("");
+          void client.invalidateQueries({
+            queryKey: ["bom", scope, "list"],
+            refetchType: "none",
+          });
+          if (
+            JSON.stringify({ ...filters, modelo }) === JSON.stringify(applied)
+          )
+            void list.refetch();
+          setApplied({ ...filters, modelo });
+        }}
+        onReset={() => {
+          setFilters({ ...DEFAULT_FILTERS });
+          setApplied({ ...DEFAULT_FILTERS });
+          setError("");
+        }}
+        pending={list.isFetching}
+      />
+      <Card
+        fill
+        label={
+          applied.modelo ? `Componentes · ${applied.modelo}` : "Componentes BOM"
         }
       >
         {(error ||

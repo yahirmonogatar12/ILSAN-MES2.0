@@ -52,6 +52,14 @@ export function PiecePanel({ active }: { active: boolean }) {
   return (
     <div className="product-tracking-panel">
       <FilterBar
+        actions={
+          <ExportButton
+            size="sm"
+            loading={exportForm.pending}
+            disabled={!applied || !query.isSuccess || query.isFetching}
+            onClick={() => void exportForm.submit()}
+          />
+        }
         fields={[
           {
             key: "codigo",
@@ -80,19 +88,7 @@ export function PiecePanel({ active }: { active: boolean }) {
           setApplied(codigo);
         }}
       />
-      <Card
-        fill
-        title="Historial de procesos"
-        badge={query.data?.items.length}
-        actions={
-          <ExportButton
-            size="sm"
-            loading={exportForm.pending}
-            disabled={!applied || !query.isSuccess || query.isFetching}
-            onClick={() => void exportForm.submit()}
-          />
-        }
-      >
+      <Card fill label="Historial de procesos">
         {(issue || exportForm.error) && (
           <Alert className="product-tracking-message" tone="danger">
             {issue || exportForm.error?.message}

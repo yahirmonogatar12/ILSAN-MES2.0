@@ -4,7 +4,6 @@ import { Page } from "@/shared/ui";
 import {
   columnsFor,
   ListingCard,
-  SearchBar,
   Stats,
   useListing,
   useWarehouse,
@@ -29,12 +28,6 @@ export default function InventoryPage() {
   const summary = state.query.data?.summary;
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
-      <SearchBar
-        kind="inventory"
-        state={state.filters}
-        pending={state.query.isFetching}
-        refresh={() => void state.query.refetch()}
-      />
       <ListingCard
         warehouse={warehouse}
         state={state}

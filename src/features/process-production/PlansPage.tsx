@@ -362,42 +362,6 @@ export function PlansPage({ kind }: { kind: Kind }) {
       banner={<DemoBanner />}
     >
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        pending={query.isFetching || dirty || orderForm.pending}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onReset={() => {
-          const next = defaults();
-          setDraft(next);
-          setApplied(next);
-          setError("");
-        }}
-        onSubmit={() => {
-          const issue = rangeIssue(draft);
-          setError(issue);
-          if (!issue) {
-            setApplied({ ...draft });
-            if (draft.start === applied.start && draft.end === applied.end)
-              void query.refetch();
-          }
-        }}
-      />
-      <Card
-        fill
-        title={`Planes de producción ${kind}`}
-        badge={
-          kind === "ASSY" ? (
-            data.length
-          ) : (
-            <span className="process-production-count">
-              {data.length}
-              {orderNotice}
-            </span>
-          )
-        }
         actions={
           <>
             <Button
@@ -481,7 +445,30 @@ export function PlansPage({ kind }: { kind: Kind }) {
             />
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        pending={query.isFetching || dirty || orderForm.pending}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onReset={() => {
+          const next = defaults();
+          setDraft(next);
+          setApplied(next);
+          setError("");
+        }}
+        onSubmit={() => {
+          const issue = rangeIssue(draft);
+          setError(issue);
+          if (!issue) {
+            setApplied({ ...draft });
+            if (draft.start === applied.start && draft.end === applied.end)
+              void query.refetch();
+          }
+        }}
+      />
+      <Card fill label={`Planes de producción ${kind}`}>
         {(error || orderForm.error || exportForm.error) && (
           <Alert tone="danger" className="table-notice">
             {error || orderForm.error?.message || exportForm.error?.message}

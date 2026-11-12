@@ -6,7 +6,6 @@ import {
   Plus,
   RefreshCw,
   SlidersHorizontal,
-  Tags,
 } from "lucide-react";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { usePermission } from "@/core/auth/usePermission";
@@ -149,6 +148,37 @@ export default function FpaPage() {
   return (
     <Page className="fpa-module" banner={<DemoBanner />}>
       <FilterBar
+        actions={
+          <>
+            <Button
+              size="sm"
+              icon={<RefreshCw size={15} />}
+              disabled={list.isFetching}
+              onClick={() => void list.refetch()}
+            >
+              Actualizar
+            </Button>
+            <ExportButton
+              size="sm"
+              icon={<Download size={15} />}
+              loading={exportFile.isPending}
+              disabled={list.isPending || list.isError}
+              onClick={() => exportFile.mutate()}
+            >
+              {mode === "demo" ? "Exportar CSV" : "Exportar Excel"}
+            </ExportButton>
+            {create.data === true && !create.isError && (
+              <Button
+                size="sm"
+                variant="success"
+                icon={<Plus size={15} />}
+                onClick={() => setDialog({ type: "create" })}
+              >
+                Nueva solicitud
+              </Button>
+            )}
+          </>
+        }
         fields={fields}
         values={filters}
         defaults={DEFAULT_FILTERS}
@@ -193,43 +223,7 @@ export default function FpaPage() {
         }}
         pending={list.isFetching}
       />
-      <Card
-        fill
-        title="Solicitudes de FPA"
-        icon={<Tags size={18} />}
-        badge={list.data?.meta.total ?? "—"}
-        actions={
-          <>
-            <Button
-              size="sm"
-              icon={<RefreshCw size={15} />}
-              disabled={list.isFetching}
-              onClick={() => void list.refetch()}
-            >
-              Actualizar
-            </Button>
-            <ExportButton
-              size="sm"
-              icon={<Download size={15} />}
-              loading={exportFile.isPending}
-              disabled={list.isPending || list.isError}
-              onClick={() => exportFile.mutate()}
-            >
-              {mode === "demo" ? "Exportar CSV" : "Exportar Excel"}
-            </ExportButton>
-            {create.data === true && !create.isError && (
-              <Button
-                size="sm"
-                variant="success"
-                icon={<Plus size={15} />}
-                onClick={() => setDialog({ type: "create" })}
-              >
-                Nueva solicitud
-              </Button>
-            )}
-          </>
-        }
-      >
+      <Card fill label="Solicitudes de FPA">
         {(filterError || exportFile.error || create.error || adjust.error) && (
           <Alert tone="warning" className="table-notice">
             {filterError ||

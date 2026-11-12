@@ -217,35 +217,6 @@ export default function LqcReleasePage() {
       ) : (
         <>
           <FilterBar
-            fields={fields}
-            values={draft}
-            defaults={initial}
-            pending={query.isFetching}
-            onChange={(patch) =>
-              setDraft((previous) => ({ ...previous, ...patch }))
-            }
-            onReset={() => {
-              const next = { ...lqcDefaults(), linea: filters.linea };
-              setDraft(next);
-              setFilters(next);
-              setIssue("");
-            }}
-            onSubmit={() => {
-              const error = reportDateIssue(
-                draft.fecha_inicio,
-                draft.fecha_fin,
-              );
-              setIssue(error);
-              if (error) return;
-              if (JSON.stringify(draft) === JSON.stringify(filters))
-                void query.refetch();
-              else setFilters({ ...draft });
-            }}
-          />
-          <Card
-            fill
-            title={filters.linea || "Todas las líneas"}
-            badge={visible.length}
             actions={
               <>
                 <Button size="sm" onClick={() => setScreen("lines")}>
@@ -276,7 +247,32 @@ export default function LqcReleasePage() {
                 />
               </>
             }
-          >
+            fields={fields}
+            values={draft}
+            defaults={initial}
+            pending={query.isFetching}
+            onChange={(patch) =>
+              setDraft((previous) => ({ ...previous, ...patch }))
+            }
+            onReset={() => {
+              const next = { ...lqcDefaults(), linea: filters.linea };
+              setDraft(next);
+              setFilters(next);
+              setIssue("");
+            }}
+            onSubmit={() => {
+              const error = reportDateIssue(
+                draft.fecha_inicio,
+                draft.fecha_fin,
+              );
+              setIssue(error);
+              if (error) return;
+              if (JSON.stringify(draft) === JSON.stringify(filters))
+                void query.refetch();
+              else setFilters({ ...draft });
+            }}
+          />
+          <Card fill label={filters.linea || "Todas las líneas"}>
             {(issue || download.error) && (
               <Alert tone="danger" className="table-notice">
                 {issue || download.error?.message}

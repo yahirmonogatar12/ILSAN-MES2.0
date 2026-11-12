@@ -11,6 +11,7 @@ import {
   DialogFooter,
   ExportButton,
   Modal,
+  TableToolbar,
 } from "@/shared/ui";
 import { columnsFor } from "./ResultsTable";
 import { comparisonRows, compareFields, testDetail } from "./machineViews";
@@ -83,47 +84,50 @@ export function MachineComparison({
       className="production-results-dialog"
     >
       <DialogBody>
-        <Card
-          fill
-          title={"Ejecuciones seleccionadas · " + records.length}
-          actions={
-            <CheckboxField
-              label="Solo diferencias"
-              checked={onlyDiffs}
-              onChange={(event) => setOnlyDiffs(event.target.checked)}
-            />
-          }
-        >
-          {download.error && (
-            <Alert tone="danger">{download.error.message}</Alert>
-          )}
-          <DataGrid
-            label="Comparación de parámetros ICT"
-            rows={compared}
-            columns={columns}
-            rowKey={(row, index) => text(row.execution) + ":" + index}
-            minWidth={1570}
-            layout="fixed"
-            className="production-results-table"
-            virtualRows={{ rowHeight: 32 }}
-            resetKey={String(onlyDiffs)}
-            loading={query.isPending}
-            error={query.error}
-            onRetry={() => void query.refetch()}
-            rowProps={(row) => ({
-              className: row.different
-                ? "production-results-difference"
-                : undefined,
-            })}
+        <>
+          <TableToolbar
+            actions={
+              <>
+                <CheckboxField
+                  label="Solo diferencias"
+                  checked={onlyDiffs}
+                  onChange={(event) => setOnlyDiffs(event.target.checked)}
+                />
+                <ExportButton
+                  loading={download.pending}
+                  disabled={!query.isSuccess}
+                  onClick={() => void download.submit()}
+                />
+              </>
+            }
           />
-        </Card>
+          <Card fill label={"Ejecuciones seleccionadas · " + records.length}>
+            {download.error && (
+              <Alert tone="danger">{download.error.message}</Alert>
+            )}
+            <DataGrid
+              label="Comparación de parámetros ICT"
+              rows={compared}
+              columns={columns}
+              rowKey={(row, index) => text(row.execution) + ":" + index}
+              minWidth={1570}
+              layout="fixed"
+              className="production-results-table"
+              virtualRows={{ rowHeight: 32 }}
+              resetKey={String(onlyDiffs)}
+              loading={query.isPending}
+              error={query.error}
+              onRetry={() => void query.refetch()}
+              rowProps={(row) => ({
+                className: row.different
+                  ? "production-results-difference"
+                  : undefined,
+              })}
+            />
+          </Card>
+        </>
       </DialogBody>
       <DialogFooter>
-        <ExportButton
-          loading={download.pending}
-          disabled={!query.isSuccess}
-          onClick={() => void download.submit()}
-        />
         <Button disabled={download.pending} onClick={onClose}>
           Cerrar
         </Button>

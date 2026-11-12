@@ -11,6 +11,7 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 
 export function Card({
   title,
+  label,
   icon,
   actions,
   badge,
@@ -19,6 +20,8 @@ export function Card({
   className = "",
 }: {
   title?: string;
+  /** Accessible section name for a table whose visible heading is omitted. */
+  label?: string;
   icon?: ReactNode;
   actions?: ReactNode;
   badge?: ReactNode;
@@ -32,6 +35,7 @@ export function Card({
     <section
       className={`surface ${fill ? "surface-fill" : ""} ${className}`}
       aria-labelledby={title ? id : undefined}
+      aria-label={title ? undefined : label}
     >
       {(title || actions) && (
         <div className="catalog-heading">

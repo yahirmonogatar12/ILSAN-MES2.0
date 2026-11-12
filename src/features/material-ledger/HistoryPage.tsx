@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Download, History, RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
@@ -84,21 +84,6 @@ export function HistoryPage({ kind }: { kind: HistoryKind }) {
   return (
     <Page className="material-ledger-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={defaults}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onSubmit={submit}
-        onReset={reset}
-        pending={table.query.isFetching}
-      />
-      <Card
-        fill
-        title={TITLES[kind]}
-        icon={<History size={18} />}
-        badge={table.query.data?.total ?? "—"}
         actions={
           <>
             <Button
@@ -124,7 +109,17 @@ export function HistoryPage({ kind }: { kind: HistoryKind }) {
             </ExportButton>
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={defaults}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onSubmit={submit}
+        onReset={reset}
+        pending={table.query.isFetching}
+      />
+      <Card fill label={TITLES[kind]}>
         {(error || download.error) && (
           <Alert tone="warning" className="table-notice">
             {error || download.error?.message}

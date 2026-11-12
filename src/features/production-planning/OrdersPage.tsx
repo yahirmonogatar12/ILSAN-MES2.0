@@ -373,26 +373,6 @@ export function OrdersPage({ kind }: { kind: "po" | "wo" }) {
   return (
     <Page className="production-planning-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onSubmit={submit}
-        onReset={() => {
-          const next = orderDefaults();
-          setDraft(next);
-          setApplied(next);
-          setError("");
-          setSelected(new Set());
-        }}
-        pending={list.isFetching}
-      />
-      <Card
-        fill
-        title={kind === "po" ? "Purchase Orders" : "Work Orders"}
-        badge={list.data?.length ?? "—"}
         actions={
           <>
             <Button
@@ -459,7 +439,23 @@ export function OrdersPage({ kind }: { kind: "po" | "wo" }) {
             </Button>
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onSubmit={submit}
+        onReset={() => {
+          const next = orderDefaults();
+          setDraft(next);
+          setApplied(next);
+          setError("");
+          setSelected(new Set());
+        }}
+        pending={list.isFetching}
+      />
+      <Card fill label={kind === "po" ? "Purchase Orders" : "Work Orders"}>
         {(error || exported.error) && (
           <Alert tone="warning" className="table-notice">
             {error || exported.error?.message}

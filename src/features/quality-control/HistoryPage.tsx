@@ -112,34 +112,6 @@ export function HistoryView({
   return (
     <div className="quality-control-history">
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={initial}
-        pending={query.isFetching}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }) as HistoryFilters)
-        }
-        onReset={() => {
-          setDraft(initial);
-          setApplied(initial);
-          setSearches({});
-          setPage(1);
-          setError("");
-        }}
-        onSubmit={() => {
-          const issue = filterIssue(draft);
-          setError(issue);
-          if (issue) return;
-          if (JSON.stringify(applied) === JSON.stringify(draft) && page === 1)
-            void query.refetch();
-          setPage(1);
-          setApplied({ ...draft });
-        }}
-      />
-      <Card
-        fill
-        title={config.title}
-        badge={query.data?.total}
         actions={
           <>
             {query.data?.stopped !== undefined && (
@@ -177,7 +149,31 @@ export function HistoryView({
             />
           </>
         }
-      >
+        fields={fields}
+        values={draft}
+        defaults={initial}
+        pending={query.isFetching}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }) as HistoryFilters)
+        }
+        onReset={() => {
+          setDraft(initial);
+          setApplied(initial);
+          setSearches({});
+          setPage(1);
+          setError("");
+        }}
+        onSubmit={() => {
+          const issue = filterIssue(draft);
+          setError(issue);
+          if (issue) return;
+          if (JSON.stringify(applied) === JSON.stringify(draft) && page === 1)
+            void query.refetch();
+          setPage(1);
+          setApplied({ ...draft });
+        }}
+      />
+      <Card fill label={config.title}>
         {(error || exportForm.error) && (
           <Alert tone="danger" className="table-notice">
             {error || exportForm.error?.message}

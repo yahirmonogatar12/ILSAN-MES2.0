@@ -16,7 +16,6 @@ import {
   deleteFields,
   ListingCard,
   MutationDialog,
-  SearchBar,
   Stats,
   useListing,
   useWarehouse,
@@ -109,12 +108,6 @@ export default function CatalogPage() {
   const restriction = dialog?.type === "delete" ? blocked(dialog.row) : "";
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
-      <SearchBar
-        kind="catalog"
-        state={state.filters}
-        pending={state.query.isFetching}
-        refresh={() => void state.query.refetch()}
-      />
       <ListingCard
         warehouse={warehouse}
         state={state}

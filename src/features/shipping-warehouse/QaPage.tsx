@@ -146,7 +146,7 @@ function QaList({
     [open],
   );
   return (
-    <Card fill title={titles[kind]} badge={listing?.rows.length ?? 0}>
+    <Card fill label={titles[kind]}>
       {listing && (
         <Stats
           items={[

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart } from "lucide-react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
   Alert,
@@ -132,30 +131,6 @@ export default function PurchasesPage() {
         list={
           <>
             <FilterBar
-              fields={fields}
-              values={draft}
-              defaults={defaults}
-              onChange={(patch) =>
-                setDraft((previous) => ({ ...previous, ...patch }))
-              }
-              onSubmit={submit}
-              onReset={() => {
-                const next = purchaseDefaults();
-                setGridVersion((previous) => previous + 1);
-                setDraft(next);
-                setApplied(next);
-                setError("");
-                void auth.client.invalidateQueries({
-                  queryKey: auth.key("purchases"),
-                });
-              }}
-              pending={query.isFetching}
-            />
-            <Card
-              fill
-              title="Lista de compras"
-              icon={<ShoppingCart size={18} />}
-              badge={query.data?.total ?? "—"}
               actions={
                 <>
                   <Button
@@ -178,7 +153,26 @@ export default function PurchasesPage() {
                   </Button>
                 </>
               }
-            >
+              fields={fields}
+              values={draft}
+              defaults={defaults}
+              onChange={(patch) =>
+                setDraft((previous) => ({ ...previous, ...patch }))
+              }
+              onSubmit={submit}
+              onReset={() => {
+                const next = purchaseDefaults();
+                setGridVersion((previous) => previous + 1);
+                setDraft(next);
+                setApplied(next);
+                setError("");
+                void auth.client.invalidateQueries({
+                  queryKey: auth.key("purchases"),
+                });
+              }}
+              pending={query.isFetching}
+            />
+            <Card fill label="Lista de compras">
               {error && (
                 <Alert tone="warning" className="table-notice">
                   {error}

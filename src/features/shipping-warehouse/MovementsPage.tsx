@@ -266,12 +266,6 @@ export default function MovementsPage() {
       className="shipping-warehouse-page shipping-warehouse-movements"
       banner={<DemoBanner />}
     >
-      <SearchBar
-        kind="movements"
-        state={state.filters}
-        pending={state.query.isFetching}
-        refresh={() => void state.query.refetch()}
-      />
       {issue && (
         <Alert tone="warning" className="table-notice">
           {issue}

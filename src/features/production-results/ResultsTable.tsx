@@ -184,45 +184,7 @@ export function ResultsTable({
         { "--production-results-row-height": rowHeight + "px" } as CSSProperties
       }
     >
-      {spec.fields.length > 0 && (
-        <FilterBar
-          fields={spec.fields}
-          values={draft}
-          defaults={spec.defaults}
-          pending={query.isFetching}
-          onChange={(patch) =>
-            setDraft((previous) => ({ ...previous, ...patch }) as Filters)
-          }
-          onReset={() => {
-            setDraft({ ...spec.defaults });
-            setApplied({ ...spec.defaults });
-            setSearches({});
-            setPage(1);
-            setError("");
-            if (spec.manual) setQueried(false);
-          }}
-          onSubmit={() => {
-            const issue = filterIssue(draft) || spec.validate?.(draft) || "";
-            setError(issue);
-            if (issue) return;
-            if (
-              queried &&
-              !spec.progressPath &&
-              JSON.stringify(applied) === JSON.stringify(draft) &&
-              page === 1
-            )
-              void query.refetch();
-            setProgressId(crypto.randomUUID());
-            setQueried(true);
-            setApplied({ ...draft });
-            setPage(1);
-          }}
-        />
-      )}
-      <Card
-        fill
-        title={spec.title}
-        badge={queried ? query.data?.total : undefined}
+      <FilterBar
         actions={
           <>
             {Object.values(searches).some(Boolean) && (
@@ -261,106 +223,140 @@ export function ResultsTable({
             {actions}
           </>
         }
-      >
-        {(error || exportForm.error) && (
-          <Alert tone="danger" className="table-notice">
-            {error || exportForm.error?.message}
-          </Alert>
-        )}
-        {notice}
-        {queried && query.data?.summary && (
-          <div
-            className="production-results-stats"
-            aria-label="Resumen de la consulta"
-          >
-            {Object.entries(query.data.summary)
-              .filter(([key]) => summaryLabels[key])
-              .map(([key, value]) => (
-                <span key={key}>
-                  {summaryLabels[key]}{" "}
-                  <strong>{number(value).toLocaleString("es-MX")}</strong>
-                </span>
-              ))}
-          </div>
-        )}
-        {!queried && (
-          <Alert tone="info" className="table-notice">
-            Selecciona los filtros y pulsa Consultar.
-          </Alert>
-        )}
-        {query.isFetching && spec.progressPath && (
-          <div role="status" className="production-results-stats">
-            Leyendo archivos {number(progress.data?.done)} /{" "}
-            {number(progress.data?.total)} · {text(progress.data?.phase)}
-          </div>
-        )}
-        {queried && query.data?.warnings?.length ? (
-          <Alert tone="warning" className="table-notice">
-            {query.data.warnings.join(" ")}
-          </Alert>
-        ) : null}
-        {queried && query.data?.meta && (
-          <div className="production-results-stats">
-            Archivos leídos{" "}
-            <strong>{number(query.data.meta.archivos_leidos)}</strong> Cambios{" "}
-            <strong>{number(query.data.meta.eventos)}</strong>
-          </div>
-        )}
-        {query.isSuccess && limit && query.data.rows.length >= limit && (
-          <Alert tone="info" className="table-notice">
-            La API devuelve hasta {limit.toLocaleString("es-MX")} registros por
-            consulta. Aplica filtros para acotar los resultados.
-          </Alert>
-        )}
-        {spec.remote ? (
-          <>
-            <DataTable
-              {...tableProps}
-              key={criteria + page + ":" + pageSize}
-              columnSearches={searches}
-              onColumnSearchChange={(key, value) => {
-                setSearches((previous) => ({ ...previous, [key]: value }));
-                setPage(1);
-              }}
-            />
-            {query.data && (
-              <Pagination
-                page={query.data.page}
-                pageSize={query.data.perPage}
-                total={query.data.total}
-                onPageChange={setPage}
-                onPageSizeChange={(size) => {
+        fields={spec.fields}
+        values={draft}
+        defaults={spec.defaults}
+        pending={query.isFetching}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }) as Filters)
+        }
+        onReset={() => {
+          setDraft({ ...spec.defaults });
+          setApplied({ ...spec.defaults });
+          setSearches({});
+          setPage(1);
+          setError("");
+          if (spec.manual) setQueried(false);
+        }}
+        onSubmit={() => {
+          const issue = filterIssue(draft) || spec.validate?.(draft) || "";
+          setError(issue);
+          if (issue) return;
+          if (
+            queried &&
+            !spec.progressPath &&
+            JSON.stringify(applied) === JSON.stringify(draft) &&
+            page === 1
+          )
+            void query.refetch();
+          setProgressId(crypto.randomUUID());
+          setQueried(true);
+          setApplied({ ...draft });
+          setPage(1);
+        }}
+      />
+      <>
+        <Card fill label={spec.title}>
+          {(error || exportForm.error) && (
+            <Alert tone="danger" className="table-notice">
+              {error || exportForm.error?.message}
+            </Alert>
+          )}
+          {notice}
+          {queried && query.data?.summary && (
+            <div
+              className="production-results-stats"
+              aria-label="Resumen de la consulta"
+            >
+              {Object.entries(query.data.summary)
+                .filter(([key]) => summaryLabels[key])
+                .map(([key, value]) => (
+                  <span key={key}>
+                    {summaryLabels[key]}{" "}
+                    <strong>{number(value).toLocaleString("es-MX")}</strong>
+                  </span>
+                ))}
+            </div>
+          )}
+          {!queried && (
+            <Alert tone="info" className="table-notice">
+              Selecciona los filtros y pulsa Consultar.
+            </Alert>
+          )}
+          {query.isFetching && spec.progressPath && (
+            <div role="status" className="production-results-stats">
+              Leyendo archivos {number(progress.data?.done)} /{" "}
+              {number(progress.data?.total)} · {text(progress.data?.phase)}
+            </div>
+          )}
+          {queried && query.data?.warnings?.length ? (
+            <Alert tone="warning" className="table-notice">
+              {query.data.warnings.join(" ")}
+            </Alert>
+          ) : null}
+          {queried && query.data?.meta && (
+            <div className="production-results-stats">
+              Archivos leídos{" "}
+              <strong>{number(query.data.meta.archivos_leidos)}</strong> Cambios{" "}
+              <strong>{number(query.data.meta.eventos)}</strong>
+            </div>
+          )}
+          {query.isSuccess && limit && query.data.rows.length >= limit && (
+            <Alert tone="info" className="table-notice">
+              La API devuelve hasta {limit.toLocaleString("es-MX")} registros
+              por consulta. Aplica filtros para acotar los resultados.
+            </Alert>
+          )}
+          {spec.remote ? (
+            <>
+              <DataTable
+                {...tableProps}
+                key={criteria + page + ":" + pageSize}
+                columnSearches={searches}
+                onColumnSearchChange={(key, value) => {
+                  setSearches((previous) => ({ ...previous, [key]: value }));
                   setPage(1);
-                  setPageSize(size);
                 }}
-                disabled={query.isFetching}
               />
-            )}
-          </>
-        ) : (
-          <DataGrid
-            {...tableProps}
-            resetKey={criteria}
-            summary={(loaded) =>
-              spec.id === "excess-inventory" ||
-              spec.id.startsWith("excess-") ? (
-                <div className="production-results-stats">
-                  Cantidad total{" "}
-                  <strong>
-                    {loaded
-                      .reduce(
-                        (sum, row) =>
-                          sum + number(row.current_quantity ?? row.quantity),
-                        0,
-                      )
-                      .toLocaleString("es-MX")}
-                  </strong>
-                </div>
-              ) : null
-            }
-          />
-        )}
-      </Card>
+              {query.data && (
+                <Pagination
+                  page={query.data.page}
+                  pageSize={query.data.perPage}
+                  total={query.data.total}
+                  onPageChange={setPage}
+                  onPageSizeChange={(size) => {
+                    setPage(1);
+                    setPageSize(size);
+                  }}
+                  disabled={query.isFetching}
+                />
+              )}
+            </>
+          ) : (
+            <DataGrid
+              {...tableProps}
+              resetKey={criteria}
+              summary={(loaded) =>
+                spec.id === "excess-inventory" ||
+                spec.id.startsWith("excess-") ? (
+                  <div className="production-results-stats">
+                    Cantidad total{" "}
+                    <strong>
+                      {loaded
+                        .reduce(
+                          (sum, row) =>
+                            sum + number(row.current_quantity ?? row.quantity),
+                          0,
+                        )
+                        .toLocaleString("es-MX")}
+                    </strong>
+                  </div>
+                ) : null
+              }
+            />
+          )}
+        </Card>
+      </>
     </div>
   );
 }

@@ -52,6 +52,15 @@ export default function GeneratedPage() {
         Conecta la API del módulo antes de habilitarlo en modo real.
       </Alert>
       <FilterBar
+        actions={
+          <Button
+            variant="success"
+            icon={<Plus size={15} />}
+            onClick={() => setCreating(true)}
+          >
+            Nuevo registro
+          </Button>
+        }
         fields={fields}
         values={filters}
         defaults={defaults}
@@ -64,20 +73,7 @@ export default function GeneratedPage() {
           setAppliedSearch("");
         }}
       />
-      <Card
-        fill
-        title="Registros"
-        badge={records.length}
-        actions={
-          <Button
-            variant="success"
-            icon={<Plus size={15} />}
-            onClick={() => setCreating(true)}
-          >
-            Nuevo registro
-          </Button>
-        }
-      >
+      <Card fill label="Registros">
         <DataGrid
           label={__TITLE_JSON__}
           rows={rows}

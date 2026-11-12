@@ -47,6 +47,24 @@ export default function OqcReleasePage() {
   return (
     <Page className="quality-control-page" banner={<DemoBanner />}>
       <FilterBar
+        actions={
+          <>
+            <Button
+              size="sm"
+              disabled={query.isFetching}
+              onClick={() => void query.refetch()}
+            >
+              Actualizar
+            </Button>
+            <ExportButton
+              size="sm"
+              loading={download.pending}
+              disabled={query.isPending || query.isError}
+              title="Exporta hasta 10,000 cajas con los filtros generales consultados."
+              onClick={() => void download.submit()}
+            />
+          </>
+        }
         fields={fields}
         values={draft}
         defaults={oqcDefaults}
@@ -72,29 +90,7 @@ export default function OqcReleasePage() {
           else setFilters({ ...draft });
         }}
       />
-      <Card
-        fill
-        title="Liberaciones OQC"
-        badge={query.data?.rows.length}
-        actions={
-          <>
-            <Button
-              size="sm"
-              disabled={query.isFetching}
-              onClick={() => void query.refetch()}
-            >
-              Actualizar
-            </Button>
-            <ExportButton
-              size="sm"
-              loading={download.pending}
-              disabled={query.isPending || query.isError}
-              title="Exporta hasta 10,000 cajas con los filtros generales consultados."
-              onClick={() => void download.submit()}
-            />
-          </>
-        }
-      >
+      <Card fill label="Liberaciones OQC">
         {(issue || download.error) && (
           <Alert tone="danger" className="table-notice">
             {issue || download.error?.message}

@@ -1,6 +1,6 @@
 import { useCallback, useId, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, RefreshCw, Warehouse } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
@@ -190,27 +190,6 @@ export default function InventoryPage() {
         />
       </div>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={defaults}
-        onChange={(patch) =>
-          setDraft((previous) => ({ ...previous, ...patch }))
-        }
-        onSubmit={submit}
-        onReset={reset}
-        pending={query.isFetching}
-      />
-      <Card
-        fill
-        title={
-          view === "summary" ? "Inventario por material" : "Inventario por lote"
-        }
-        icon={<Warehouse size={18} />}
-        badge={
-          view === "summary"
-            ? (summary.data?.length ?? "—")
-            : (table.query.data?.total ?? "—")
-        }
         actions={
           <>
             <Button
@@ -232,6 +211,21 @@ export default function InventoryPage() {
               {mode === "demo" ? "Exportar CSV" : "Exportar Excel"}
             </ExportButton>
           </>
+        }
+        fields={fields}
+        values={draft}
+        defaults={defaults}
+        onChange={(patch) =>
+          setDraft((previous) => ({ ...previous, ...patch }))
+        }
+        onSubmit={submit}
+        onReset={reset}
+        pending={query.isFetching}
+      />
+      <Card
+        fill
+        label={
+          view === "summary" ? "Inventario por material" : "Inventario por lote"
         }
       >
         {(error || download.error) && (

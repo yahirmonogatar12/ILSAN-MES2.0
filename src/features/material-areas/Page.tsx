@@ -152,37 +152,6 @@ function ConnectedAreaPage({ area }: { area: ConnectedArea }) {
   return (
     <Page className="material-areas-module" banner={<DemoBanner />}>
       <FilterBar
-        fields={fields}
-        values={draft}
-        defaults={{ ...initial, consulta: draft.consulta, modo: draft.modo }}
-        onChange={(patch) => {
-          setDraft((previous) => ({ ...previous, ...patch }));
-          if (patch.consulta || patch.modo) {
-            setPage(1);
-            setError("");
-            download.reset();
-          }
-        }}
-        onSubmit={submit}
-        onReset={() => {
-          const next = defaults();
-          setDraft((previous) => ({
-            ...previous,
-            start: next.start,
-            end: next.end,
-          }));
-          setDates({ start: next.start, end: next.end });
-          changeSearches({});
-          setError("");
-          download.reset();
-        }}
-        pending={query.isFetching}
-      />
-      <Card
-        fill
-        title={`${AREA_CONFIG[area].title} · ${title}${inventory ? ` · ${draft.modo === "general" ? "General" : "Detallado"}` : ""}`}
-        icon={<Boxes size={18} />}
-        badge={query.data?.total ?? "—"}
         actions={
           <>
             <span className="material-areas-summary" aria-live="polite">
@@ -211,6 +180,35 @@ function ConnectedAreaPage({ area }: { area: ConnectedArea }) {
             </ExportButton>
           </>
         }
+        fields={fields}
+        values={draft}
+        defaults={{ ...initial, consulta: draft.consulta, modo: draft.modo }}
+        onChange={(patch) => {
+          setDraft((previous) => ({ ...previous, ...patch }));
+          if (patch.consulta || patch.modo) {
+            setPage(1);
+            setError("");
+            download.reset();
+          }
+        }}
+        onSubmit={submit}
+        onReset={() => {
+          const next = defaults();
+          setDraft((previous) => ({
+            ...previous,
+            start: next.start,
+            end: next.end,
+          }));
+          setDates({ start: next.start, end: next.end });
+          changeSearches({});
+          setError("");
+          download.reset();
+        }}
+        pending={query.isFetching}
+      />
+      <Card
+        fill
+        label={`${AREA_CONFIG[area].title} · ${title}${inventory ? ` · ${draft.modo === "general" ? "General" : "Detallado"}` : ""}`}
       >
         {(error || download.error) && (
           <Alert tone="warning" className="table-notice">

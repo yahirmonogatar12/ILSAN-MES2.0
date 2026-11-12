@@ -1,11 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  Pencil,
-  Plus,
-  RefreshCw,
-  ShieldCheck,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Pencil, Plus, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
   Alert,
@@ -16,6 +10,7 @@ import {
   Page,
   TableRowActions,
   type TableColumn,
+  TableToolbar,
 } from "@/shared/ui";
 import { useAuthorities } from "./useAdministration";
 import { canManage } from "./model";
@@ -103,69 +98,68 @@ export default function AuthoritiesPage() {
   };
   return (
     <Page className="administration-module" banner={<DemoBanner />}>
-      <Card
-        fill
-        title="Roles registrados"
-        icon={<ShieldCheck size={18} />}
-        badge={list.isSuccess ? list.data.length : "—"}
-        actions={
-          <>
-            <span className="administration-scope">
-              {context.data?.es_superadmin
-                ? "Todos los departamentos"
-                : context.data?.departamento}
-            </span>
-            <Button
-              size="sm"
-              icon={<RefreshCw size={16} />}
-              disabled={context.isFetching || list.isFetching}
-              onClick={() => {
-                void context.refetch();
-                void list.refetch();
-              }}
-            >
-              Actualizar
-            </Button>
-            <Button
-              size="sm"
-              variant="success"
-              icon={<Plus size={15} />}
-              disabled={!ready || !allowed}
-              onClick={() => setDialog({ type: "role", record: null })}
-            >
-              Nuevo rol
-            </Button>
-          </>
-        }
-      >
-        {context.error ? (
-          <ErrorState
-            error={context.error}
-            onRetry={() => void context.refetch()}
-          />
-        ) : (
-          <>
-            {context.data && !allowed && (
-              <Alert tone="warning" className="table-notice">
-                Tu usuario no tiene departamento asignado. Solicita la
-                asignación para administrar roles.
-              </Alert>
-            )}
-            <DataGrid
-              label="Roles registrados"
-              rows={list.data || []}
-              columns={columns}
-              rowKey={(row) => row.id}
-              itemLabel="roles"
-              minWidth={780}
-              initialSort={{ columnId: "name", direction: "asc" }}
-              loading={context.isPending || list.isPending}
-              error={list.error}
-              onRetry={() => void list.refetch()}
+      <>
+        <TableToolbar
+          actions={
+            <>
+              <span className="administration-scope">
+                {context.data?.es_superadmin
+                  ? "Todos los departamentos"
+                  : context.data?.departamento}
+              </span>
+              <Button
+                size="sm"
+                icon={<RefreshCw size={16} />}
+                disabled={context.isFetching || list.isFetching}
+                onClick={() => {
+                  void context.refetch();
+                  void list.refetch();
+                }}
+              >
+                Actualizar
+              </Button>
+              <Button
+                size="sm"
+                variant="success"
+                icon={<Plus size={15} />}
+                disabled={!ready || !allowed}
+                onClick={() => setDialog({ type: "role", record: null })}
+              >
+                Nuevo rol
+              </Button>
+            </>
+          }
+        />
+        <Card fill label="Roles registrados">
+          {context.error ? (
+            <ErrorState
+              error={context.error}
+              onRetry={() => void context.refetch()}
             />
-          </>
-        )}
-      </Card>
+          ) : (
+            <>
+              {context.data && !allowed && (
+                <Alert tone="warning" className="table-notice">
+                  Tu usuario no tiene departamento asignado. Solicita la
+                  asignación para administrar roles.
+                </Alert>
+              )}
+              <DataGrid
+                label="Roles registrados"
+                rows={list.data || []}
+                columns={columns}
+                rowKey={(row) => row.id}
+                itemLabel="roles"
+                minWidth={780}
+                initialSort={{ columnId: "name", direction: "asc" }}
+                loading={context.isPending || list.isPending}
+                error={list.error}
+                onRetry={() => void list.refetch()}
+              />
+            </>
+          )}
+        </Card>
+      </>
       {dialog?.type === "role" && context.data && (
         <RoleForm
           record={dialog.record}
