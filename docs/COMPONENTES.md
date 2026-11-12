@@ -203,4 +203,10 @@ Si dos módulos necesitan la misma interacción, ampliar una pieza compartida o 
 
 `ImageViewer` recibe `blob`, `alt` y los callbacks opcionales `onLoad` y `onError`. Ajusta la imagen al área disponible y ofrece zoom de 100% a 600% en pasos de 20%, botones, rueda, arrastre con puntero y desplazamiento mediante flechas. Reset y la tecla Inicio restablecen el encuadre. Cada cambio de imagen reinicia la vista y libera el object URL anterior. El consumidor gestiona la consulta autenticada y el reintento de descarga.
 
-`Modal` admite un `icon` opcional junto al título y subtítulo. Los datos y controles específicos se componen en su contenido.
+`Modal` admite un `icon` opcional junto al título y subtítulo. `headerActions` permite componer controles junto al botón de cierre. Los datos y controles específicos se componen en su contenido.
+
+## Texto enriquecido y respuestas incrementales
+
+`RichText` recibe `{text}` y presenta títulos, listas, énfasis, código, citas y tablas Markdown. Las tablas utilizan `DataTable`. React escapa el HTML y los enlaces se limitan a HTTP o HTTPS.
+
+`shared/lib/serverEvents.readServerEvents` recibe un `ReadableStream`, un receptor de eventos y una señal opcional. Decodifica UTF-8 incremental, delimita eventos SSE y cancela/libera el lector al abortar o fallar. `core/http.requestEventStream` compone ese lector con el transporte autenticado y sus errores HTTP. El transporte acepta las tres representaciones de cabeceras de `RequestInit` y reemplaza cabeceras equivalentes sin duplicarlas por diferencias de mayúsculas.

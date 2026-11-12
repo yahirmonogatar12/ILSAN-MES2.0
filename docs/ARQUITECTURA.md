@@ -9,10 +9,12 @@ src/
   app/
     registry.ts           Único registro de módulos y secciones
     providers.tsx         QueryClient, sesión y notificaciones
+    assistant/            Panel global de IA cargado al abrirse
     layout/               Logo, navegación y estilos ILSAN
     pages/                Acceso a la aplicación
   core/
     auth/                 Perfil, login/logout y proveedor de sesión
+    assistant/            Contratos, adaptador y demostración del asistente
     modules/              Contratos y guardia de permisos
     runtime.ts            Modo real/demo, scope y evento de expiración
     runtime/              Indicador de demostración

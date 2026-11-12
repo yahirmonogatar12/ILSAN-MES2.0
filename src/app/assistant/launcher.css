@@ -1,0 +1,39 @@
+.assistant-launcher.icon-button {
+  position: fixed;
+  left: 20px;
+  bottom: 18px;
+  width: 58px;
+  height: 58px;
+  padding: 7px;
+  border: 1px solid #d3e7dc;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 5px 20px #0c36232b;
+  z-index: 60;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+.assistant-launcher.icon-button:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 24px #0c362345;
+}
+.assistant-launcher img {
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 600px) {
+  .assistant-launcher.icon-button {
+    left: auto;
+    right: 12px;
+    bottom: 12px;
+    width: 50px;
+    height: 50px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assistant-launcher.icon-button {
+    transition: none;
+  }
+}

@@ -9,6 +9,7 @@ export interface ModalProps {
   title: string;
   icon?: ReactNode;
   subtitle?: string;
+  headerActions?: ReactNode;
   onClose: () => void;
   children: ReactNode;
   size?: "md" | "lg" | "xl";
@@ -21,6 +22,7 @@ export function Modal({
   title,
   icon,
   subtitle,
+  headerActions,
   onClose,
   children,
   size = "md",
@@ -69,12 +71,15 @@ export function Modal({
             {subtitle && <p id={descriptionId}>{subtitle}</p>}
           </div>
         </div>
-        <IconButton
-          label="Cerrar ventana"
-          icon={<X size={20} />}
-          onClick={onClose}
-          disabled={busy}
-        />
+        <div className="modal-heading-actions">
+          {headerActions}
+          <IconButton
+            label="Cerrar ventana"
+            icon={<X size={20} />}
+            onClick={onClose}
+            disabled={busy}
+          />
+        </div>
       </div>
       {children}
     </dialog>,

@@ -4,6 +4,7 @@ import { ModuleCatalogProvider } from "@/core/modules/ModuleCatalog";
 import { modules, sections } from "./app/registry";
 import { Workspace } from "./app/workspace/Workspace";
 import { LandingPage } from "./app/pages/LandingPage";
+import { AssistantLauncher } from "./app/assistant/AssistantLauncher";
 
 export function App() {
   const { profile, scope, mode } = useAuth();
@@ -23,6 +24,7 @@ export function App() {
         scope={scope}
         mode={mode}
       />
+      <AssistantLauncher key={"assistant-" + scope} />
     </ModuleCatalogProvider>
   );
 }

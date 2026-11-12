@@ -1,4 +1,5 @@
 import { SESSION_EXPIRED_EVENT } from "./runtime";
+import { readServerEvents, type ServerEvent } from "@/shared/lib/serverEvents";
 
 export class ApiError extends Error {
   constructor(
@@ -17,17 +18,29 @@ export async function backendFetch(
   let response: Response;
   const multipart =
     typeof FormData !== "undefined" && init.body instanceof FormData;
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    // Existing permission decorators also inspect Content-Type for GET requests.
+    ...(!multipart ? { "Content-Type": "application/json" } : {}),
+    "X-Requested-With": "XMLHttpRequest",
+  };
+  const suppliedHeaders =
+    init.headers instanceof Headers
+      ? init.headers.entries()
+      : Array.isArray(init.headers)
+        ? init.headers
+        : Object.entries(init.headers ?? {});
+  for (const [name, value] of suppliedHeaders) {
+    const existing = Object.keys(headers).find(
+      (key) => key.toLowerCase() === name.toLowerCase(),
+    );
+    headers[existing || name] = value;
+  }
   try {
     response = await fetch(`/backend${path}`, {
       credentials: "same-origin",
       ...init,
-      headers: {
-        Accept: "application/json",
-        // Existing permission decorators also inspect Content-Type for GET requests.
-        ...(!multipart ? { "Content-Type": "application/json" } : {}),
-        "X-Requested-With": "XMLHttpRequest",
-        ...init.headers,
-      },
+      headers,
     });
   } catch (error) {
     // Abort errors can originate in another browser realm (iframe/DOMException).
@@ -109,6 +122,30 @@ export function saveDownload(blob: Blob, filename: string) {
   link.download = filename;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Authenticated SSE reads share the same cookies, expiry and HTTP error handling. */
+export async function requestEventStream(
+  path: string,
+  init: RequestInit,
+  receive: (event: ServerEvent) => void,
+): Promise<void> {
+  const headers = new Headers(init.headers);
+  headers.set("Accept", "text/event-stream");
+  const response = await backendFetch(path, {
+    ...init,
+    headers,
+  });
+  await ensureResponse(response);
+  if (
+    !response.headers.get("content-type")?.includes("text/event-stream") ||
+    !response.body
+  )
+    throw new ApiError(
+      "El servidor no devolvió una respuesta de chat válida.",
+      502,
+    );
+  await readServerEvents(response.body, receive, init.signal ?? undefined);
 }
 
 /** Authenticated binary downloads without navigating away from the workspace. */

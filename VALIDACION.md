@@ -1,5 +1,14 @@
 # Validación local
 
+## Asistente de IA · 12 de noviembre de 2026
+
+- Se recreó el icono original y el panel global con carga diferida, vista ampliada, historial, archivado, eliminación confirmada, idiomas, adjuntos, respuestas SSE y recuperación manual. Auditoría y cuotas se muestran con sus permisos específicos.
+- La integración reutiliza sesión, transporte, controles, tablas, gráficos y visores compartidos. Las consultas incluyen el scope del usuario. Revocar el acceso desmonta el panel, cancela la respuesta y elimina sus consultas. El cierre visual conserva la respuesta activa.
+- `npm run check` aprobado con 637 pruebas de frontend en 64 archivos, 11 pruebas de herramientas, TypeScript, arquitectura y compilación de la plantilla. Arquitectura aprobada con 390 archivos y 76 módulos. Compilación y formato aprobados. Evidencia en `output/assistant-check.log`, `output/assistant-build.log` y `output/assistant-format.log`.
+- El navegador comprobó el panel lateral y ampliado en 1366×768, y la adaptación en 390×640 y 320×568. El documento conservó las dimensiones exactas del viewport. El compositor permanece visible y los mensajes se desplazan internamente. En 320 px se comprobó la separación del título y los controles del encabezado.
+- Se verificaron respuesta HTTP SSE, contexto de la pestaña activa, tablas Markdown, indicadores de calidad, vista previa de CSV con el visor compartido, descarga con contenido correcto y cuotas en móvil. La demostración respondió con dos mensajes y cero solicitudes al backend. El navegador terminó sin errores JavaScript. Evidencia en `output/playwright/assistant-*`.
+- Las APIs se contrastaron con el código Flask existente. La comprobación con el proveedor real requiere una sesión autorizada y el servicio configurado. El editor avanzado de propuestas de planificación del chat original sigue pendiente de migración. Detalles en `docs/ASISTENTE_IA.md`.
+
 ## Contratos y mantenimiento de producción · 12 de noviembre de 2026
 
 - Los adaptadores de producción exponen entidades y payloads específicos. Los decodificadores comprueban planes, órdenes, partes, inventario, lotes y propuestas. Proyección valida fechas y paginación, admite inventario nulo y detecta partes repetidas entre páginas remotas. Los constructores de capturas comprueban los campos obligatorios antes del envío.

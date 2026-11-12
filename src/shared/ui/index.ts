@@ -12,6 +12,7 @@ export * from "./ErrorBoundary";
 export * from "./TabBar";
 export * from "./MetricChart";
 export * from "./PercentageBar";
+export * from "./RichText";
 export * from "./FilePreview";
 export * from "./ImageViewer";
 export * from "./SpreadsheetPreview";
