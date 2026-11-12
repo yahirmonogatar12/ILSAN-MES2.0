@@ -8,14 +8,15 @@
     "build": "npm run check:architecture && tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "test:browser": "npm run build && playwright test",
     "typecheck": "tsc --noEmit",
     "check:architecture": "node tools/check-architecture.mjs",
     "test:tools": "node --test tools/generate-module.test.mjs tools/check-architecture.test.mjs",
     "check:scaffold": "node tools/check-scaffold.mjs",
     "check": "npm run check:architecture && npm run typecheck && npm test && npm run test:tools && npm run check:scaffold",
     "module:new": "node tools/generate-module.mjs",
-    "format": "prettier --write src tools docs *.ts *.json README.md AGENTS.md VALIDACION.md .github",
-    "format:check": "prettier --check src tools docs *.ts *.json README.md AGENTS.md VALIDACION.md .github"
+    "format": "prettier --write src tools docs e2e *.ts *.json README.md AGENTS.md VALIDACION.md .github",
+    "format:check": "prettier --check src tools docs e2e *.ts *.json README.md AGENTS.md VALIDACION.md .github"
   },
   "dependencies": {
     "@tanstack/react-query": "5.105.3",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@babel/parser": "8.1.0",
+    "@playwright/test": "1.65.0",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.8",

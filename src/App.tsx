@@ -23,8 +23,9 @@ export function App() {
         sections={sections}
         scope={scope}
         mode={mode}
-      />
-      <AssistantLauncher key={"assistant-" + scope} />
+      >
+        <AssistantLauncher key={"assistant-" + scope} />
+      </Workspace>
     </ModuleCatalogProvider>
   );
 }

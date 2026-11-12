@@ -79,6 +79,8 @@ npm run preview
 
 `check` verifica estructura, TypeScript, pruebas de componentes/contratos/flujos, herramientas y la compilación de un módulo generado. `build` genera `dist/`; `preview` permite comprobarlo en **http://127.0.0.1:4174/** con el proxy local. `npm run format` mantiene el formato del código y la documentación.
 
+`npx playwright install chromium` prepara el navegador de pruebas. `npm run test:browser` compila la aplicación y ejecuta los recorridos de escritorio y móvil que también utiliza el CI. Los contratos HTTP controlados y los archivos de prueba están en `e2e/`. [Ejecución y cobertura del navegador](docs/PRUEBAS.md#recorridos-de-navegador).
+
 Para producción se debe servir `dist/`, hacer fallback de rutas a `index.html` y configurar `/backend` hacia Flask en el mismo origen. Los servidores de Vite son de desarrollo/verificación. El proyecto queda local; no se publica automáticamente.
 
 ## Funciones de Materiales

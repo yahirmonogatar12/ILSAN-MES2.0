@@ -18,6 +18,8 @@ El registro alimenta menú, pestañas, restauración y guardia de URL. Una deneg
 
 ## Purchase Orders y Work Orders
 
+Part Planning LG y Proyección comparten `PivotPage` como composición visual. `usePivot` concentra consultas, filtros, paginación y exportación, `usePivotCells` coordina las capturas y sus escrituras, `pivotColumns` define las celdas y `PivotDialogs` reúne los diálogos. `pivot.ts` contiene la transformación P/S/I, los metadatos de filtros y las filas de exportación. Estas funciones utilizan las entidades tipadas del dominio y conservan la edición mediante los controles compartidos.
+
 `OrdersPage` compone la pantalla sobre `useOrders`, `orderColumns` y `OrderDialogs`. Las consultas y la selección pertenecen al hook, las acciones de fila a las columnas y las capturas a los diálogos. Las acciones reutilizan los payloads tipados de `requests.ts`.
 
 `types.ts` define órdenes, partes de proyección, inventario, lotes proyectados y propuestas de schedule. `PlanningApi.action` relaciona el nombre de la operación con sus campos obligatorios y su respuesta. `contracts.ts` valida las respuestas al entrar al módulo y construye los resultados tipados. Las capturas dinámicas pasan por los constructores de `requests.ts` antes de llegar al adaptador.

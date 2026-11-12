@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
+import { useActiveModule } from "@/core/modules/ActiveModule";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { usePermission } from "@/core/auth/usePermission";
 import { createAssistantApi } from "@/core/assistant/api";
@@ -23,6 +24,7 @@ import { useChatStream } from "./useChatStream";
 export function useAssistantSession(open: boolean) {
   const { mode, scope } = useAuth();
   const location = useLocation();
+  const activeModule = useActiveModule();
   const client = useQueryClient();
   const canArtifacts = usePermission(ASSISTANT_CAPABILITIES.artifacts);
   const canAudit = usePermission(ASSISTANT_CAPABILITIES.audit);
@@ -196,10 +198,6 @@ export function useAssistantSession(open: boolean) {
           return;
         const id = await ensureConversation();
         const snapshot = [...files];
-        const panel = document.querySelector(
-          "main > [role=tabpanel]:not([hidden])",
-        );
-        const labelId = panel?.getAttribute("aria-labelledby");
         setDraft("");
         setFiles([]);
         await stream.send(
@@ -210,11 +208,9 @@ export function useAssistantSession(open: boolean) {
             language,
             page_context: {
               path: location.pathname,
-              title: document.title,
-              container_id: panel?.id ?? null,
-              module_title: labelId
-                ? document.getElementById(labelId)?.textContent?.trim()
-                : undefined,
+              title: "ILSAN MES",
+              container_id: activeModule?.panelId ?? null,
+              module_title: activeModule?.title,
             },
             file_refs: snapshot.map((file) => file.file_ref),
             file_ref: snapshot.at(-1)?.file_ref ?? null,

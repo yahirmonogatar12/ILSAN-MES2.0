@@ -62,6 +62,8 @@ Reglas:
 
 `isNumericValue` e `isNullableText` comprueban valores del JSON original sin convertirlos. `requiredText` y `requiredNumber` comprueban y convierten capturas obligatorias. `positiveIntegerList` comprueba listas de identificadores y recibe el mensaje del dominio. Las interfaces de cada módulo describen los campos estables y los decodificadores comprueban esa forma antes de entregar datos a la pantalla.
 
+`requiredInteger(value, field, minimum = 0)` comprueba enteros seguros y rechaza valores vacíos, booleanos, objetos, valores no finitos y cantidades inferiores al mínimo. Admite cadenas numéricas históricas. Los decodificadores del asistente usan mínimo cero para cuotas, consumo, tamaños y filas, y mínimo uno para identificadores. Las cuotas nulas conservan la herencia y los contadores ausentes conservan su valor predeterminado.
+
 `shared/lib/text.ts` ofrece `text` para conversión simple, `jsonText` para serializar objetos, `containsText(value, search, locale?)` para coincidencias que conservan acentos y `normalizeSearch` para búsquedas sin acentos. Los consumidores deciden el recorte de espacios y la serialización previa. Los modelos mantienen sus exportaciones públicas mediante reexportaciones de estas utilidades. Las copias profundas usan `structuredClone` directamente.
 
 ## Recorrido de un módulo
@@ -77,6 +79,8 @@ La entrada pública de /, /inicio y /login presenta el portal corporativo. El ac
 7. La pantalla entrega filas/columnas a `DataTable`, filtros a `FilterBar` y valores a los campos compartidos.
 
 `app/workspace` conserva los módulos abiertos en paneles independientes. La pestaña activa sigue la URL; las otras pantallas visitadas mantienen estado con `Activity` y pausan sus efectos. Los nombres de pestañas restaurados no cargan código hasta visitarlos. El control visual `TabBar` pertenece a `shared/ui`; no conoce sesión ni navegación. Ver [pestañas y ciclo de vida](PESTANAS.md).
+
+`Workspace` publica el módulo activo mediante `core/modules/ActiveModule`. El contrato contiene ID, título, ruta e ID del panel, y toma el valor nulo cuando termina la navegación por módulos abiertos. Las herramientas globales se componen como hijos del workspace autorizado y consumen esos metadatos con `useActiveModule`. El chat construye su contexto desde ese contrato y la ruta del router.
 
 ## Sesión y consultas
 

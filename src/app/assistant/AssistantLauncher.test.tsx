@@ -13,6 +13,10 @@ import { describe, expect, it, vi } from "vitest";
 import { createQueryClient } from "@/app/providers";
 import { AuthProvider } from "@/core/auth/AuthProvider";
 import { assistantKeys } from "@/core/assistant/config";
+import {
+  ActiveModuleContext,
+  type ActiveModule,
+} from "@/core/modules/ActiveModule";
 import { AssistantLauncher } from "./AssistantLauncher";
 const json = (value: unknown, status = 200) =>
   new Response(JSON.stringify(value), {
@@ -105,18 +109,26 @@ function setup(buttons = ["Usar asistente IA"]) {
   });
   vi.stubGlobal("fetch", fetcher);
   const client = createQueryClient();
-  render(
+  let activeModule: ActiveModule | null = null;
+  const ui = () => (
     <MemoryRouter initialEntries={["/material/materiales"]}>
       <QueryClientProvider client={client}>
         <AuthProvider>
-          <AssistantLauncher />
+          <ActiveModuleContext.Provider value={activeModule}>
+            <AssistantLauncher />
+          </ActiveModuleContext.Provider>
         </AuthProvider>
       </QueryClientProvider>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
+  const view = render(ui());
   return {
     client,
     fetcher,
+    setModule: (next: ActiveModule) => {
+      activeModule = next;
+      view.rerender(ui());
+    },
     revoke: () => {
       allowed = [];
       return client.invalidateQueries({
@@ -136,6 +148,34 @@ async function open() {
   return screen.getByRole("dialog", { name: "Asistente IA" });
 }
 describe("global assistant", () => {
+  it("takes active module metadata from its provider without workspace markup", async () => {
+    const view = setup();
+    view.setModule({
+      id: "materials",
+      title: "Control de material",
+      path: "/material/materiales",
+      panelId: "panel-from-contract",
+    });
+    const dialog = await open();
+    expect(document.querySelector("main")).toBeNull();
+    await userEvent.type(
+      within(dialog).getByRole("textbox", { name: "Mensaje" }),
+      "Contexto de prueba",
+    );
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Enviar" }),
+    );
+    await screen.findByText("Inventario consultado");
+    const request = view.fetcher.mock.calls.find(([url]) =>
+      url.endsWith("/messages/stream"),
+    )!;
+    expect(JSON.parse(String(request[1]?.body)).page_context).toEqual({
+      path: "/material/materiales",
+      title: "ILSAN MES",
+      container_id: "panel-from-contract",
+      module_title: "Control de material",
+    });
+  });
   it("keeps the launcher and all AI traffic hidden without its exact permission", async () => {
     const view = setup([]);
     await waitFor(() =>

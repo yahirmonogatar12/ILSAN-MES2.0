@@ -1,4 +1,9 @@
-import { isRecord, record, number, requiredText } from "@/shared/lib/parse";
+import {
+  isRecord,
+  record,
+  requiredInteger,
+  requiredText,
+} from "@/shared/lib/parse";
 import { text } from "@/shared/lib/text";
 import { ATTACH_EXTENSIONS, MAX_FILE_BYTES } from "./config";
 import type {
@@ -16,10 +21,13 @@ import type {
 } from "./types";
 
 export function language(value: unknown): Language {
-  return ["es", "en", "ko"].includes(text(value))
-    ? (value as Language)
-    : "auto";
+  return value === "es" || value === "en" || value === "ko" ? value : "auto";
 }
+const optionalRecord = (value: unknown) => (value == null ? {} : record(value));
+const count = (value: unknown, field: string) =>
+  value == null ? 0 : requiredInteger(value, field);
+const quotaLimit = (value: unknown, field: string) =>
+  value == null ? null : requiredInteger(value, field);
 const nullableText = (value: unknown) => (value == null ? null : text(value));
 const records = (value: unknown): Record<string, unknown>[] => {
   if (!Array.isArray(value))
@@ -27,27 +35,26 @@ const records = (value: unknown): Record<string, unknown>[] => {
   return value.map(record);
 };
 export function usage(value: unknown): Usage {
-  const data = isRecord(value) ? value : {};
+  const data = optionalRecord(value);
   return {
-    request_count: number(data.request_count),
-    artifact_count: number(data.artifact_count),
-    input_tokens: number(data.input_tokens),
-    output_tokens: number(data.output_tokens),
+    request_count: count(data.request_count, "request_count"),
+    artifact_count: count(data.artifact_count, "artifact_count"),
+    input_tokens: count(data.input_tokens, "input_tokens"),
+    output_tokens: count(data.output_tokens, "output_tokens"),
   };
 }
 export function limits(value: unknown): Limits {
-  const data = isRecord(value) ? value : {};
+  const data = optionalRecord(value);
   return {
-    daily_request_limit:
-      data.daily_request_limit == null
-        ? null
-        : number(data.daily_request_limit),
-    daily_token_limit:
-      data.daily_token_limit == null ? null : number(data.daily_token_limit),
-    daily_artifact_limit:
-      data.daily_artifact_limit == null
-        ? null
-        : number(data.daily_artifact_limit),
+    daily_request_limit: quotaLimit(
+      data.daily_request_limit,
+      "daily_request_limit",
+    ),
+    daily_token_limit: quotaLimit(data.daily_token_limit, "daily_token_limit"),
+    daily_artifact_limit: quotaLimit(
+      data.daily_artifact_limit,
+      "daily_artifact_limit",
+    ),
   };
 }
 export function bootstrap(value: unknown): Bootstrap {
@@ -85,7 +92,7 @@ export function attachment(value: unknown): Attachment {
     filename: requiredText(data.filename, "filename"),
     extension: text(data.extension),
     kind: text(data.kind),
-    size_bytes: number(data.size_bytes),
+    size_bytes: count(data.size_bytes, "attachment.size_bytes"),
     file_ref: data.file_ref == null ? undefined : text(data.file_ref),
   };
 }
@@ -97,8 +104,8 @@ export function artifact(value: unknown): Artifact {
     title: text(data.title),
     filename: text(data.filename),
     mime_type: text(data.mime_type),
-    size_bytes: number(data.size_bytes),
-    row_count: number(data.row_count),
+    size_bytes: count(data.size_bytes, "artifact.size_bytes"),
+    row_count: count(data.row_count, "artifact.row_count"),
     status: text(data.status),
     expires_at: nullableText(data.expires_at),
     source: nullableText(data.source),
@@ -128,8 +135,7 @@ export function visualization(value: unknown): Visualization {
 }
 export function message(value: unknown): Message {
   const data = record(value);
-  if (typeof data.id !== "number" || !Number.isSafeInteger(data.id))
-    throw new Error("El servidor devolvió un mensaje sin identificador.");
+  const id = requiredInteger(data.id, "message.id", 1);
   const content = isRecord(data.content_json) ? data.content_json : {};
   const files = Array.isArray(content.attachments)
     ? content.attachments
@@ -137,8 +143,8 @@ export function message(value: unknown): Message {
       ? [content.attachment]
       : [];
   return {
-    id: data.id,
-    key: String(data.id),
+    id,
+    key: String(id),
     client_message_id: nullableText(data.client_message_id),
     role: text(data.role),
     content: text(data.content),
@@ -160,7 +166,7 @@ export function quota(value: unknown): Quota {
     throw new Error("El servidor devolvió una cuota inválida.");
   return {
     ...limits(data),
-    id: number(data.id),
+    id: requiredInteger(data.id, "quota.id", 1),
     subject_type: data.subject_type,
     subject_key: requiredText(data.subject_key, "subject_key"),
   };
@@ -240,9 +246,9 @@ export function decodeEvent(event: string, value: unknown): ChatEvent | null {
       return {
         type: "done",
         messageId:
-          Number.isSafeInteger(data.message_id) && Number(data.message_id) > 0
-            ? Number(data.message_id)
-            : undefined,
+          data.message_id == null
+            ? undefined
+            : requiredInteger(data.message_id, "message_id", 1),
         artifacts: data.artifacts ? artifacts(data.artifacts) : [],
         visualizations: Array.isArray(data.visualizations)
           ? data.visualizations.map(visualization)

@@ -1,5 +1,15 @@
 # Validación local
 
+## Contexto, validaciones y recorridos de navegador · 12 de noviembre de 2026
+
+- El workspace publica su módulo activo mediante `ActiveModuleContext`, con ID, título, ruta e ID del panel. El asistente recibe ese contexto desde el proveedor y el router. Las pruebas verifican cambio de módulo, cierre de la última pestaña y funcionamiento del chat aunque cambien los atributos del HTML.
+- `requiredInteger` valida enteros seguros y mínimos explícitos. Los decodificadores del asistente rechazan cuotas, identificadores, consumo y tamaños inválidos. Se conservan cuotas cero, herencia mediante nulos, cadenas numéricas históricas y metadatos ausentes permitidos por el contrato.
+- `PivotPage` pasó de 532 a 218 líneas. Compone consultas y filtros en `usePivot`, edición en `usePivotCells`, columnas en `pivotColumns`, transformaciones y exportación en `pivot.ts` y diálogos en `PivotDialogs`. La entrada pública, la agrupación P/S/I, la paginación y los payloads conservan sus contratos.
+- `npm run check` aprobado con 670 pruebas en 66 archivos, 11 pruebas de herramientas, TypeScript y comprobación de la plantilla. Arquitectura aprobada con 396 archivos y 76 módulos. Compilación y formato aprobados. Evidencia en `output/maintainability-check.log`, `output/maintainability-browser.log` y `output/maintainability-format.log`.
+- Se agregaron cinco recorridos Playwright sobre la compilación de producción y se ejecutaron en 1366×768, 390×640 y 320×568. Las 15 combinaciones aprobaron filtros, paginación de 500, descarga, pestañas, edición de inventario y schedule, contexto del chat, visor Excel y rechazo de cuotas inválidas. Se comprueban dimensiones del documento, compositor visible y ausencia de errores de JavaScript o consola.
+- El workflow instala Chromium y ejecuta las pruebas de navegador junto con las comprobaciones de estructura, tipos, contratos y formato. Los fallos conservan informe, capturas y trazas. `@playwright/test` se agregó como dependencia de desarrollo y sus archivos están en `e2e/`.
+- Los recorridos se ejecutaron localmente con respuestas HTTP controladas y un Excel pequeño de prueba. La comprobación con la sesión real y el proveedor de IA requiere el servicio autorizado de planta.
+
 ## Asistente de IA · 12 de noviembre de 2026
 
 - Se recreó el icono original y el panel global con carga diferida, vista ampliada, historial, archivado, eliminación confirmada, idiomas, adjuntos, respuestas SSE y recuperación manual. Auditoría y cuotas se muestran con sus permisos específicos.

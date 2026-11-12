@@ -50,6 +50,10 @@ El proxy existente antepone `/backend`. La configuración del proveedor y la cla
 
 Cada envío comunica contenido, UUID de cliente, idioma, adjuntos y contexto de la pestaña activa. Los archivos se envían como multipart y conservan el identificador que devuelve el servidor. Se aceptan los mismos formatos del original, hasta 100 adjuntos de 20 MB cada uno.
 
+El contexto de la pestaña proviene de `useActiveModule`, publicado por el workspace desde sus descriptores. Conserva el título y el ID del módulo aunque cambien las etiquetas o atributos del HTML. La ruta proviene del router.
+
+Los decodificadores rechazan cuotas, consumo, tamaños e identificadores inválidos con un error explícito. Admiten enteros representados como texto, conservan cero como cuota válida y permiten valores nulos para heredar límites. Los mensajes e identificadores de cuotas requieren un entero positivo. Los metadatos numéricos históricos ausentes conservan sus valores predeterminados.
+
 ## Respuestas y recuperación
 
 Se procesan confirmaciones, texto incremental, avances de herramientas, archivos, visualizaciones, consumo diario, errores y finalización. El lector soporta UTF-8 dividido entre paquetes, delimitadores CRLF, comentarios y datos multilínea.

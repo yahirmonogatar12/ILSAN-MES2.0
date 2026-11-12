@@ -9,6 +9,7 @@
 | `npm run check:scaffold`     | Generar, registrar y compilar un módulo independiente con la plantilla actual.      |
 | `npm run check`              | Todas las comprobaciones anteriores.                                                |
 | `npm run build`              | Comprobación de estructura, TypeScript y build de producción.                       |
+| `npm run test:browser`       | Compilación y recorridos Chromium en escritorio y móvil.                            |
 | `npm run format`             | Formato uniforme del código y documentación.                                        |
 
 ## Pruebas incluidas
@@ -52,6 +53,24 @@
 
 - Material por áreas: ámbitos y permisos de SMD/Micom/IMD/IPM/ASSY; ocho esquemas, inventario sin fechas, periodos de movimientos, filtros remotos por vista, paginación 500/500/101 y tamaños de API; exportación completa con los mismos criterios. ASSY informa pendiente sin pedir una API inexistente.
 
+## Recorridos de navegador
+
+La suite de `e2e/` utiliza Playwright sobre la compilación de producción. El servidor de preview se inicia en el puerto 4175 y se cierra al terminar. Los proyectos cubren 1366×768, 390×640 y 320×568 con dos workers y sin reintentos automáticos.
+
+```powershell
+npx playwright install chromium
+npm run test:browser
+npm run test:browser -- --project=desktop
+```
+
+Los cinco recorridos comprueban filtros, paginación predeterminada de 500, filtros por columna y descarga, conservación de filtros y cierre de pestañas, edición directa de inventario y schedule, contexto del chat al cambiar de módulo y vista previa del Excel generado, permisos del asistente y rechazo de cuotas inválidas. Cada proyecto comprueba las dimensiones del documento y que el compositor permanezca visible.
+
+`e2e/fixtures.ts` intercepta las APIs del backend, mantiene los cambios de la sesión de prueba y falla ante un endpoint sin contrato o un error de JavaScript o consola. La fecha del navegador queda fijada para que los rangos sean reproducibles. `e2e/fixtures/materials.xlsx` contiene una hoja pequeña para verificar descarga y lectura real del visor compartido.
+
+El informe HTML queda en `output/browser-report/`. Los errores conservan capturas y trazas en `output/browser-results/`. Se puede abrir una traza con `npx playwright show-trace <archivo.zip>`.
+
+El workflow de GitHub ejecuta `npm ci`, `npm run check`, `npm run format:check`, instala Chromium con sus dependencias y ejecuta `npm run test:browser`. Ante un fallo conserva el informe y las trazas como artefactos durante siete días.
+
 ## Límites de las pruebas
 
 Vitest usa jsdom, con cuatro workers de threads y aislamiento por archivo. La espera de consultas asíncronas de Testing Library es de cinco segundos para permitir la compilación inicial de rutas lazy en equipos Windows ocupados. No se reintentan ni se omiten pruebas. Su preparación simula `showModal`, que no dispone de la capa modal nativa del navegador. La contención de foco, el scroll, los overlays y el diseño se revisan además en navegador real.
@@ -60,4 +79,4 @@ En la prueba de importación ECO, jsdom no sincroniza la validez interna del arc
 
 Los contratos HTTP se comprueban con respuestas controladas y el modo demostración no contacta Flask. La integración con credenciales reales, MySQL y exportación Excel requiere el backend disponible y un entorno autorizado de pruebas.
 
-CI ejecuta `npm ci`, `npm run check` y `npm run build` cuando este proyecto se use como repositorio. No publica ni despliega la aplicación.
+El workflow se activa con los eventos push y pull_request. La ejecución de navegador utiliza respuestas controladas. La comprobación con credenciales reales y el servicio de IA requiere un entorno autorizado.

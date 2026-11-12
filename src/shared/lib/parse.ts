@@ -45,6 +45,24 @@ export function positiveIntegerList(value: unknown, message: string): number[] {
   return value;
 }
 
+/** Required safe integer. Accepts legacy numeric strings and rejects blank captures. */
+export function requiredInteger(
+  value: unknown,
+  field: string,
+  minimum = 0,
+): number {
+  if (typeof value === "string" && !value.trim())
+    throw new Error(
+      `El campo ${field} debe ser un entero mayor o igual a ${minimum}.`,
+    );
+  const result = requiredNumber(value, field);
+  if (!Number.isSafeInteger(result) || result < minimum)
+    throw new Error(
+      `El campo ${field} debe ser un entero mayor o igual a ${minimum}.`,
+    );
+  return result;
+}
+
 /** Common assertion for APIs that share this exact error contract. */
 export function record(value: unknown): Record<string, unknown> {
   if (!isRecord(value))

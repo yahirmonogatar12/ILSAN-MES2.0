@@ -10,6 +10,7 @@ import { Workspace } from "@/app/workspace/Workspace";
 import { decodeTabs } from "@/app/workspace/tabs";
 import type { ModuleDefinition, SectionDefinition } from "@/core/modules/types";
 import { SESSION_EXPIRED_EVENT } from "@/core/runtime";
+import { useActiveModule } from "@/core/modules/ActiveModule";
 import {
   Button,
   Card,
@@ -99,6 +100,7 @@ function mount(
   modules: ModuleDefinition[],
   path = "/informacion-basica/a",
   userScope = scope,
+  children?: React.ReactNode,
 ) {
   localStorage.setItem("mes-v2:mode", JSON.stringify("demo"));
   return render(
@@ -111,13 +113,44 @@ function mount(
           sections={sections}
           scope={userScope}
           mode="demo"
-        />
+        >
+          {children}
+        </Workspace>
       </AppProviders>
     </MemoryRouter>,
   );
 }
 
 describe("pestañas del workspace", () => {
+  it("publica el módulo activo y limpia su contexto al cerrar la última pestaña", async () => {
+    function ContextProbe() {
+      const module = useActiveModule();
+      return (
+        <output aria-label="Contexto del workspace">
+          {JSON.stringify(module)}
+        </output>
+      );
+    }
+    const { modules } = sampleModules();
+    mount(modules, "/informacion-basica/a", scope, <ContextProbe />);
+    await screen.findByRole("table", { name: "Tabla A" });
+    const context = await screen.findByLabelText("Contexto del workspace");
+    await waitFor(() =>
+      expect(context).toHaveTextContent('"panelId":"workspace-panel-a"'),
+    );
+    await userEvent.click(screen.getByRole("link", { name: "B" }));
+    await screen.findByRole("table", { name: "Tabla B" });
+    expect(JSON.parse(context.textContent!)).toEqual({
+      id: "b",
+      title: "B",
+      path: "/informacion-basica/b",
+      panelId: "workspace-panel-b",
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Cerrar B" }));
+    await waitFor(() => expect(context).toHaveTextContent('"id":"a"'));
+    await userEvent.click(screen.getByRole("button", { name: "Cerrar A" }));
+    await waitFor(() => expect(context).toHaveTextContent("null"));
+  });
   it("conserva captura, página, tamaño y DOM de la tabla, pausa efectos y no duplica módulos", async () => {
     const { modules, effects } = sampleModules();
     mount(modules);
