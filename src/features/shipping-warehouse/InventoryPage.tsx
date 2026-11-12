@@ -28,38 +28,49 @@ export default function InventoryPage() {
   const summary = state.query.data?.summary;
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
-      <ListingCard
-        warehouse={warehouse}
-        state={state}
-        kind="inventory"
-        title="Inventario general embarques"
-        columns={columns}
-        width={1000}
-        actions={[
-          {
-            id: "closure",
-            label: "Cierre de inventario",
-            onClick: () => setClosure(true),
-          },
-        ]}
-        summary={(rows) => (
-          <Stats
-            items={[
-              ["Partes", rows.length],
-              [
-                "Piezas",
-                rows.reduce(
-                  (sum, row) => sum + number(row.current_quantity),
-                  0,
-                ),
-              ],
-              ...(summary?.latest_period_start
-                ? [["Inicio del periodo", summary.latest_period_start] as const]
-                : []),
-            ]}
-          />
-        )}
-      />
+      <div
+        className="shipping-warehouse-inventory-panel"
+        hidden={closure}
+        inert={closure}
+      >
+        <ListingCard
+          warehouse={warehouse}
+          state={state}
+          kind="inventory"
+          title="Inventario general embarques"
+          columns={columns}
+          width={1000}
+          actions={[
+            {
+              id: "closure",
+              label: "Cierre de inventario",
+              onClick: () => setClosure(true),
+            },
+          ]}
+          summary={(rows) => (
+            <Stats
+              items={[
+                ["Partes", rows.length],
+                [
+                  "Piezas",
+                  rows.reduce(
+                    (sum, row) => sum + number(row.current_quantity),
+                    0,
+                  ),
+                ],
+                ...(summary?.latest_period_start
+                  ? [
+                      [
+                        "Inicio del periodo",
+                        summary.latest_period_start,
+                      ] as const,
+                    ]
+                  : []),
+              ]}
+            />
+          )}
+        />
+      </div>
       {closure && (
         <InventoryClosure
           warehouse={warehouse}

@@ -11,6 +11,7 @@ export interface MesFixture {
   date: string;
   allowAssistant: boolean;
   invalidQuota: boolean;
+  extraPermissions: Record<string, Record<string, string[]>>;
 }
 export const test = base.extend<{ mes: MesFixture }>({
   mes: async ({ page }, use) => {
@@ -19,6 +20,7 @@ export const test = base.extend<{ mes: MesFixture }>({
       date: "2026-11-09",
       allowAssistant: true,
       invalidQuota: false,
+      extraPermissions: {},
     };
     const errors: string[] = [],
       unexpected: string[] = [];
@@ -113,6 +115,7 @@ export const test = base.extend<{ mes: MesFixture }>({
           usuario: "browser-qa",
           rol: "operador",
           permisos: {
+            ...mes.extraPermissions,
             LISTA_INFORMACIONBASICA: {
               "Control de material": ["Control de material"],
             },

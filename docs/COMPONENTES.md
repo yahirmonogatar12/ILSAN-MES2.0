@@ -26,6 +26,8 @@ Importar los controles desde `@/shared/ui`. Los componentes no conocen Materiale
 
 `ExportButton` comparte la apariencia verde (`success`), el icono de descarga y el texto predeterminado Exportar Excel. Acepta las propiedades de `Button`, salvo `variant`: cada módulo entrega su `onClick`, `loading`, `disabled` y, cuando corresponde, texto/icono/tamaño propios. Usarlo para exportaciones nuevas en listados y diálogos; la consulta y generación del archivo permanecen en el módulo. Las exportaciones de CSV/ejemplo en demo usan el mismo componente.
 
+`ProgressRing` presenta un indicador circular de porcentaje con `value` y `label`. Acota el valor visual entre 0 y 100, trata valores no finitos como cero y formatea hasta dos decimales. El nombre accesible incluye la etiqueta y el porcentaje. El consumidor calcula el indicador y adapta sus dimensiones con sus estilos.
+
 `DisclosureMenu` presenta un menú desplegable a partir de `label` y `children`. `align` permite alinearlo a izquierda o derecha y `className` adapta su presentación al consumidor. Se abre por clic y se cierra al pulsar una acción, fuera del menú o Escape. Conserva la navegación nativa de enlaces y botones y recupera el foco del desplegable al cerrar con Escape.
 
 `openOnHover` habilita la apertura al entrar con un puntero de ratón y conserva el menú mientras se recorren sus enlaces. Los clics del ratón mantienen abierto el menú durante ese recorrido. Enter, Espacio y la interacción táctil conservan la apertura y cierre por activación. La opción está desactivada por defecto.
@@ -82,6 +84,8 @@ Para una tabla local con filtros por columna, usar `DataGrid`. Compone la misma 
 - `initialPageSize` utiliza `DEFAULT_PAGE_SIZE` (500 filas) por defecto. `PAGE_SIZE_OPTIONS` ofrece 10, 25, 50, 100, 200 y 500; las tablas remotas reutilizan los mismos valores. `paginate={false}` sirve para historiales cortos. `resetKey` reinicia la página cuando cambian los criterios de consulta externos.
 - Los filtros activos se muestran sobre la tabla y se pueden quitar aunque no haya coincidencias. Cancelar, Escape o pulsar fuera no aplica cambios; el foco regresa al botón del filtro.
 - Los filtros se mantienen durante la pantalla actual. No se guardan datos ni selección de valores en preferencias.
+
+Al cambiar de página, tamaño, orden o criterios, `DataGrid` vuelve al inicio vertical y conserva la posición horizontal. Al regresar a una pestaña con los mismos criterios se mantiene el desplazamiento. `DataTable.scrollResetKey` permite aplicar ese comportamiento a paginaciones remotas controladas por el consumidor.
 
 `DataTable` continúa disponible como presentación controlada. `filters`, `filterOptions` y `onColumnFilterChange` permiten conectar el mismo selector a una consulta remota. En ese caso el módulo aplica los filtros en el servidor y proporciona las opciones completas; no usar `DataGrid` sobre una sola página remota.
 

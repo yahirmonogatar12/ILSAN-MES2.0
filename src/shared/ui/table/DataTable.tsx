@@ -96,6 +96,8 @@ export interface DataTableProps<T> {
   /** Fixed layout fits declared column widths; minWidth preserves scrolling on narrow screens. */
   layout?: "auto" | "fixed";
   maxHeight?: string;
+  /** Reset vertical position for a new page or query while preserving horizontal position. */
+  scrollResetKey?: string;
   /** Optional fixed-height window. Keep complete groups together when cells span rows. */
   virtualRows?: { rowHeight: number; groupSize?: number };
   className?: string;
@@ -133,6 +135,7 @@ export function DataTable<T>({
   minWidth = 800,
   layout = "auto",
   maxHeight,
+  scrollResetKey,
   virtualRows,
   className = "",
   rowProps,
@@ -146,6 +149,14 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const overflowRef = useRef<HTMLDivElement>(null);
   const [windowRange, setWindowRange] = useState({ start: 0, count: 60 });
+  const previousScrollResetKey = useRef(scrollResetKey);
+  useEffect(() => {
+    // Activity reconnects effects when the same workspace tab becomes visible.
+    if (previousScrollResetKey.current === scrollResetKey) return;
+    previousScrollResetKey.current = scrollResetKey;
+    if (overflowRef.current) overflowRef.current.scrollTop = 0;
+    setWindowRange((previous) => ({ ...previous, start: 0 }));
+  }, [scrollResetKey]);
   const rowHeight = virtualRows?.rowHeight ?? 0;
   const groupSize = Math.max(1, Math.floor(virtualRows?.groupSize ?? 1));
   const windowed = !grouping && Number.isFinite(rowHeight) && rowHeight > 0;

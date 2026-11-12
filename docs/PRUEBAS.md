@@ -63,7 +63,9 @@ npm run test:browser
 npm run test:browser -- --project=desktop
 ```
 
-Los cinco recorridos comprueban filtros, paginación predeterminada de 500, filtros por columna y descarga, conservación de filtros y cierre de pestañas, edición directa de inventario y schedule, contexto del chat al cambiar de módulo y vista previa del Excel generado, permisos del asistente y rechazo de cuotas inválidas. Cada proyecto comprueba las dimensiones del documento y que el compositor permanezca visible.
+Los recorridos comprueban filtros, paginación predeterminada de 500, filtros por columna y descarga, conservación de filtros y cierre de pestañas, edición directa de inventario y schedule, contexto del chat al cambiar de módulo y vista previa del Excel generado, permisos del asistente y rechazo de cuotas inválidas. Cada proyecto comprueba las dimensiones del documento y que el compositor permanezca visible.
+
+El cierre de inventario de Embarques se recorre con 1,033 partes. Se comprueban la distribución interna de datos, accuracy, preview e historial, la selección nativa del CSV, las descargas, la última fila virtualizada, el cambio de página y el `batchId` enviado al confirmar o cancelar. Un archivo inválido o cambiado bloquea la confirmación. El regreso conserva los filtros del inventario.
 
 `e2e/fixtures.ts` intercepta las APIs del backend, mantiene los cambios de la sesión de prueba y falla ante un endpoint sin contrato o un error de JavaScript o consola. La fecha del navegador queda fijada para que los rangos sean reproducibles. `e2e/fixtures/materials.xlsx` contiene una hoja pequeña para verificar descarga y lectura real del visor compartido.
 

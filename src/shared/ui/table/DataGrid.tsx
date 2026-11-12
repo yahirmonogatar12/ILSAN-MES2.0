@@ -20,6 +20,7 @@ export interface DataGridProps<T> extends Omit<
   | "columnSearches"
   | "onColumnSearchChange"
   | "groupingRows"
+  | "scrollResetKey"
 > {
   initialSort?: TableSort;
   initialPageSize?: number;
@@ -115,6 +116,13 @@ export function DataGrid<T>({
       )}
       <DataTable
         {...props}
+        scrollResetKey={JSON.stringify([
+          table.page,
+          table.pageSize,
+          table.sorting,
+          resetKey,
+          filters,
+        ])}
         rows={
           grouping
             ? paginate
