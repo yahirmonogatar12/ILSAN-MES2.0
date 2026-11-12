@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { localDate, rangeIssue, today, validDate } from "./date";
-import { isRecord, number, record } from "./parse";
+import {
+  isRecord,
+  number,
+  record,
+  isNumericValue,
+  isNullableText,
+  positiveIntegerList,
+  requiredNumber,
+  requiredText,
+} from "./parse";
 import { containsText, jsonText, normalizeSearch, text } from "./text";
 
 describe("calendario compartido", () => {
@@ -50,6 +59,21 @@ describe("calendario compartido", () => {
 });
 
 describe("conversiones compartidas", () => {
+  it("comprueba valores y capturas sin convertir objetos o booleanos en cantidades", () => {
+    expect([null, "0", "0007", 0].every(isNumericValue)).toBe(true);
+    expect([false, {}, Infinity].some(isNumericValue)).toBe(false);
+    expect(isNullableText(null)).toBe(true);
+    expect(isNullableText(0)).toBe(false);
+    expect(requiredNumber("0", "cantidad")).toBe(0);
+    expect(() => requiredNumber(null, "cantidad")).toThrow("cantidad");
+    expect(() => requiredNumber(false, "cantidad")).toThrow("cantidad");
+    expect(requiredText(" A-01/A ", "parte")).toBe("A-01/A");
+    expect(() => requiredText({}, "parte")).toThrow("parte");
+    expect(positiveIntegerList([1, 9], "IDs inválidos")).toEqual([1, 9]);
+    expect(() => positiveIntegerList(["1"], "IDs inválidos")).toThrow(
+      "IDs inválidos",
+    );
+  });
   it("convierte cantidades finitas con las reglas de Number", () => {
     expect([0, "0", " 12.5 ", null, true, false, 7n].map(number)).toEqual([
       0, 0, 12.5, 0, 1, 0, 7,

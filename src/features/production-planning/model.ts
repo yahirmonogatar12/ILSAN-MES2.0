@@ -242,3 +242,12 @@ export const HISTORY_SPECS: readonly Spec[] = [
   ["imported_by", "USUARIO", 105],
   ["status", "ESTADO", 95],
 ];
+
+export const PO_STATES = [
+    "PLAN",
+    "PREPARACION",
+    "EMBARCADO",
+    "EN_TRANSITO",
+    "ENTREGADO",
+  ],
+  WO_STATES = ["CREADA", "PLANIFICADA", "EN_PRODUCCION", "CERRADA"];

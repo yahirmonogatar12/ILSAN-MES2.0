@@ -1,4 +1,8 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { Activity } from "react";
+import { AssyProposals } from "./AssyProposals";
+import type { Api } from "./types";
+import { extraDecoders } from "./contracts";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -86,7 +90,13 @@ describe("Flujos de Control de proceso", () => {
   it("asigna el grupo SCAN al plan elegido sin extenderlo de forma implícita", async () => {
     const base = adapter.createApi("demo"),
       extra = vi.fn(base.extra);
-    vi.spyOn(adapter, "createApi").mockReturnValue({ ...base, extra });
+    vi.spyOn(adapter, "createApi").mockReturnValue({
+      ...base,
+      extra: async (name, data, signal) =>
+        extraDecoders[name](
+          await (signal ? extra(name, data, signal) : extra(name, data)),
+        ),
+    });
     mount("/proceso/produccion-assy");
     await screen.findByRole("table", { name: "Planes ASSY" });
     await userEvent.click(
@@ -293,7 +303,13 @@ describe("Flujos de Control de proceso", () => {
               }
             : result;
         });
-    vi.spyOn(adapter, "createApi").mockReturnValue({ ...base, extra });
+    vi.spyOn(adapter, "createApi").mockReturnValue({
+      ...base,
+      extra: async (name, data, signal) =>
+        extraDecoders[name](
+          await (signal ? extra(name, data, signal) : extra(name, data)),
+        ),
+    });
     mount("/proceso/produccion-assy");
     await screen.findByRole("table", { name: "Planes ASSY" });
     await userEvent.click(screen.getByRole("button", { name: "Importar WOs" }));
@@ -317,7 +333,13 @@ describe("Flujos de Control de proceso", () => {
   it("compara propuestas antes de aplicar y no inserta lotes nuevos automáticamente", async () => {
     const base = adapter.createApi("demo"),
       extra = vi.fn(base.extra);
-    vi.spyOn(adapter, "createApi").mockReturnValue({ ...base, extra });
+    vi.spyOn(adapter, "createApi").mockReturnValue({
+      ...base,
+      extra: async (name, data, signal) =>
+        extraDecoders[name](
+          await (signal ? extra(name, data, signal) : extra(name, data)),
+        ),
+    });
     mount("/proceso/produccion-assy");
     await screen.findByRole("table", { name: "Planes ASSY" });
     await userEvent.click(screen.getByRole("button", { name: "Plan IA" }));
@@ -375,5 +397,96 @@ describe("Flujos de Control de proceso", () => {
         expect.any(AbortSignal),
       ),
     );
+  });
+
+  it("aborta la comparación de una propuesta al cerrar su herramienta", async () => {
+    const base = adapter.createApi("demo");
+    let finish!: (value: unknown) => void;
+    let requestSignal: AbortSignal | undefined;
+    const pending = new Promise<unknown>((resolve) => {
+      finish = resolve;
+    });
+    const extra = vi.fn<
+      (...args: Parameters<Api["extra"]>) => Promise<unknown>
+    >(async (name, data, signal) => {
+      if (name === "diff") {
+        requestSignal = signal;
+        return pending;
+      }
+      return base.extra(name, data, signal);
+    });
+    vi.spyOn(adapter, "createApi").mockReturnValue({
+      ...base,
+      extra: async (name, data, signal) =>
+        extraDecoders[name](await extra(name, data, signal)),
+    });
+    mount("/proceso/produccion-assy");
+    await screen.findByRole("table", { name: "Planes ASSY" });
+    await userEvent.click(screen.getByRole("button", { name: "Plan IA" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Ver cambios" }),
+    );
+    expect(requestSignal?.aborted).toBe(false);
+    await userEvent.click(
+      within(
+        screen.getByRole("dialog", { name: "Propuestas IA · ASSY" }),
+      ).getByRole("button", { name: "Cerrar" }),
+    );
+    expect(requestSignal?.aborted).toBe(true);
+    await act(async () => finish({ cambios: [], nuevos: [], sobran: [] }));
+    expect(
+      screen.queryByRole("table", { name: "Cambios de propuesta ASSY" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("permite comparar de nuevo después de suspender y reactivar una pestaña", async () => {
+    localStorage.setItem("mes-v2:mode", JSON.stringify("demo"));
+    const base = adapter.createApi("demo");
+    let finish!: (value: unknown) => void;
+    let signal: AbortSignal | undefined;
+    const pending = new Promise<unknown>((resolve) => {
+      finish = resolve;
+    });
+    const extra = vi.fn<
+      (...args: Parameters<Api["extra"]>) => Promise<unknown>
+    >(async (name, data, requestSignal) => {
+      if (name === "diff") {
+        signal = requestSignal;
+        return pending;
+      }
+      return base.extra(name, data, requestSignal);
+    });
+    vi.spyOn(adapter, "createApi").mockReturnValue({
+      ...base,
+      extra: async (name, data, requestSignal) =>
+        extraDecoders[name](await extra(name, data, requestSignal)),
+    });
+    const view = (mode: "visible" | "hidden") => (
+      <MemoryRouter>
+        <AppProviders>
+          <Activity mode={mode}>
+            <AssyProposals
+              initial={defaults()}
+              onClose={vi.fn()}
+              onDone={vi.fn()}
+            />
+          </Activity>
+        </AppProviders>
+      </MemoryRouter>
+    );
+    const rendered = render(view("visible"));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Ver cambios" }),
+    );
+    rendered.rerender(view("hidden"));
+    expect(signal?.aborted).toBe(true);
+    await act(async () => finish({ cambios: [], nuevos: [], sobran: [] }));
+    rendered.rerender(view("visible"));
+    expect(
+      await screen.findByRole("button", { name: "Ver cambios" }),
+    ).toBeEnabled();
+    expect(
+      screen.queryByRole("table", { name: "Cambios de propuesta ASSY" }),
+    ).not.toBeInTheDocument();
   });
 });

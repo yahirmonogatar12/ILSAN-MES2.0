@@ -18,6 +18,10 @@ El registro alimenta menú, pestañas, restauración y guardia de URL. Una deneg
 
 ## Purchase Orders y Work Orders
 
+`OrdersPage` compone la pantalla sobre `useOrders`, `orderColumns` y `OrderDialogs`. Las consultas y la selección pertenecen al hook, las acciones de fila a las columnas y las capturas a los diálogos. Las acciones reutilizan los payloads tipados de `requests.ts`.
+
+`types.ts` define órdenes, partes de proyección, inventario, lotes proyectados y propuestas de schedule. `PlanningApi.action` relaciona el nombre de la operación con sus campos obligatorios y su respuesta. `contracts.ts` valida las respuestas al entrar al módulo y construye los resultados tipados. Las capturas dinámicas pasan por los constructores de `requests.ts` antes de llegar al adaptador.
+
 - PO: `GET /api/po/listar`, `POST /api/po/crear`. Filtros de fecha y estado remotos; cliente sobre la consulta cargada. Se conservan códigos, modelo, cliente/proveedor, cantidades, entrega y auditoría.
 - WO: `GET /api/wo/listar` con `incluir_planificadas=true`; `GET /api/raw/modelos` devuelve códigos de modelo. Alta por `POST /api/work_orders`, edición por `POST /api/wo/actualizar`, baja por `DELETE /api/wo/eliminar` y estado por `PUT /api/wo/<codigo>/estado`. Solo CREADA ofrece edición, eliminación y selección para importar al plan.
 - Crear plan desde WO: `POST /api/work_orders/import`, con IDs numéricos en `wo_ids` y `import_date`. Se conservan las observaciones por cada WO cuando hay éxito parcial.
@@ -30,6 +34,8 @@ El registro alimenta menú, pestañas, restauración y guardia de URL. Una deneg
 `GET /api/part-planning/plan`: `date_from`, `date_to`, `part`, `only_shortage`, `page` y `page_size`. Se permite un intervalo de hasta 120 días de diferencia. Se mantienen los ceros y los vacíos distintos, `qty`, `sched`, inventario, `proj` y el total de partes.
 
 La API limita cada respuesta a 200 partes. El adaptador calcula el intervalo requerido para una página lógica de 500, solicita las páginas de 200 que lo cubren y recorta los extremos. La página lógica 2 toma los 100 registros finales de la página remota 3, la 4 y la 5 completas. Se conservan 500/500/101 partes para un total de 1,101. Abortos y filtros acompañan todas las solicitudes. Si total o fechas cambian durante la composición se pide actualizar.
+
+La respuesta comprueba fechas ISO, orden del intervalo, fechas de columnas, paginación, identificadores y cantidades de cada parte. La página y el intervalo deben coincidir con la solicitud. Se rechazan partes repetidas dentro de una página o entre las páginas remotas combinadas. El inventario puede ser `null` cuando Flask no tiene captura para una parte. Los ceros, valores de proyección nulos, cantidades textuales y metadatos adicionales conservan su representación.
 
 Proyección presenta tres filas P/S/I por parte, con metadatos agrupados. La tabla compartida renderiza una ventana de altura fija y mantiene grupos completos de tres. Las 500 partes continúan cargadas y accesibles al desplazarse; no se agregan 1,500 filas al DOM simultáneamente. La paginación cuenta partes. El Excel identificado como **Exportar página** contiene todas las partes de la página lógica, independientemente de la ventana visible.
 

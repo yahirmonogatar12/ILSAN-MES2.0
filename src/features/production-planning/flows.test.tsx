@@ -1,3 +1,5 @@
+import { actionDecoders } from "./contracts";
+import { actionPayloads } from "./requests";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -50,7 +52,8 @@ describe("Planificación de producción", () => {
       .mockResolvedValue({ success: true });
     vi.spyOn(adapter, "createPlanningApi").mockReturnValue({
       ...base,
-      action,
+      action: async (name, data) =>
+        actionDecoders[name](await action(name, data)),
       pivot: vi.fn().mockResolvedValue({
         dates: [date],
         rows: [
@@ -365,9 +368,13 @@ describe("Planificación de producción", () => {
           ? Promise.reject(
               new ApiError("El schedule cambió; vuelve a generar.", 409),
             )
-          : base.action(name, data),
+          : base.action(name, actionPayloads[name](data)),
       );
-    vi.spyOn(adapter, "createPlanningApi").mockReturnValue({ ...base, action });
+    vi.spyOn(adapter, "createPlanningApi").mockReturnValue({
+      ...base,
+      action: async (name, data) =>
+        actionDecoders[name](await action(name, data)),
+    });
     isolated(
       <ProposalDialog filters={week()} onClose={vi.fn()} onDone={vi.fn()} />,
     );

@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -142,4 +143,68 @@ describe("Presentación original de los planes", () => {
       expect(screen.getByLabelText("Filas por página")).toHaveValue("500");
     },
   );
+
+  it("bloquea cambios de orden mientras se guarda la captura enviada", async () => {
+    const base = adapter.createApi("demo"),
+      date = defaults().start;
+    const plans = [
+      {
+        lot_no: "LOCK-A",
+        working_date: date,
+        line: "M1",
+        group_no: 1,
+        sequence: 1,
+        plan_count: 100,
+        uph: 1000,
+      },
+      {
+        lot_no: "LOCK-B",
+        working_date: date,
+        line: "M1",
+        group_no: 1,
+        sequence: 2,
+        plan_count: 100,
+        uph: 1000,
+      },
+    ];
+    let finish!: (value: Row) => void;
+    const pending = new Promise<Row>((resolve) => {
+      finish = resolve;
+    });
+    const action = vi.fn(() => pending);
+    vi.spyOn(adapter, "createApi").mockReturnValue({
+      ...base,
+      plans: vi.fn().mockResolvedValue(plans),
+      action,
+    });
+    mount("/proceso/produccion-assy");
+    const table = await screen.findByRole("table", { name: "Planes ASSY" });
+    fireEvent.drop(
+      within(table).getByRole("row", { name: "Asignar planes a GRUPO 2" }),
+      { dataTransfer: { getData: () => "LOCK-A" } },
+    );
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Guardar orden" })[0],
+    );
+    await waitFor(() => expect(action).toHaveBeenCalledOnce());
+    expect(screen.getByRole("button", { name: "Auto acomodo" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Bajar LOCK-A" })).toBeDisabled();
+    const target = within(table)
+      .getByRole("cell", { name: "LOCK-B" })
+      .closest("tr")!;
+    fireEvent.drop(target, { dataTransfer: { getData: () => "LOCK-A" } });
+    expect(action.mock.calls).toHaveLength(1);
+    const group = within(table).getByRole("row", { name: "GRUPO 2" });
+    const moved = within(table)
+      .getByRole("cell", { name: "LOCK-A" })
+      .closest("tr")!;
+    expect(
+      group.compareDocumentPosition(moved) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(within(group).getByText("Total: 0.1h")).toBeInTheDocument();
+    await act(async () => finish({ success: true }));
+    await waitFor(() =>
+      expect(screen.queryByText("Orden sin guardar.")).not.toBeInTheDocument(),
+    );
+  });
 });

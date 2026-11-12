@@ -1,3 +1,4 @@
+import { actionPayloads } from "./requests";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
@@ -377,7 +378,7 @@ export default function ProjectedPage() {
             )
               payload.value =
                 payload.value === "" ? null : Number(payload.value);
-            return auth.api.action(action, payload);
+            return auth.api.action(action, actionPayloads[action](payload));
           }}
         />
       )}

@@ -1,5 +1,5 @@
-import { text } from "./model";
-import type { Kind, Row } from "./types";
+import { SHIFTS, text } from "./model";
+import type { Kind, Row, Plan, ActionPayloads } from "./types";
 export const SHIFT = {
   start: 450,
   end: 1050,
@@ -20,6 +20,8 @@ export function lineCompare(a: string, b: string) {
     ranks[matchA[1]] - ranks[matchB[1]] || Number(matchA[2]) - Number(matchB[2])
   );
 }
+export function autoArrange(data: readonly Plan[], count: number): Plan[];
+export function autoArrange(data: readonly Row[], count: number): Row[];
 export function autoArrange(data: readonly Row[], count: number): Row[] {
   if (!Number.isSafeInteger(count) || count < 1 || count > 12)
     throw new Error("El número de grupos debe estar entre 1 y 12.");
@@ -51,6 +53,16 @@ function stamp(date: string, minutes: number): string | null {
   return `${d.toISOString().slice(0, 10)} ${clock(minutes % 1440)}:00`;
 }
 /** Port of the original productive-time/break rules. Dates remain local wall-clock values. */
+export function calculateTimeline(
+  kind: Kind,
+  source: readonly Plan[],
+  view?: string,
+): Plan[];
+export function calculateTimeline(
+  kind: Kind,
+  source: readonly Row[],
+  view?: string,
+): Row[];
 export function calculateTimeline(
   kind: Kind,
   source: readonly Row[],
@@ -107,10 +119,7 @@ export function calculateTimeline(
         kind === "ASSY" ? state.productive > SHIFT.productive : end > SHIFT.end;
       return {
         ...row,
-        _shift:
-          row.shift ??
-          ["DIA", "TIEMPO EXTRA", "NOCHE"][Number(row.routing ?? 1) - 1] ??
-          "DIA",
+        _shift: row.shift ?? SHIFTS[Number(row.routing ?? 1) - 1] ?? "DIA",
         input: row.input ?? row.produced_count ?? row.produced ?? 0,
         _bucket: key,
         _overtime: overtime,
@@ -125,35 +134,50 @@ export function calculateTimeline(
         sequence: state.sequence,
         secuencia: state.sequence,
         grupo: row.group_no ?? 1,
-        turno:
-          row.shift ??
-          ["DIA", "TIEMPO EXTRA", "NOCHE"][Number(row.routing ?? 1) - 1] ??
-          "DIA",
+        turno: row.shift ?? SHIFTS[Number(row.routing ?? 1) - 1] ?? "DIA",
         extra: overtime ? "EXTRA" : "NORMAL",
       };
     });
 }
-export function orderPayload(kind: Kind, data: readonly Row[]) {
+const optionalClock = (value: unknown) => (value == null ? value : text(value));
+const optionalQuantity = (value: unknown) =>
+  value == null ? value : Number(value);
+export function orderPayload(
+  kind: Kind,
+  data: readonly Row[],
+): ActionPayloads["order"] {
   return {
     sequences: data.map((row) =>
       kind === "ASSY"
         ? {
-            lot_no: row.lot_no,
+            lot_no: text(row.lot_no),
             group_no: Number(row.group_no ?? 1),
             sequence: Number(row.sequence ?? row.secuencia ?? 1),
-            plan_start_date: row.plan_start_date,
-            planned_start: row.planned_start,
-            planned_end: row.planned_end,
-            effective_minutes: row.effective_minutes,
-            breaks_minutes: row.breaks_minutes,
+            plan_start_date: optionalClock(row.plan_start_date),
+            planned_start: optionalClock(row.planned_start),
+            planned_end: optionalClock(row.planned_end),
+            effective_minutes: optionalQuantity(row.effective_minutes),
+            breaks_minutes: optionalQuantity(row.breaks_minutes),
           }
         : {
-            lot_no: row.lot_no,
+            lot_no: text(row.lot_no),
             sequence: Number(row.sequence ?? row.secuencia ?? 1),
           },
     ),
   };
 }
+export function moveRow(
+  kind: Kind,
+  source: readonly Plan[],
+  lot: string,
+  target: string,
+): Plan[];
+export function moveRow(
+  kind: Kind,
+  source: readonly Row[],
+  lot: string,
+  target: string,
+): Row[];
 export function moveRow(
   kind: Kind,
   source: readonly Row[],
@@ -182,6 +206,18 @@ export function moveRow(
 }
 
 /** Moves a plan to the end of an ASSY group without changing its date or other plans. */
+export function moveToGroup(
+  source: readonly Plan[],
+  lot: string,
+  group: number,
+  date: string,
+): Plan[];
+export function moveToGroup(
+  source: readonly Row[],
+  lot: string,
+  group: number,
+  date: string,
+): Row[];
 export function moveToGroup(
   source: readonly Row[],
   lot: string,

@@ -1,11 +1,16 @@
 import { downloadFile, request } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import { orderParams, pivotParams, record, rows, text } from "./model";
+import {
+  decodeOrders,
+  decodePivot,
+  decodeProjectedPlan,
+  actionDecoders,
+} from "./contracts";
 import type {
   Action,
   PlanningApi,
   PivotFilters,
-  PivotResult,
   Upload,
   FileAction,
 } from "./types";
@@ -38,21 +43,6 @@ const actions: Partial<Record<Action, string>> = {
   "update-lot": "/api/plan-proyectado/update",
   "delete-lot": "/api/plan-proyectado/delete",
 };
-function decodePivot(value: unknown): PivotResult {
-  const d = record(value);
-  if (
-    !Array.isArray(d.dates) ||
-    !d.dates.every((v) => typeof v === "string") ||
-    !Number.isSafeInteger(d.total_parts) ||
-    Number(d.total_parts) < 0 ||
-    !Number.isSafeInteger(d.page) ||
-    Number(d.page) < 1 ||
-    !Number.isSafeInteger(d.page_size) ||
-    Number(d.page_size) < 1
-  )
-    throw new Error("El plan recibido no tiene un formato válido.");
-  return { ...d, dates: d.dates, rows: rows(d.rows) } as unknown as PivotResult;
-}
 export function createPlanningApi(mode: RuntimeMode): PlanningApi {
   const demo = () => import("./demo").then((module) => module.demoPlanningApi);
   const load = async (
@@ -66,6 +56,7 @@ export function createPlanningApi(mode: RuntimeMode): PlanningApi {
     p.set("page_size", String(size));
     return decodePivot(
       await request<unknown>(`/api/part-planning/plan?${p}`, { signal }),
+      { filters, page, size },
     );
   };
   return {
@@ -77,7 +68,7 @@ export function createPlanningApi(mode: RuntimeMode): PlanningApi {
           { signal },
         ),
       );
-      const result = rows(d.data);
+      const result = decodeOrders(kind, d.data);
       return kind === "po" && filters.cliente
         ? result.filter((row) => text(row.cliente) === filters.cliente)
         : result;
@@ -142,6 +133,10 @@ export function createPlanningApi(mode: RuntimeMode): PlanningApi {
         );
       const combined = [first, ...rest].flatMap((result) => result.rows),
         start = offset - (firstPage - 1) * serverSize;
+      if (new Set(combined.map((row) => row.part_no)).size !== combined.length)
+        throw new Error(
+          "El plan cambió durante la consulta. Actualiza el listado.",
+        );
       return {
         ...first,
         rows: combined.slice(start, start + size),
@@ -157,9 +152,7 @@ export function createPlanningApi(mode: RuntimeMode): PlanningApi {
           { signal },
         ),
       );
-      rows(d.lotes);
-      rows(d.lineas);
-      return d;
+      return decodeProjectedPlan(d);
     },
     async history(signal) {
       if (mode === "demo") return (await demo()).history(signal);
@@ -181,7 +174,7 @@ export function createPlanningApi(mode: RuntimeMode): PlanningApi {
       }
       if (action === "delete-wo") method = "DELETE";
       if (!path) throw new Error("Operación no disponible.");
-      return record(
+      return actionDecoders[action](
         await request<unknown>(path, { method, body: JSON.stringify(payload) }),
       );
     },

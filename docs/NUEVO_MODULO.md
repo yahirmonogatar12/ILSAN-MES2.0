@@ -27,6 +27,8 @@ El generador admite las secciones `informacion-basica`, `material`, `produccion`
 6. Declarar el permiso exacto de Flask en `module.ts`; comprobar la autorización del endpoint de cada escritura.
 7. Verificar contratos y flujo con un entorno de pruebas; retirar `demoOnly` cuando el módulo real esté listo.
 
+Definir interfaces para entidades y payloads con campos obligatorios. En APIs con varias acciones, asociar cada nombre de operación a su payload y respuesta mediante un mapa de tipos. Usar registros extensibles para metadatos y capturas dinámicas, y validar los campos tipados al recibir JSON. Las capturas genéricas se convierten en payloads comprobados antes del envío. Control de proceso y Plan de producción incluyen este patrón en `types.ts`, `contracts.ts` y `requests.ts`.
+
 Las acciones generales de una tabla se entregan a `FilterBar.actions`. Para una captura o filtros propios, usar `TableToolbar` con `children` y `actions`. La tabla se contiene en `Card fill label="Nombre del listado"`, con su etiqueta accesible en `DataGrid` o `DataTable`. La plantilla del generador aplica esta distribución.
 
 Antes de agregar funciones de fechas, números, objetos o búsquedas, consultar `@/shared/lib/date`, `@/shared/lib/parse` y `@/shared/lib/text`. Seleccionar el calendario de planta con `today` o el calendario del operador con `localDate`, y mantener las restricciones del proceso en `model.ts`. Compartir únicamente conversiones equivalentes y usar `structuredClone` directamente. Los contratos disponibles se describen en la arquitectura. [Utilidades compartidas](ARQUITECTURA.md#utilidades-compartidas).

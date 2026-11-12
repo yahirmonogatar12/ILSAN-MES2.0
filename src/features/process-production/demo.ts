@@ -1,3 +1,4 @@
+import { decodePlans, extraDecoders } from "./contracts";
 import { ApiError } from "@/core/http";
 import { exportSpreadsheet } from "@/shared/lib/spreadsheet";
 import {
@@ -9,7 +10,7 @@ import {
   text,
   today,
 } from "./model";
-import type { Api, Filters, Kind, Row } from "./types";
+import type { Api, Extra, Filters, Kind, Row } from "./types";
 
 let sequence = 20;
 const store: Record<Kind, Row[]> = { ASSY: [], IMT: [], SMT: [] };
@@ -135,17 +136,180 @@ function create(kind: Kind, data: Row): Row {
   }
   return { success: true, lot_no: lot };
 }
+async function demoExtra(name: Extra, payload: Row): Promise<unknown> {
+  if (name === "wos") return structuredClone(workOrders);
+  if (name === "import-wos") {
+    const plans: Row[] = [],
+      errors: string[] = [];
+    for (const id of payload.wo_ids as number[]) {
+      const wo = workOrders.find((wo) => wo.id === id);
+      if (!wo || wo.ya_importado) {
+        errors.push(`WO ${id}: ya importada o no disponible.`);
+        continue;
+      }
+      const result = create("ASSY", {
+        working_date: payload.import_date,
+        part_no: wo.modelo,
+        wo_code: wo.wo_code,
+        po_code: wo.codigo_po,
+        plan_count: wo.cantidad_planeada,
+        line: "M1",
+      });
+      wo.ya_importado = true;
+      wo.lot_no_existente = result.lot_no;
+      plans.push({ wo_code: wo.wo_code, lot_no: result.lot_no });
+    }
+    return { success: true, imported: plans.length, plans, errors };
+  }
+  if (name === "scan")
+    return {
+      success: true,
+      scan_lots: scanAvailable
+        ? [
+            {
+              linea: "M1",
+              nparte: "EBR23966228",
+              modelo: "MODELO DEMO",
+              lotes_scan: 2,
+              registros: 20,
+              cantidad_total: 20,
+              primero: `${today()} 08:00`,
+              ultimo: `${today()} 09:00`,
+            },
+          ]
+        : [],
+      plan_options: structuredClone(store.ASSY),
+    };
+  if (name === "assign-scan") {
+    const row = store.ASSY.find(
+      (row) =>
+        row.lot_no === payload.target_lot_no &&
+        row.line === payload.linea &&
+        row.part_no === payload.nparte,
+    );
+    if (!row || !scanAvailable)
+      throw new Error("El grupo SCAN o el plan ya no están disponibles.");
+    const pending = Number(row.plan_count) - Number(row.produced_count ?? 0);
+    if (pending < 20 && !payload.allow_extend)
+      throw new ApiError(
+        "La cantidad SCAN excede el pendiente. Activa la extensión para continuar.",
+        409,
+      );
+    if (pending < 20) row.plan_count = Number(row.produced_count ?? 0) + 20;
+    row.produced_count = Number(row.produced_count ?? 0) + 20;
+    row.input = row.produced_count;
+    scanAvailable = false;
+    return {
+      success: true,
+      message: "Grupo SCAN asignado.",
+      updated_rows: 20,
+    };
+  }
+  if (name === "create-scan") {
+    if (!scanAvailable) throw new Error("No hay escaneos pendientes.");
+    const value = create("ASSY", {
+      line: payload.linea,
+      part_no: payload.nparte,
+      plan_count: 20,
+      working_date: payload.working_date,
+    });
+    scanAvailable = false;
+    return { ...value, message: "Plan creado con los escaneos asignados." };
+  }
+  if (name === "proposals")
+    return [
+      {
+        proposal_id: "PROP-DEMO-ASSY",
+        version: 1,
+        date_from: today(),
+        date_to: today(),
+        status: "DRAFT",
+        total_items: 2,
+        total_qty: 1800,
+        created_at: `${today()} 08:00`,
+      },
+    ];
+  if (name === "diff") {
+    const row = store.ASSY[0];
+    return {
+      success: true,
+      proposal_id: payload.proposal_id,
+      version: 1,
+      fechas: [today()],
+      sin_cambio: 0,
+      cambios: [
+        {
+          lot_no: row.lot_no,
+          part_no: row.part_no,
+          antes: {
+            cantidad: row.plan_count,
+            linea: row.line,
+            grupo: row.group_no,
+            secuencia: row.sequence,
+          },
+          despues: {
+            cantidad: 800,
+            linea: row.line,
+            grupo: row.group_no,
+            secuencia: row.sequence,
+          },
+          campos: ["cantidad"],
+          aplicables: ["cantidad"],
+          bloqueado: null,
+          razon: "Ajuste de demanda",
+        },
+      ],
+      nuevos: [
+        { part_no: "EBR30164704", linea: "M2", cantidad: 1000, grupo: 2 },
+      ],
+      sobran: [],
+    };
+  }
+  if (name === "apply-diff") {
+    let applied = 0;
+    const omitted: Row[] = [];
+    for (const change of rows(payload.cambios)) {
+      const row = store.ASSY.find((row) => row.lot_no === change.lot_no);
+      if (!row || Number(change.cantidad) < Number(row.produced_count ?? 0)) {
+        omitted.push({
+          lot_no: change.lot_no,
+          motivo: "Cantidad menor a lo producido o lote no disponible.",
+        });
+        continue;
+      }
+      row.plan_count = change.cantidad;
+      row.line = change.linea;
+      row.group_no = change.grupo;
+      row.sequence = change.secuencia;
+      applied++;
+    }
+    return { success: true, aplicados: applied, omitidos: omitted };
+  }
+  return {
+    ...create("ASSY", {
+      working_date: today(),
+      line: "M2",
+      part_no: "EBR30164704",
+      plan_count: 1000,
+    }),
+    insertados: 1,
+    omitidos: [],
+  };
+}
+
 export const demoApi: Api = {
   async plans(kind, filters) {
-    return structuredClone(select(kind, filters));
+    return decodePlans(structuredClone(select(kind, filters)));
   },
   async pending(kind, filters) {
-    return structuredClone(
-      select(kind, filters).filter(
-        (row) =>
-          row.status !== "CANCELADO" &&
-          Number(row.plan_count) >
-            Number(row.produced_count ?? row.produced ?? 0),
+    return decodePlans(
+      structuredClone(
+        select(kind, filters).filter(
+          (row) =>
+            row.status !== "CANCELADO" &&
+            Number(row.plan_count) >
+              Number(row.produced_count ?? row.produced ?? 0),
+        ),
       ),
     );
   },
@@ -204,165 +368,9 @@ export const demoApi: Api = {
       { bom_rev: "02", is_current: false, eco_no: "ECO-DEMO-02" },
     ];
   },
-  async extra(name, payload) {
-    if (name === "wos") return structuredClone(workOrders);
-    if (name === "import-wos") {
-      const plans: Row[] = [],
-        errors: string[] = [];
-      for (const id of payload.wo_ids as number[]) {
-        const wo = workOrders.find((wo) => wo.id === id);
-        if (!wo || wo.ya_importado) {
-          errors.push(`WO ${id}: ya importada o no disponible.`);
-          continue;
-        }
-        const result = create("ASSY", {
-          working_date: payload.import_date,
-          part_no: wo.modelo,
-          wo_code: wo.wo_code,
-          po_code: wo.codigo_po,
-          plan_count: wo.cantidad_planeada,
-          line: "M1",
-        });
-        wo.ya_importado = true;
-        wo.lot_no_existente = result.lot_no;
-        plans.push({ wo_code: wo.wo_code, lot_no: result.lot_no });
-      }
-      return { success: true, imported: plans.length, plans, errors };
-    }
-    if (name === "scan")
-      return {
-        success: true,
-        scan_lots: scanAvailable
-          ? [
-              {
-                linea: "M1",
-                nparte: "EBR23966228",
-                modelo: "MODELO DEMO",
-                lotes_scan: 2,
-                registros: 20,
-                cantidad_total: 20,
-                primero: `${today()} 08:00`,
-                ultimo: `${today()} 09:00`,
-              },
-            ]
-          : [],
-        plan_options: structuredClone(store.ASSY),
-      };
-    if (name === "assign-scan") {
-      const row = store.ASSY.find(
-        (row) =>
-          row.lot_no === payload.target_lot_no &&
-          row.line === payload.linea &&
-          row.part_no === payload.nparte,
-      );
-      if (!row || !scanAvailable)
-        throw new Error("El grupo SCAN o el plan ya no están disponibles.");
-      const pending = Number(row.plan_count) - Number(row.produced_count ?? 0);
-      if (pending < 20 && !payload.allow_extend)
-        throw new ApiError(
-          "La cantidad SCAN excede el pendiente. Activa la extensión para continuar.",
-          409,
-        );
-      if (pending < 20) row.plan_count = Number(row.produced_count ?? 0) + 20;
-      row.produced_count = Number(row.produced_count ?? 0) + 20;
-      row.input = row.produced_count;
-      scanAvailable = false;
-      return {
-        success: true,
-        message: "Grupo SCAN asignado.",
-        updated_rows: 20,
-      };
-    }
-    if (name === "create-scan") {
-      if (!scanAvailable) throw new Error("No hay escaneos pendientes.");
-      const value = create("ASSY", {
-        line: payload.linea,
-        part_no: payload.nparte,
-        plan_count: 20,
-        working_date: payload.working_date,
-      });
-      scanAvailable = false;
-      return { ...value, message: "Plan creado con los escaneos asignados." };
-    }
-    if (name === "proposals")
-      return [
-        {
-          proposal_id: "PROP-DEMO-ASSY",
-          version: 1,
-          date_from: today(),
-          date_to: today(),
-          status: "DRAFT",
-          total_items: 2,
-          total_qty: 1800,
-          created_at: `${today()} 08:00`,
-        },
-      ];
-    if (name === "diff") {
-      const row = store.ASSY[0];
-      return {
-        success: true,
-        proposal_id: payload.proposal_id,
-        version: 1,
-        fechas: [today()],
-        sin_cambio: 0,
-        cambios: [
-          {
-            lot_no: row.lot_no,
-            part_no: row.part_no,
-            antes: {
-              cantidad: row.plan_count,
-              linea: row.line,
-              grupo: row.group_no,
-              secuencia: row.sequence,
-            },
-            despues: {
-              cantidad: 800,
-              linea: row.line,
-              grupo: row.group_no,
-              secuencia: row.sequence,
-            },
-            campos: ["cantidad"],
-            aplicables: ["cantidad"],
-            bloqueado: null,
-            razon: "Ajuste de demanda",
-          },
-        ],
-        nuevos: [
-          { part_no: "EBR30164704", linea: "M2", cantidad: 1000, grupo: 2 },
-        ],
-        sobran: [],
-      };
-    }
-    if (name === "apply-diff") {
-      let applied = 0;
-      const omitted: Row[] = [];
-      for (const change of rows(payload.cambios)) {
-        const row = store.ASSY.find((row) => row.lot_no === change.lot_no);
-        if (!row || Number(change.cantidad) < Number(row.produced_count ?? 0)) {
-          omitted.push({
-            lot_no: change.lot_no,
-            motivo: "Cantidad menor a lo producido o lote no disponible.",
-          });
-          continue;
-        }
-        row.plan_count = change.cantidad;
-        row.line = change.linea;
-        row.group_no = change.grupo;
-        row.sequence = change.secuencia;
-        applied++;
-      }
-      return { success: true, aplicados: applied, omitidos: omitted };
-    }
-    return {
-      ...create("ASSY", {
-        working_date: today(),
-        line: "M2",
-        part_no: "EBR30164704",
-        plan_count: 1000,
-      }),
-      insertados: 1,
-      omitidos: [],
-    };
+  async extra(name, payload, signal) {
+    signal?.throwIfAborted();
+    return extraDecoders[name](await demoExtra(name, payload));
   },
   async upload(kind, _file, date) {
     create(kind, {

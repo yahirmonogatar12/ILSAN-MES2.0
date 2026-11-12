@@ -176,7 +176,13 @@ export function Reschedule({
           onClose={() => setConfirm(false)}
           onDone={onDone}
           label="Confirmar reprogramación"
-          onSave={(value) => context.api.action(kind, "reschedule", value)}
+          onSave={(value) =>
+            context.api.action(kind, "reschedule", {
+              ...value,
+              lot_nos: [...selected],
+              new_working_date: text(value.new_working_date),
+            })
+          }
         />
       )}
     </>

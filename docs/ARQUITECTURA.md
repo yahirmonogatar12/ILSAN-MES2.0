@@ -58,6 +58,8 @@ Reglas:
 
 `shared/lib/parse.ts` expone `number`, `isRecord` y `record`. `number` usa la conversión nativa de `Number` y devuelve cero para resultados no finitos. `isRecord` admite objetos no nulos y excluye arreglos. `record` devuelve ese objeto o lanza el mensaje común de registro inválido. Los decodificadores con errores o restricciones propios conservan sus adaptadores.
 
+`isNumericValue` e `isNullableText` comprueban valores del JSON original sin convertirlos. `requiredText` y `requiredNumber` comprueban y convierten capturas obligatorias. `positiveIntegerList` comprueba listas de identificadores y recibe el mensaje del dominio. Las interfaces de cada módulo describen los campos estables y los decodificadores comprueban esa forma antes de entregar datos a la pantalla.
+
 `shared/lib/text.ts` ofrece `text` para conversión simple, `jsonText` para serializar objetos, `containsText(value, search, locale?)` para coincidencias que conservan acentos y `normalizeSearch` para búsquedas sin acentos. Los consumidores deciden el recorte de espacios y la serialización previa. Los modelos mantienen sus exportaciones públicas mediante reexportaciones de estas utilidades. Las copias profundas usan `structuredClone` directamente.
 
 ## Recorrido de un módulo

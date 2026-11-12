@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as http from "@/core/http";
 import { createPlanningApi } from "./api";
 import { orderDefaults, pivotParams, proposalCapacity, week } from "./model";
-import type { Action, PivotFilters, Row } from "./types";
+import type { Action, PivotFilters } from "./types";
 afterEach(() => vi.restoreAllMocks());
 const filters: PivotFilters = {
   date_from: "2026-11-02",
@@ -210,6 +210,9 @@ describe("contratos del plan de producción", () => {
     const api = createPlanningApi("live"),
       base = { ...orderDefaults(), cliente: "LG_REFRIS", estado: "PLAN" };
     expect(await api.orders("po", base)).toHaveLength(1);
+    fetcher.mockResolvedValueOnce(
+      json({ success: true, data: [{ codigo_wo: "WO/01-A" }] }),
+    );
     await api.orders("wo", {
       ...base,
       cliente: "",
@@ -265,7 +268,7 @@ describe("contratos del plan de producción", () => {
       date = week().date_to;
     await api.action("generate", { fecha: date });
     const before = await api.lots(date),
-      lot = (before.lotes as Row[])[0];
+      lot = before.lotes[0];
     expect(lot.status).toBe("PENDIENTE");
     await api.action("confirm-lots", { fecha: date });
     expect((await api.lots(date)).lotes).toEqual(
@@ -289,7 +292,7 @@ describe("contratos del plan de producción", () => {
       api.action("apply-proposal", {
         proposal_id: proposal.proposal_id,
         version: proposal.version,
-        items: proposal.proposals,
+        items: proposal.proposals.map((item) => ({ ...item, included: true })),
       }),
     ).rejects.toMatchObject({ status: 409 });
     expect(fetcher).not.toHaveBeenCalled();

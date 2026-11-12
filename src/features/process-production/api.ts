@@ -1,3 +1,4 @@
+import { decodePlans, extraDecoders } from "./contracts";
 import { downloadFile, request, requestFile, saveDownload } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import {
@@ -27,21 +28,16 @@ export function createApi(mode: RuntimeMode): Api {
     async plans(kind, filters, signal) {
       planParams(filters);
       if (mode === "demo") return (await demo()).plans(kind, filters, signal);
-      const result = rows(
+      const result = decodePlans(
         await request<unknown>(`${BASES[kind]}?${planParams(filters)}`, {
           signal,
         }),
       );
-      if (
-        result.some((row) => !text(row.lot_no)) ||
-        new Set(result.map((row) => row.lot_no)).size !== result.length
-      )
-        throw new Error("El servidor devolvió lotes sin identificador único.");
       return result;
     },
     async pending(kind, filters, signal) {
       if (mode === "demo") return (await demo()).pending(kind, filters, signal);
-      return rows(
+      return decodePlans(
         await request<unknown>(
           `${BASES[kind]}/${kind === "IMT" ? "pending-reschedule" : "pending"}?${planParams(filters)}`,
           { signal },
@@ -90,18 +86,7 @@ export function createApi(mode: RuntimeMode): Api {
           ...(method === "POST" ? { body: JSON.stringify(payload) } : {}),
         },
       );
-      if (name === "wos" || name === "proposals") rows(result);
-      else if (name === "scan") {
-        const data = record(result);
-        rows(data.scan_lots);
-        rows(data.plan_options);
-      } else if (name === "diff") {
-        const data = record(result);
-        rows(data.cambios);
-        rows(data.nuevos);
-        rows(data.sobran);
-      }
-      return result;
+      return extraDecoders[name](result);
     },
     async upload(kind: Kind, file: File, workingDate: string) {
       if (kind === "ASSY")

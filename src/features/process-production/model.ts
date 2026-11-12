@@ -4,9 +4,17 @@ import {
   rangeIssue as dateRangeIssue,
 } from "@/shared/lib/date";
 import { jsonText as text } from "@/shared/lib/text";
-import { isRecord } from "@/shared/lib/parse";
+import { isRecord, requiredText, requiredNumber } from "@/shared/lib/parse";
 
-import type { Field, Filters, Kind, Row, Spec } from "./types";
+import type {
+  Field,
+  Filters,
+  Kind,
+  Row,
+  Spec,
+  PlanValues,
+  PlanUpdate,
+} from "./types";
 
 export { today, validDate, text };
 
@@ -211,7 +219,22 @@ export function fieldIssues(fields: readonly Field[], values: Row) {
     return [];
   });
 }
-export function planPayload(kind: Kind, values: Row, editing: boolean): Row {
+export function planPayload(kind: Kind, values: Row, editing: true): PlanUpdate;
+export function planPayload(
+  kind: Kind,
+  values: Row,
+  editing: false,
+): PlanValues;
+export function planPayload(
+  kind: Kind,
+  values: Row,
+  editing: boolean,
+): PlanValues | PlanUpdate;
+export function planPayload(
+  kind: Kind,
+  values: Row,
+  editing: boolean,
+): PlanValues | PlanUpdate {
   const numeric = new Set([
     "plan_count",
     "ct",
@@ -226,7 +249,7 @@ export function planPayload(kind: Kind, values: Row, editing: boolean): Row {
       .filter((field) => !field.readOnly)
       .map((field) => field.key),
   );
-  return Object.fromEntries(
+  const payload = Object.fromEntries(
     Object.entries(values)
       .filter(
         ([key]) =>
@@ -237,6 +260,15 @@ export function planPayload(kind: Kind, values: Row, editing: boolean): Row {
         numeric.has(key) ? Number(value ?? 0) : text(value).trim(),
       ]),
   );
+  if (editing)
+    return { ...payload, lot_no: requiredText(payload.lot_no, "lot_no") };
+  return {
+    ...payload,
+    working_date: requiredText(payload.working_date, "working_date"),
+    line: requiredText(payload.line, "line"),
+    part_no: requiredText(payload.part_no, "part_no"),
+    plan_count: requiredNumber(payload.plan_count, "plan_count"),
+  };
 }
 export const PLAN_SPECS: readonly Spec[] = [
   ["group_no", "GRUPO", 60],

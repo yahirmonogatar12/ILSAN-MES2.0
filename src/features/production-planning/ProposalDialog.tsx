@@ -1,3 +1,4 @@
+import { actionPayloads } from "./requests";
 import { useState } from "react";
 import { ApiError } from "@/core/http";
 import { useForm } from "@/shared/hooks/useForm";
@@ -15,7 +16,13 @@ import {
 } from "@/shared/ui";
 import { FormDialog, usePlanning } from "./components";
 import { makeColumns, proposalCapacity, rows, text, TURNOS } from "./model";
-import type { PivotFilters, Row, Spec } from "./types";
+import type {
+  PivotFilters,
+  Row,
+  ScheduleItem,
+  ScheduleProposal,
+  Spec,
+} from "./types";
 const proposalSpecs: readonly Spec[] = [
   ["part_no", "PARTE", 155],
   ["sched_date", "FECHA", 110],
@@ -41,8 +48,8 @@ export function ProposalDialog({
   onDone: (result: Row) => void;
 }) {
   const auth = usePlanning(),
-    [proposal, setProposal] = useState<Row | null>(null),
-    [items, setItems] = useState<Row[]>([]),
+    [proposal, setProposal] = useState<ScheduleProposal | null>(null),
+    [items, setItems] = useState<(ScheduleItem & { included: boolean })[]>([]),
     [tab, setTab] = useState("items"),
     [editing, setEditing] = useState<number | null>(null),
     [action, setAction] = useState<"apply" | "reject" | null>(null),
@@ -60,11 +67,7 @@ export function ProposalDialog({
           .map((v) => v.trim())
           .filter(Boolean),
       });
-      if (!text(result.proposal_id) || !Number.isSafeInteger(result.version))
-        throw new Error("El servidor no devolvió una propuesta revisable.");
-      const proposed = rows(result.proposals);
-      if (proposed.some((item) => !item.item_id))
-        throw new Error("La propuesta contiene filas sin identificador.");
+      const proposed = result.proposals;
       setProposal(result);
       setItems(proposed.map((item) => ({ ...item, included: true })));
       setStale(false);
@@ -150,7 +153,11 @@ export function ProposalDialog({
               <Button
                 size="sm"
                 disabled={stale}
-                onClick={() => setEditing(items.indexOf(row))}
+                onClick={() =>
+                  setEditing(
+                    items.findIndex((item) => item.item_id === row.item_id),
+                  )
+                }
               >
                 Editar
               </Button>
@@ -181,9 +188,11 @@ export function ProposalDialog({
         "Genera una propuesta nueva antes de aplicar o rechazar.",
       );
     try {
+      const operation =
+        action === "apply" ? "apply-proposal" : "reject-proposal";
       return await auth.api.action(
-        action === "apply" ? "apply-proposal" : "reject-proposal",
-        {
+        operation,
+        actionPayloads[operation]({
           proposal_id: proposal?.proposal_id,
           version: proposal?.version,
           ...(action === "apply"
@@ -201,7 +210,7 @@ export function ProposalDialog({
                 reason_code: "USER_REJECTED",
                 reason_text: text(values.reason).trim(),
               }),
-        },
+        }),
       );
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) setStale(true);

@@ -1,5 +1,13 @@
 # Validación local
 
+## Contratos y mantenimiento de producción · 12 de noviembre de 2026
+
+- Los adaptadores de producción exponen entidades y payloads específicos. Los decodificadores comprueban planes, órdenes, partes, inventario, lotes y propuestas. Proyección valida fechas y paginación, admite inventario nulo y detecta partes repetidas entre páginas remotas. Los constructores de capturas comprueban los campos obligatorios antes del envío.
+- `PlansPage` pasó de 670 a 140 líneas y compone consultas/orden en `usePlans`, columnas, acciones y diálogos. `AssyTools` pasó de 568 a 17 líneas y selecciona las herramientas independientes de WO, SCAN y propuestas. `OrdersPage` pasó de 534 a 191 líneas sobre `useOrders`, columnas y diálogos.
+- `npm run check` aprobado con 597 pruebas en 58 archivos, 11 pruebas de herramientas, TypeScript, arquitectura y compilación del módulo generado. Build aprobado. Las regresiones comprueban guardado de orden pendiente, comparación abortada al cerrar y suspensión/reactivación de pestañas. Evidencia en `output/production-maintainability-check.log` y `output/production-maintainability-build.log`.
+- Se revisaron ocho pantallas en 1366×768 y 390×640. Las 16 combinaciones conservaron el documento dentro del viewport y terminaron sin errores JavaScript. Se comprobaron importación WO, asignación SCAN y aplicación explícita de cambios de propuesta. Las capturas de la comparación permiten revisar el modal en ambos tamaños.
+- La revisión funcional utilizó demostración y las pruebas HTTP usaron respuestas controladas. Los contratos se contrastaron con el código Flask existente. Evidencia del navegador en `output/playwright/production-maintainability-layout-result.log` y las capturas `production-maintainability-*.png` de esa carpeta.
+
 ## Controles compactos de tablas · 12 de noviembre de 2026
 
 - Las barras compartidas distribuyen los campos según su tipo. Las fechas ocupan 126 px y los botones de consulta y acciones tienen 28 px de alto. Los selectores ajustan su ancho al contenido y las búsquedas, textos y cantidades usan tamaños propios.

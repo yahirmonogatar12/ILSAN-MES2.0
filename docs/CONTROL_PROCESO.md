@@ -18,6 +18,10 @@ El botón **SMT Plan** es distinto del control de máquinas SMT del otro grupo o
 
 ## Planes
 
+`PlansPage` compone filtros, tabla y controles. `usePlans` concentra consultas, captura, orden local, guardado y exportación. `planColumns` construye las columnas y usa un índice por lote para las acciones de orden. `PlanActions` y `PlanDialogs` componen las acciones y los diálogos del dominio.
+
+El contrato público usa `Plan`, `PlanValues`, `PlanUpdate` y `PlanSequence`. `Api.action` vincula cada operación con su payload y `Api.extra` vincula la operación con su payload y respuesta. Los registros extensibles mantienen metadatos históricos. `contracts.ts` comprueba los campos tipados al recibir planes, WO, grupos SCAN y propuestas, tanto en el adaptador HTTP como en demostración. Las cantidades numéricas textuales, los nulos admitidos por Flask y los campos opcionales tienen tipos explícitos.
+
 Bases: ASSY `/api/plan`, IMT `/api/plan-imd`, SMT `/api/plan-smt`.
 
 - Consulta `GET base?start&end`, que devuelve un array. Se conservan lotes, WO/PO, fecha, grupo/secuencia, línea, turno, modelo, NP, cantidades, auditoría de revisión y campos específicos. IMT muestra P1–P4 como PANA A–D; SMT muestra SA–SE como SMT A–E. Los códigos de base de datos no se reemplazan por nombres de pantalla en los payloads.
@@ -45,6 +49,10 @@ IMT/SMT importan por `POST base/import-excel`, multipart `file` y `working_date`
 ASSY importa WO por `GET /api/work_orders?include_import_status=1&desde&hasta` y `POST /api/work_orders/import`, con IDs numéricos originales e `import_date`. Las ya importadas se bloquean y se muestran sus lotes; los errores parciales no se ocultan.
 
 ## SCAN y propuestas ASSY
+
+`AssyTools` selecciona `AssyWorkOrders`, `AssyScanLots` o `AssyProposals`. Cada herramienta gestiona su operación y comparte `useAssyFilters`, los controles comunes y los constructores de payloads de `requests.ts`. `ProposalComparison` presenta las diferencias. Cerrar o suspender una comparación cancela su lectura y descarta una respuesta tardía. Al reactivar la pantalla se libera el indicador de comparación pendiente.
+
+El guardado de orden bloquea cambios posteriores de arrastre, flechas, grupo y autoacomodo hasta resolver la escritura. Una falla conserva el orden capturado para el reintento explícito. Los payloads parciales de secuencias conservan la ausencia de datos de tiempo cuando esos campos no están presentes.
 
 `GET /api/plan/input-main/scan-lots`: `date_from`, `date_to`, `line`, `part_no`, `limit=500`. Devuelve grupos por línea/parte y opciones de plan. La asignación usa `/assign-lot` con línea, parte, período, lote destino y `allow_extend` explícito. Se filtran planes compatibles y pendientes. Crear desde SCAN usa `/create-plan`, con fecha confirmada. Las operaciones se ejecutan en Flask; no se generan escaneos artificiales en modo real.
 

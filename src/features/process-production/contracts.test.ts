@@ -311,7 +311,12 @@ describe("Fork de Control de producción en Control de proceso", () => {
       "único",
     );
     fetcher.mockResolvedValueOnce(json({ success: true }));
-    await expect(createApi("live").extra("scan", {})).rejects.toThrow();
+    await expect(
+      createApi("live").extra("scan", {
+        date_from: defaults().start,
+        date_to: defaults().end,
+      }),
+    ).rejects.toThrow();
   });
   it("porta el acomodo por líneas, descansos y fechas locales sin perder campos del lote", () => {
     const source: Row[] = [
@@ -389,7 +394,7 @@ describe("Fork de Control de producción en Control de proceso", () => {
       qr_required_count: 0,
     });
     await demoApi.action("SMT", "reschedule", {
-      lot_nos: [result.lot_top],
+      lot_nos: [String(result.lot_top)],
       new_working_date: defaults().end,
     });
     expect(
