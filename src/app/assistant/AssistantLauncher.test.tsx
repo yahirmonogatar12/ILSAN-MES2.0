@@ -147,7 +147,174 @@ async function open() {
   await screen.findByRole("textbox", { name: "Mensaje" });
   return screen.getByRole("dialog", { name: "Asistente IA" });
 }
+function pointer(
+  button: HTMLElement,
+  type: string,
+  x: number,
+  pointerId = 1,
+  pointerType = "mouse",
+) {
+  const event = new MouseEvent(type, {
+    bubbles: true,
+    button: 0,
+    clientX: x,
+    clientY: 600,
+  });
+  Object.defineProperty(event, "pointerId", { value: pointerId });
+  Object.defineProperty(event, "pointerType", { value: pointerType });
+  fireEvent(button, event);
+}
+
 describe("global assistant", () => {
+  it("keeps the real panel frame and saved size while the assistant initializes", async () => {
+    localStorage.setItem("mes-ai-expanded:live:operador", "true");
+    const view = setup();
+    const original = view.fetcher.getMockImplementation()!;
+    let release!: (response: Response) => void;
+    const pending = new Promise<Response>((resolve) => {
+      release = resolve;
+    });
+    view.fetcher.mockImplementation((url, init) =>
+      url.endsWith("/bootstrap") ? pending : original(url, init),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Abrir asistente IA" }),
+    );
+    await screen.findByRole("combobox", { name: "Idioma del asistente" });
+    const dialog = screen.getByRole("dialog", { name: "Asistente IA" });
+    const loading = await within(dialog).findByRole("status", {
+      name: "Cargando asistente…",
+    });
+    expect(loading).toHaveAttribute("aria-busy", "true");
+    expect(dialog).toHaveClass("assistant-panel", "assistant-panel-expanded");
+    expect(
+      within(dialog).queryByRole("textbox", { name: "Mensaje" }),
+    ).toBeNull();
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Reducir panel" }),
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Asistente IA" }),
+    ).not.toHaveClass("assistant-panel-expanded");
+    await act(async () => release(await original("/backend/api/ai/bootstrap")));
+    await screen.findByRole("textbox", { name: "Mensaje" });
+    expect(screen.getByRole("dialog", { name: "Asistente IA" })).toHaveClass(
+      "assistant-panel",
+    );
+    expect(
+      screen.queryByRole("status", { name: "Cargando asistente…" }),
+    ).toBeNull();
+  });
+  it("docks after dragging and opens only on the next intentional activation", async () => {
+    vi.stubGlobal("innerWidth", 1000);
+    const view = setup();
+    const button = await screen.findByRole("button", {
+      name: "Abrir asistente IA",
+    });
+    vi.spyOn(button, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(20, 600, 58, 58),
+    );
+    pointer(button, "pointerdown", 45);
+    pointer(button, "pointermove", 1500);
+    expect(button).toHaveStyle({ left: "942px", right: "auto" });
+    pointer(button, "pointerup", 1500);
+    expect(button).toHaveAttribute("data-side", "right");
+    expect(button).not.toHaveAttribute("data-dragging");
+    expect(localStorage.getItem("mes-ai-launcher-side:live:operador")).toBe(
+      '"right"',
+    );
+    fireEvent.click(button, { detail: 1 });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(
+      view.fetcher.mock.calls.some(([url]) => url.includes("/api/ai/")),
+    ).toBe(false);
+    await userEvent.click(button);
+    await screen.findByRole("textbox", { name: "Mensaje" });
+  });
+  it.each(["pointercancel", "lostpointercapture"])(
+    "restores its edge when %s interrupts a drag and still accepts keyboard activation",
+    async (cancelEvent) => {
+      vi.stubGlobal("innerWidth", 1000);
+      localStorage.setItem("mes-ai-launcher-side:live:operador", '"left"');
+      setup();
+      const button = await screen.findByRole("button", {
+        name: "Abrir asistente IA",
+      });
+      vi.spyOn(button, "getBoundingClientRect").mockReturnValue(
+        new DOMRect(20, 600, 58, 58),
+      );
+      pointer(button, "pointerdown", 45);
+      pointer(button, "pointermove", 800);
+      pointer(button, "pointerup", 800, 2);
+      expect(button).toHaveAttribute("data-dragging", "true");
+      pointer(button, cancelEvent, 800);
+      expect(button).toHaveAttribute("data-side", "left");
+      expect(button).not.toHaveAttribute("data-dragging");
+      expect(button.style.left).toBe("");
+      fireEvent.click(button, { detail: 1 });
+      expect(screen.queryByRole("dialog")).toBeNull();
+      button.focus();
+      await userEvent.keyboard("{Enter}");
+      await screen.findByRole("textbox", { name: "Mensaje" });
+    },
+  );
+  it("treats a small pointer movement as a normal tap", async () => {
+    setup();
+    const button = await screen.findByRole("button", {
+      name: "Abrir asistente IA",
+    });
+    pointer(button, "pointerdown", 45);
+    pointer(button, "pointermove", 49);
+    pointer(button, "pointerup", 49);
+    expect(button).not.toHaveAttribute("data-side");
+    fireEvent.click(button, { detail: 1 });
+    await screen.findByRole("textbox", { name: "Mensaje" });
+  });
+  it("opens the first touch tap after dragging once even when a compatibility click follows", async () => {
+    const view = setup();
+    const button = await screen.findByRole("button", {
+      name: "Abrir asistente IA",
+    });
+    pointer(button, "pointerdown", 45, 2, "touch");
+    pointer(button, "pointermove", 800, 2, "touch");
+    pointer(button, "pointerup", 800, 2, "touch");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    pointer(button, "pointerdown", 45, 3, "touch");
+    pointer(button, "pointerup", 45, 3, "touch");
+    fireEvent.click(button, { detail: 1 });
+    const dialog = await screen.findByRole("dialog", { name: "Asistente IA" });
+    await within(dialog).findByRole("textbox", { name: "Mensaje" });
+    expect(
+      view.fetcher.mock.calls.filter(([url]) => url.endsWith("/bootstrap")),
+    ).toHaveLength(1);
+  });
+  it("restores the saved edge and allows moving it with the arrow keys", async () => {
+    localStorage.setItem("mes-ai-launcher-side:live:operador", '"right"');
+    const view = setup();
+    const button = await screen.findByRole("button", {
+      name: "Abrir asistente IA",
+    });
+    expect(button).toHaveAttribute("data-side", "right");
+    button.focus();
+    await userEvent.keyboard("{ArrowLeft}");
+    expect(button).toHaveAttribute("data-side", "left");
+    expect(localStorage.getItem("mes-ai-launcher-side:live:operador")).toBe(
+      '"left"',
+    );
+    await userEvent.keyboard("{ArrowRight}");
+    expect(button).toHaveAttribute("data-side", "right");
+    expect(
+      view.fetcher.mock.calls.some(([url]) => url.includes("/api/ai/")),
+    ).toBe(false);
+  });
+  it("uses the responsive default for an invalid saved edge", async () => {
+    localStorage.setItem("mes-ai-launcher-side:live:operador", '"outside"');
+    setup();
+    const button = await screen.findByRole("button", {
+      name: "Abrir asistente IA",
+    });
+    expect(button).not.toHaveAttribute("data-side");
+  });
   it("takes active module metadata from its provider without workspace markup", async () => {
     const view = setup();
     view.setModule({

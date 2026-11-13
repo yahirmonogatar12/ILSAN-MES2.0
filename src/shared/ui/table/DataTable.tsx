@@ -11,7 +11,8 @@ import {
   type ReactNode,
 } from "react";
 import { Button, IconButton } from "../Button";
-import { EmptyState, ErrorState, Loading } from "../Feedback";
+import { EmptyState, ErrorState } from "../Feedback";
+import { TableSkeleton } from "../Skeleton";
 import { ColumnFilter } from "./ColumnFilter";
 import { ColumnSearch } from "./ColumnSearch";
 import type { GridAnchor } from "./GridPopup";
@@ -295,7 +296,14 @@ export function DataTable<T>({
       </tr>
     );
   }
-  if (loading) return <Loading text={loadingText} />;
+  if (loading)
+    return (
+      <TableSkeleton
+        label={loadingText ?? `Cargando ${label}…`}
+        columns={columns.length}
+        maxHeight={maxHeight}
+      />
+    );
   if (error) return <ErrorState error={error} onRetry={onRetry} />;
   if (
     !rows.length &&

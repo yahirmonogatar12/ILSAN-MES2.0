@@ -1,6 +1,7 @@
 import { AlertCircle, LoaderCircle, SearchX } from "lucide-react";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Button } from "./Button";
+import { useInitialLoading } from "../hooks/useInitialLoading";
 
 export function Alert({
   children,
@@ -21,8 +22,10 @@ export function Alert({
   );
 }
 export function Loading({ text = "Cargando…" }: { text?: string }) {
+  const element = useRef<HTMLDivElement>(null);
+  useInitialLoading(element);
   return (
-    <div className="state-panel" role="status">
+    <div ref={element} className="state-panel" role="status">
       <LoaderCircle className="spin" size={26} aria-hidden="true" />
       <p>{text}</p>
     </div>

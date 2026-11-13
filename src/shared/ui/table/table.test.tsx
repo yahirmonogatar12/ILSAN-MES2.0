@@ -149,6 +149,9 @@ describe("tabla compartida con modelos ajenos a Materiales", () => {
       />,
     );
     expect(screen.getByRole("status")).toHaveTextContent("Cargando");
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByRole("table")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
     expect(screen.queryByText("Sin registros")).not.toBeInTheDocument();
     rerender(
       <DataTable
@@ -160,6 +163,19 @@ describe("tabla compartida con modelos ajenos a Materiales", () => {
       />,
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Sin conexión");
+    expect(screen.queryByRole("status")).toBeNull();
+    rerender(
+      <DataTable
+        label="Clientes"
+        rows={customers}
+        columns={columns}
+        rowKey={(row) => row.id}
+      />,
+    );
+    expect(screen.getByRole("table", { name: "Clientes" })).toHaveTextContent(
+      "Cliente 10",
+    );
+    expect(screen.queryByRole("status")).toBeNull();
   });
   it("el ordenamiento respeta la entrada y compara fechas y nulos", () => {
     const original = [...customers];

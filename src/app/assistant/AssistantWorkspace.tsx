@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Archive, Maximize2, Minimize2, Plus, Trash2 } from "lucide-react";
+import { Archive, Plus, Trash2 } from "lucide-react";
 import {
   Alert,
   Button,
@@ -7,13 +7,10 @@ import {
   ConfirmDialog,
   ErrorState,
   IconButton,
-  Loading,
-  Modal,
   SelectField,
   TabBar,
   tabIds,
 } from "@/shared/ui";
-import { usePersistentState } from "@/shared/hooks/usePersistentState";
 import type { Conversation, Language } from "@/core/assistant/types";
 import { useAssistantSession } from "./useAssistantSession";
 import { labels } from "./i18n";
@@ -22,21 +19,24 @@ import { ChatComposer } from "./ChatComposer";
 import { Messages } from "./Messages";
 import { AssistantAudit } from "./AssistantAudit";
 import { AssistantQuotas } from "./AssistantQuotas";
-import "./assistant.css";
+import { AssistantPanel } from "./AssistantPanel";
+import {
+  AssistantSkeleton,
+  AssistantHistorySkeleton,
+} from "./AssistantSkeleton";
 
 export default function AssistantWorkspace({
   open,
   onClose,
+  expanded,
+  onToggle,
 }: {
   open: boolean;
   onClose: () => void;
+  expanded: boolean;
+  onToggle: () => void;
 }) {
   const session = useAssistantSession(open);
-  const [expanded, setExpanded] = usePersistentState(
-    "mes-ai-expanded:" + session.scope,
-    false,
-    (value) => value === true,
-  );
   const [tab, setTab] = useState("chat");
   const [deleting, setDeleting] = useState<Conversation | null>(null);
   const t = labels(session.language);
@@ -73,7 +73,7 @@ export default function AssistantWorkspace({
         />
       </div>
       {session.history.isPending ? (
-        <Loading />
+        <AssistantHistorySkeleton />
       ) : session.history.isError ? (
         <ErrorState
           error={session.history.error}
@@ -101,17 +101,15 @@ export default function AssistantWorkspace({
     : undefined;
   return (
     <>
-      <Modal
+      <AssistantPanel
         title={t.title}
         subtitle={
           bootstrap?.model ? "ILSAN MES · " + bootstrap.model : "ILSAN MES"
         }
-        icon={<img src="/brand/assistant.svg" alt="" />}
         onClose={onClose}
-        closeOnBackdrop={false}
-        className={
-          "assistant-panel" + (expanded ? " assistant-panel-expanded" : "")
-        }
+        expanded={expanded}
+        onToggle={onToggle}
+        toggleLabel={expanded ? t.collapse : t.expand}
         headerActions={
           <>
             <SelectField
@@ -128,13 +126,6 @@ export default function AssistantWorkspace({
               onChange={(event) =>
                 void session.changeLanguage(event.target.value as Language)
               }
-            />
-            <IconButton
-              label={expanded ? t.collapse : t.expand}
-              icon={
-                expanded ? <Minimize2 size={17} /> : <Maximize2 size={17} />
-              }
-              onClick={() => setExpanded(!expanded)}
             />
           </>
         }
@@ -162,7 +153,7 @@ export default function AssistantWorkspace({
             aria-labelledby={tabIds("assistant", active).tab}
           >
             {session.bootstrap.isPending ? (
-              <Loading />
+              <AssistantSkeleton />
             ) : session.bootstrap.isError ? (
               <ErrorState
                 error={session.bootstrap.error}
@@ -248,7 +239,7 @@ export default function AssistantWorkspace({
                       </Alert>
                     )}
                     {session.selected && session.detail.isPending ? (
-                      <Loading />
+                      <AssistantSkeleton messagesOnly />
                     ) : session.detail.isError ? (
                       <ErrorState
                         error={session.detail.error}
@@ -297,7 +288,7 @@ export default function AssistantWorkspace({
             )}
           </section>
         </div>
-      </Modal>
+      </AssistantPanel>
       {deleting && (
         <ConfirmDialog
           title={t.delete}

@@ -10,11 +10,14 @@
   background: #fff;
   box-shadow: 0 5px 20px #0c36232b;
   z-index: 60;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
   transition:
     transform 160ms ease,
     box-shadow 160ms ease;
 }
-.assistant-launcher.icon-button:hover {
+.assistant-launcher.icon-button:hover:not(:disabled) {
   background: #fff;
   transform: translateY(-2px);
   box-shadow: 0 7px 24px #0c362345;
@@ -22,6 +25,20 @@
 .assistant-launcher img {
   width: 100%;
   height: 100%;
+  pointer-events: none;
+}
+.assistant-launcher.icon-button[data-side="left"] {
+  left: 20px;
+  right: auto;
+}
+.assistant-launcher.icon-button[data-side="right"] {
+  left: auto;
+  right: 20px;
+}
+.assistant-launcher.icon-button[data-dragging] {
+  cursor: grabbing;
+  transform: none;
+  transition: none;
 }
 @media (max-width: 600px) {
   .assistant-launcher.icon-button {
@@ -30,6 +47,12 @@
     bottom: 12px;
     width: 50px;
     height: 50px;
+  }
+  .assistant-launcher.icon-button[data-side="left"] {
+    left: 12px;
+  }
+  .assistant-launcher.icon-button[data-side="right"] {
+    right: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -4,7 +4,8 @@ import { useAuth } from "../auth/useAuth";
 import { allowsRoles, usePermission } from "../auth/usePermission";
 import type { PermissionRule } from "../auth/types";
 import { Card } from "@/shared/ui/Layout";
-import { EmptyState, ErrorState, Loading } from "@/shared/ui/Feedback";
+import { EmptyState, ErrorState } from "@/shared/ui/Feedback";
+import { ModuleSkeleton } from "@/shared/ui/Skeleton";
 
 export function ModuleAccess({
   permission,
@@ -43,11 +44,7 @@ export function ModuleAccess({
       </Card>
     );
   if (access.isPending)
-    return (
-      <Card>
-        <Loading text="Verificando acceso al módulo…" />
-      </Card>
-    );
+    return <ModuleSkeleton label="Verificando acceso al módulo…" />;
   if (access.isError)
     return (
       <Card>

@@ -15,7 +15,9 @@ import {
   EmptyState,
   ErrorBoundary,
   ErrorState,
-  Loading,
+  InitialLoadingBoundary,
+  LoadingPending,
+  ModuleSkeleton,
   tabIds,
 } from "@/shared/ui";
 import { Shell } from "../layout/Shell";
@@ -60,7 +62,7 @@ export function Workspace(props: Props) {
             onRetry={() => void access.refetch()}
           />
         ) : (
-          <Loading text="Verificando permisos…" />
+          <ModuleSkeleton label="Verificando permisos…" />
         )}
       </Shell>
     );
@@ -141,9 +143,15 @@ function AuthorizedWorkspace({
                         />
                       )}
                     >
-                      <Suspense fallback={<Loading text="Cargando módulo…" />}>
-                        <Component />
-                      </Suspense>
+                      <InitialLoadingBoundary
+                        fallback={
+                          <ModuleSkeleton label={`Cargando ${module.title}…`} />
+                        }
+                      >
+                        <Suspense fallback={<LoadingPending />}>
+                          <Component />
+                        </Suspense>
+                      </InitialLoadingBoundary>
                     </ErrorBoundary>
                   </Activity>
                 </ModuleAccess>

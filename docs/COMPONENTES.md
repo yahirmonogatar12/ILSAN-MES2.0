@@ -32,6 +32,16 @@ Importar los controles desde `@/shared/ui`. Los componentes no conocen Materiale
 
 `openOnHover` habilita la apertura al entrar con un puntero de ratón y conserva el menú mientras se recorren sus enlaces. Los clics del ratón mantienen abierto el menú durante ese recorrido. Enter, Espacio y la interacción táctil conservan la apertura y cierre por activación. La opción está desactivada por defecto.
 
+`Skeleton` representa un bloque decorativo animado y acepta `className` para adaptarlo a su contexto. Los bloques se ocultan a los lectores de pantalla. La animación respeta la preferencia de movimiento reducido.
+
+`TableSkeleton` presenta encabezado y filas de carga con `label`, `columns` y `maxHeight`. Su región accesible anuncia la carga y expone `aria-busy`. `DataTable` lo muestra durante su carga inicial y `DataGrid` lo recibe mediante esa composición. La propiedad `fetching` mantiene el contenido visible durante el refresco.
+
+`ModuleSkeleton` compone `Page`, `Card`, `Skeleton` y `TableSkeleton` para reservar el espacio de filtros y listado mientras se descarga un módulo o se verifica su acceso. Su propiedad `label` identifica la operación para accesibilidad. Los controles de los esqueletos son decorativos.
+
+`InitialLoadingBoundary` conserva su `fallback` durante la primera descarga de código y las primeras consultas de la vista. Monta el contenido con captura deshabilitada y lo revela cuando terminan las cargas registradas. `LoadingPending` enlaza el fallback de `Suspense` con ese registro, y `Loading` y `TableSkeleton` se registran automáticamente. Ambos omiten los indicadores bajo elementos `hidden`. Después de revelar el contenido, las consultas posteriores mantienen visibles sus filtros y capturas.
+
+`useInitialLoading(ref?)`, disponible también en `shared/hooks`, permite integrar otros indicadores iniciales. El registro dura mientras se muestra el indicador dentro del límite y se libera al desmontarlo. El fallback se presenta fuera del contexto de registro para completar su ciclo al terminar las consultas.
+
 ## Campos y formularios
 
 `TextField`, `TextareaField` y `SelectField` aceptan las propiedades nativas del control, además de `label`, `hint`, `error` y `containerClassName`. Generan IDs únicos y asocian etiqueta, ayuda y error. `initialFocus` permite que un diálogo sitúe el foco en ese campo.

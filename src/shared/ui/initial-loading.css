@@ -1,0 +1,22 @@
+.ui-initial-loading,
+.ui-initial-loading-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.ui-initial-loading {
+  position: relative;
+}
+.ui-initial-loading-content[aria-hidden="true"] {
+  visibility: hidden;
+}
+.ui-initial-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

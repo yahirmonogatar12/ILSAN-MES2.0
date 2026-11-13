@@ -2,9 +2,17 @@
 
 El icono flotante utiliza el robot original de ILSAN. Aparece en el espacio de trabajo autenticado cuando la sesión tiene permiso para usar el asistente. El panel se carga con `React.lazy` al abrirlo por primera vez.
 
+El icono se arrastra horizontalmente con ratón o pantalla táctil y se ajusta al borde más cercano al soltarlo. Con el foco en el botón, las flechas izquierda y derecha eligen el lado. La preferencia se conserva en el navegador por usuario y modo. Un clic, toque, Enter o Espacio abre el chat. El arrastre admite una tolerancia de 6 px para distinguir una pulsación y su cancelación recupera el lado previo.
+
 ## Distribución del código
 
+La carga inicial muestra el panel lateral con su cabecera y un esqueleto de mensajes y escritura. El ancho normal o ampliado se conserva al terminar la descarga y durante la inicialización. Las conversaciones y mensajes pendientes también usan bloques del componente compartido `Skeleton`.
+
+La transición del esqueleto al contenido conserva la posición del panel. Su marco aparece directamente para evitar que cada fase de inicialización repita un desplazamiento de entrada.
+
 - `app/assistant/AssistantLauncher.tsx` controla el acceso y la carga diferida.
+- `app/assistant/AssistantPanel.tsx` comparte la cabecera, tamaño y acciones entre carga, errores y contenido preparado.
+- `app/assistant/AssistantSkeleton.tsx` compone los estados de carga del chat y del historial.
 - `app/assistant/AssistantWorkspace.tsx` compone el panel, historial y pestañas administrativas.
 - `app/assistant/useAssistantSession.ts` coordina conversaciones, adjuntos y preferencias.
 - `app/assistant/useChatStream.ts` procesa la respuesta activa, sus reintentos y su cancelación.

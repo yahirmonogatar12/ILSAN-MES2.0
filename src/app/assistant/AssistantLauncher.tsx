@@ -9,9 +9,11 @@ import {
   DialogBody,
   ErrorBoundary,
   IconButton,
-  Loading,
-  Modal,
 } from "@/shared/ui";
+import { usePersistentState } from "@/shared/hooks/usePersistentState";
+import { AssistantPanel } from "./AssistantPanel";
+import { AssistantLoading } from "./AssistantSkeleton";
+import { useLauncherPosition } from "./useLauncherPosition";
 import "./launcher.css";
 
 const AssistantWorkspace = lazy(() => import("./AssistantWorkspace"));
@@ -25,20 +27,33 @@ export function AssistantLauncher() {
     void client.cancelQueries({ queryKey: assistantKeys.all(scope) });
     client.removeQueries({ queryKey: assistantKeys.all(scope) });
   }, [allowed, client, scope]);
-  return allowed ? <AuthorizedAssistant key={scope} /> : null;
+  return allowed ? <AuthorizedAssistant key={scope} scope={scope} /> : null;
 }
-function AuthorizedAssistant() {
+function AuthorizedAssistant({ scope }: { scope: string }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const position = useLauncherPosition(scope);
+  const [expanded, setExpanded] = usePersistentState(
+    "mes-ai-expanded:" + scope,
+    false,
+    (value) => value === true,
+  );
+  const toggle = () => setExpanded((value) => !value);
   const close = () => setOpen(false);
   return (
     <>
       <IconButton
+        {...position.handlers}
         className="assistant-launcher"
         label="Abrir asistente IA"
+        title="Abrir asistente IA. Arrastra hacia un lado o usa las flechas izquierda y derecha."
+        data-side={position.side ?? undefined}
+        data-dragging={position.dragging || undefined}
+        style={position.style}
+        aria-keyshortcuts="ArrowLeft ArrowRight"
         aria-haspopup="dialog"
         aria-expanded={open}
-        icon={<img src="/brand/assistant.svg" alt="" />}
+        icon={<img src="/brand/assistant.svg" alt="" draggable={false} />}
         onClick={() => {
           setMounted(true);
           setOpen(true);
@@ -48,27 +63,36 @@ function AuthorizedAssistant() {
         <ErrorBoundary
           fallback={(error, reset) =>
             open ? (
-              <Modal title="Asistente IA" onClose={close}>
+              <AssistantPanel
+                expanded={expanded}
+                onToggle={toggle}
+                onClose={close}
+              >
                 <DialogBody>
                   <Alert tone="danger">{error.message}</Alert>
                   <Button onClick={reset}>Reintentar</Button>
                 </DialogBody>
-              </Modal>
+              </AssistantPanel>
             ) : null
           }
         >
           <Suspense
             fallback={
               open ? (
-                <Modal title="Asistente IA" onClose={close}>
-                  <DialogBody>
-                    <Loading />
-                  </DialogBody>
-                </Modal>
+                <AssistantLoading
+                  expanded={expanded}
+                  onToggle={toggle}
+                  onClose={close}
+                />
               ) : null
             }
           >
-            <AssistantWorkspace open={open} onClose={close} />
+            <AssistantWorkspace
+              open={open}
+              onClose={close}
+              expanded={expanded}
+              onToggle={toggle}
+            />
           </Suspense>
         </ErrorBoundary>
       )}

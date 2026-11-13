@@ -122,6 +122,48 @@ function mount(
 }
 
 describe("pestañas del workspace", () => {
+  it("conserva el mismo esqueleto mientras carga código y datos y muestra el módulo al terminar", async () => {
+    let resolve!: (value: { default: () => React.ReactNode }) => void;
+    const pending = new Promise<{ default: () => React.ReactNode }>((done) => {
+      resolve = done;
+    });
+    const { modules } = sampleModules();
+    let finishData!: () => void;
+    function LoadedModule() {
+      const [loading, setLoading] = useState(true);
+      finishData = () => setLoading(false);
+      return (
+        <Page>
+          <TextField label="Captura inicial" />
+          <Card fill>
+            <DataGrid
+              label="Lista inicial"
+              rows={[{ id: 1 }]}
+              columns={[{ id: "id", header: "ID", cell: (row) => row.id }]}
+              rowKey={(row) => row.id}
+              loading={loading}
+            />
+          </Card>
+        </Page>
+      );
+    }
+    mount([{ ...modules[0], component: lazy(() => pending) }]);
+    const loading = await screen.findByRole("status", { name: "Cargando A…" });
+    expect(loading).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByRole("table")).toBeNull();
+    expect(within(loading).queryByRole("button")).toBeNull();
+    await act(async () => resolve({ default: LoadedModule }));
+    expect(screen.getByRole("status", { name: "Cargando A…" })).toBe(loading);
+    expect(
+      screen.queryByRole("textbox", { name: "Captura inicial" }),
+    ).toBeNull();
+    act(() => finishData());
+    await screen.findByRole("table", { name: "Lista inicial" });
+    expect(
+      screen.getByRole("textbox", { name: "Captura inicial" }),
+    ).toBeVisible();
+    expect(screen.queryByRole("status", { name: "Cargando A…" })).toBeNull();
+  });
   it("publica el módulo activo y limpia su contexto al cerrar la última pestaña", async () => {
     function ContextProbe() {
       const module = useActiveModule();

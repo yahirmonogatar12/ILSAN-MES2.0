@@ -1,0 +1,142 @@
+.ui-skeleton {
+  display: block;
+  min-width: 0;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(
+    100deg,
+    var(--skeleton-base, #ffffff0c) 30%,
+    var(--skeleton-highlight, #ffffff1c) 50%,
+    var(--skeleton-base, #ffffff0c) 70%
+  );
+  background-size: 220% 100%;
+  animation: ui-skeleton-shimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.ui-skeleton-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.ui-table-skeleton.table-overflow {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 180px;
+  min-width: 0;
+  overflow: hidden;
+}
+.surface-fill > .ui-table-skeleton {
+  min-height: 0;
+}
+.ui-table-skeleton-heading,
+.ui-table-skeleton-row {
+  display: grid;
+  align-items: center;
+  gap: 24px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--skeleton-border, #ffffff0b);
+}
+.ui-table-skeleton-heading {
+  flex: 0 0 37px;
+  background: var(--mes-header);
+}
+.ui-table-skeleton-heading .ui-skeleton {
+  width: 70%;
+  height: 9px;
+}
+.ui-table-skeleton-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.ui-table-skeleton-row {
+  height: 44px;
+}
+.ui-table-skeleton-row:nth-child(even) {
+  background: #ffffff02;
+}
+.ui-table-skeleton-row .ui-skeleton:nth-child(even) {
+  width: 62%;
+}
+.ui-module-skeleton-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.ui-module-skeleton-field {
+  display: grid;
+  gap: 8px;
+  width: 170px;
+  min-width: 0;
+}
+.ui-module-skeleton-field .ui-skeleton:first-child {
+  width: 55%;
+  height: 9px;
+}
+.ui-module-skeleton-field .ui-skeleton:last-child {
+  height: 30px;
+}
+.ui-module-skeleton-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.ui-module-skeleton-actions .ui-skeleton {
+  width: 92px;
+  height: 30px;
+}
+.ui-module-skeleton-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 46px;
+  padding: 12px 16px;
+}
+.ui-module-skeleton-footer .ui-skeleton {
+  width: 170px;
+}
+@keyframes ui-skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (max-width: 700px) {
+  .ui-module-skeleton-filters {
+    gap: 10px;
+    padding: 10px;
+  }
+  .ui-module-skeleton-field {
+    flex: 1;
+    width: auto;
+  }
+  .ui-module-skeleton-field:nth-child(3),
+  .ui-module-skeleton-actions .ui-skeleton:last-child {
+    display: none;
+  }
+  .ui-module-skeleton-actions .ui-skeleton {
+    width: 60px;
+  }
+  .ui-table-skeleton-heading,
+  .ui-table-skeleton-row {
+    gap: 10px;
+    padding-inline: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton {
+    animation: none;
+  }
+}
