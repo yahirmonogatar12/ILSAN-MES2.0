@@ -4,6 +4,7 @@ import { SelectField } from "./Fields";
 export interface GroupAction {
   id: string;
   label: string;
+
   onClick: () => void;
   disabled?: boolean;
 }

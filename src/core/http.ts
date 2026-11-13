@@ -5,6 +5,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    public payload: unknown = null,
   ) {
     super(message);
     this.name = "ApiError";
@@ -86,6 +87,7 @@ export async function ensureResponse(response: Response): Promise<void> {
       (Array.isArray(payload.errors) ? payload.errors.join("\n") : "") ||
       fallback,
     response.status,
+    payload,
   );
 }
 
@@ -111,6 +113,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
         (Array.isArray(payload.errors) ? payload.errors.join("\n") : "") ||
         "No se pudo completar la operación.",
       response.status,
+      payload,
     );
   return payload as T;
 }
@@ -174,7 +177,7 @@ export async function requestFile(
   const type = response.headers.get("content-type") || "";
   if (type.includes("json")) {
     const value = await response.json();
-    throw new ApiError(value.error || "No se recibió un archivo.", 502);
+    throw new ApiError(value.error || "No se recibió un archivo.", 502, value);
   }
   if (!allowHtml && type.includes("text/html"))
     throw new ApiError(
