@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { Page } from "@/shared/ui";
-import {
-  ListingCard,
-  Stats,
-} from "./components";
+import { ListingCard, Stats } from "./components";
 import { useListing, useWarehouse } from "./hooks";
 import { columnsFor } from "./warehouseModel";
 import { InventoryClosure } from "./InventoryClosure";
@@ -28,7 +25,7 @@ export default function InventoryPage() {
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
       <div
-        className="shipping-warehouse-inventory-panel"
+        className="shipping-warehouse-panel shipping-warehouse-inventory-panel"
         hidden={closure}
         inert={closure}
       >

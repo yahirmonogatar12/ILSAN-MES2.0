@@ -214,6 +214,78 @@ function physicalFile(name = "conteo.csv") {
     ),
   };
 }
+test("shipping inventory table fills the screen before and after returning from closure", async ({
+  page,
+  closure,
+}, testInfo) => {
+  expect(closure.requests).toEqual([]);
+  await page.goto("/proceso/embarques/inventario");
+  const table = page.getByRole("table", {
+    name: "Inventario general embarques",
+    exact: true,
+  });
+  await expect(table).toBeVisible();
+  const panel = page.getByRole("region", {
+    name: "Inventario general embarques",
+    exact: true,
+  });
+  const scroll = panel.locator(".table-overflow");
+  await expect
+    .poll(() => scroll.evaluate((element) => element.clientHeight))
+    .toBeGreaterThan(180);
+  await expect(table.getByRole("columnheader").first()).toBeInViewport();
+  await expect(
+    table.getByRole("cell", { name: "CLOSE-0001", exact: true }),
+  ).toBeInViewport();
+  await panel
+    .getByRole("button", { name: "Página siguiente", exact: true })
+    .click();
+  await expect(
+    table.getByRole("cell", { name: "CLOSE-0501", exact: true }),
+  ).toBeInViewport();
+  const view = await openClosure(page);
+  await expect(panel).toBeHidden();
+  await view
+    .getByRole("button", { name: "Regresar a inventario", exact: true })
+    .click();
+  await expect
+    .poll(() => scroll.evaluate((element) => element.clientHeight))
+    .toBeGreaterThan(180);
+  await expect(
+    table.getByRole("cell", { name: "CLOSE-0501", exact: true }),
+  ).toBeInViewport();
+  await page.screenshot({
+    path: testInfo.outputPath("shipping-inventory.png"),
+  });
+  await scroll.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(
+    table.getByRole("cell", { name: "CLOSE-1000", exact: true }),
+  ).toBeInViewport();
+  expect(
+    await page.evaluate(() => [
+      document.documentElement.scrollWidth,
+      document.documentElement.scrollHeight,
+    ]),
+  ).toEqual([page.viewportSize()!.width, page.viewportSize()!.height]);
+  if (testInfo.project.name === "desktop") {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await expect
+      .poll(() => scroll.evaluate((element) => element.clientHeight))
+      .toBeGreaterThan(600);
+    await scroll.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    await expect(
+      table.getByRole("cell", { name: "CLOSE-0501", exact: true }),
+    ).toBeInViewport();
+    await page.screenshot({
+      path: testInfo.outputPath("shipping-inventory-wide.png"),
+    });
+  }
+});
+
 test("shipping closure matches the inline original and confirms the validated batch", async ({
   page,
   closure,

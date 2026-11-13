@@ -1,5 +1,12 @@
 # Validación local
 
+## Altura del inventario general de Embarques · 13 de noviembre de 2026
+
+- La regresión reprodujo un área de tabla de 0 px. El contenedor añadido para alternar inventario y cierre había dejado la tarjeta fuera del selector de crecimiento de `Page`. Inventario reutiliza ahora el panel común de Embarques, incluida su regla de altura para la tarjeta y su estado oculto.
+- Los nueve recorridos de inventario y cierre aprobaron sobre la compilación de producción en 1366×768, 390×640 y 320×568. La nueva prueba comprueba encabezados y filas dentro del viewport, paginación de 500, regreso del cierre conservando la página y desplazamiento interno hasta el último registro de la página. El documento conserva las dimensiones del viewport. También se revisó la tabla en 1920×1080.
+- `npm run check` aprobado con 732 pruebas en 74 archivos, 11 pruebas de herramientas, TypeScript, lint, arquitectura y compilación de la plantilla. El formato de los archivos modificados y `git diff --check` aprobaron. Evidencia en `output/shipping-inventory-check.log`.
+- La reproducción y la verificación utilizan respuestas HTTP controladas con 1,033 partes. Evidencia en `output/shipping-inventory-before.log`, `output/shipping-inventory-browser.log` y las capturas `shipping-inventory*.png` bajo `output/browser-results/`.
+
 ## Límite de vista previa Excel · 13 de noviembre de 2026
 
 - El máximo de entrada del visor se elevó a 200 MiB, mostrado como 200 MB. Las pruebas comprueban aceptación de 100 MiB y del límite exacto, y rechazo por encima del máximo antes de cargar el motor.

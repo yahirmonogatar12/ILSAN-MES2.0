@@ -62,6 +62,9 @@
 .shipping-warehouse-panel > .surface-fill {
   flex: 1 1 0;
 }
+.shipping-warehouse-inventory-panel {
+  gap: 10px;
+}
 .shipping-warehouse-dialog[open] {
   display: flex;
   flex-direction: column;
