@@ -20,6 +20,7 @@ function plan(value: Row): value is Plan {
       "working_date",
       "line",
       "part_no",
+      "sub_assy",
       "wo_code",
       "po_code",
       "model_code",

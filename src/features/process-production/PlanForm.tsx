@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
 import {
@@ -8,6 +9,7 @@ import {
   DialogFooter,
   FormMessages,
   Modal,
+  TextField,
 } from "@/shared/ui";
 import { Fields, useProcess } from "./components";
 import { fieldIssues, planFields, planPayload, text } from "./model";
@@ -18,17 +20,23 @@ export function PlanForm({
   editing,
   onClose,
   onDone,
+  reloadSubAssy,
 }: {
   kind: Kind;
   initial: Row;
   editing: boolean;
   onClose: () => void;
   onDone: (result: Row) => void;
+  reloadSubAssy?: () => Promise<string | null>;
 }) {
   const context = useProcess();
+  const [subAssyReloaded, setSubAssyReloaded] = useState(false);
   const form: ReturnType<typeof useForm<Row>> = useForm<Row>({
     initialValues: initial,
     validate: (value): string[] => [
+      ...(subAssyForm.pending
+        ? ["Espera a que termine la consulta de sub-assy."]
+        : []),
       ...fieldIssues(planFields(kind, editing), value),
       ...(revisions.isError &&
       text(value.part_no).trim() === text(initial.part_no).trim() &&
@@ -45,6 +53,18 @@ export function PlanForm({
         ),
       ),
   });
+  const subAssyForm = useForm({
+    initialValues: {},
+    validate: () =>
+      form.pending ? ["Espera a que termine el guardado del plan."] : [],
+    onSubmit: async () => {
+      if (!reloadSubAssy) return;
+      const value = await reloadSubAssy();
+      form.setField("sub_assy", value);
+      setSubAssyReloaded(true);
+    },
+  });
+  const busy = form.pending || subAssyForm.pending;
   const part = text(form.values.part_no).trim();
   const revisions = useQuery({
     queryKey: context.key("revisions", part),
@@ -90,22 +110,52 @@ export function PlanForm({
       });
     }
     return fields;
-  }, [kind, editing, revisions.data, form.values]);
+  }, [kind, editing, revisions.data, form.values, initial.part_no, part]);
   return (
     <Modal
       title={`${editing ? "Editar" : "Nuevo"} plan ${kind}${editing ? ` · ${text(initial.lot_no)}` : ""}`}
       size="lg"
       className="process-production-form"
-      busy={form.pending}
+      busy={busy}
       closeOnBackdrop={false}
       onClose={onClose}
     >
       <form onSubmit={form.handleSubmit}>
         <DialogBody>
+          {editing && kind === "ASSY" && (
+            <div className="process-production-sub-assy">
+              <TextField
+                label="Sub-assy / PCB"
+                value={text(form.values.sub_assy)}
+                placeholder="Sin sub-assy / PCB"
+                readOnly
+              />
+              <Button
+                size="sm"
+                icon={<RefreshCw size={14} />}
+                disabled={busy || !reloadSubAssy}
+                loading={subAssyForm.pending}
+                loadingLabel="Consultando RAW…"
+                onClick={() => void subAssyForm.submit()}
+              >
+                Recargar sub-assy
+              </Button>
+            </div>
+          )}
+          {subAssyReloaded && !subAssyForm.pending && !subAssyForm.error && (
+            <Alert
+              tone={text(form.values.sub_assy).trim() ? "info" : "warning"}
+            >
+              {text(form.values.sub_assy).trim()
+                ? "Sub-assy actualizado desde RAW."
+                : "RAW todavía no tiene un sub-assy / PCB configurado para esta parte."}
+            </Alert>
+          )}
+          <FormMessages errors={subAssyForm.errors} error={subAssyForm.error} />
           <Fields
             fields={fields}
             values={form.values}
-            pending={form.pending}
+            pending={busy}
             change={(key, value) => {
               if (key === "part_no" && editing && kind === "IMT")
                 form.setValues((previous) => ({
@@ -140,10 +190,15 @@ export function PlanForm({
           <FormMessages errors={form.errors} error={form.error} />
         </DialogBody>
         <DialogFooter>
-          <Button disabled={form.pending} onClick={onClose}>
+          <Button disabled={busy} onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" loading={form.pending}>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={form.pending}
+            disabled={busy}
+          >
             Guardar plan
           </Button>
         </DialogFooter>

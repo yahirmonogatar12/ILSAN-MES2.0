@@ -76,6 +76,11 @@ export function PlanDialogs({ state }: { state: PlansController }) {
           }
           onClose={() => setDialog(null)}
           onDone={done}
+          reloadSubAssy={
+            dialog.type === "edit" && kind === "ASSY"
+              ? () => state.reloadSubAssy(dialog.row.lot_no)
+              : undefined
+          }
         />
       )}
       {dialog?.type === "import" && (

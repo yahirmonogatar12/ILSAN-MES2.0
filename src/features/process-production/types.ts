@@ -7,6 +7,7 @@ export interface Plan extends Row {
   working_date?: string | null;
   line?: string | null;
   part_no?: string | null;
+  sub_assy?: string | null;
   wo_code?: string | null;
   po_code?: string | null;
   model_code?: string | null;

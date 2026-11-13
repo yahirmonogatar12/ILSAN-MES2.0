@@ -67,6 +67,10 @@ describe("Flujos de Control de proceso", () => {
         screen.getByRole("button", { name: `Editar ${lot}` }),
       );
       const form = screen.getByRole("dialog");
+      if (kind !== "ASSY")
+        expect(
+          within(form).queryByRole("button", { name: "Recargar sub-assy" }),
+        ).toBeNull();
       expect(within(form).queryByLabelText(/^Estado/)).not.toBeInTheDocument();
       expect(
         within(form).queryByLabelText(/Motivo de pausa|Motivo de término/),

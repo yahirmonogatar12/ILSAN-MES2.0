@@ -1,5 +1,25 @@
 # Validación local
 
+## Recarga de sub-assy en planes ASSY · 13 de noviembre de 2026
+
+- El modal de edición de cada plan ASSY presenta Sub-assy / PCB y el botón Recargar sub-assy. La acción reutiliza la consulta de planes que obtiene el dato desde RAW, con su alcance de sesión y señal de aborto. El lote exacto identifica el valor que se muestra en el modal y la respuesta actualiza la tabla.
+- La captura de cantidad, modelo y los demás campos del plan se conserva durante la recarga. Una PCB retirada limpia el valor anterior y un valor ausente muestra el aviso de RAW. Los fallos permiten reintentar conservando el dato previo. La recarga protege el formulario mientras consulta y el guardado mantiene su payload.
+- Las regresiones verifican recarga desde nulo o una PCB anterior, códigos completos, consulta sin escritura, actualización de tabla al cerrar, errores, lote desaparecido, bloqueo de doble consulta y aborto al desmontar. Los contratos conservan cadenas, nulos y campos históricos ausentes y rechazan objetos como sub-assy.
+- `npm run check` aprobado con 698 pruebas en 70 archivos, 11 pruebas de herramientas, TypeScript, arquitectura y compilación de la plantilla. El lint emitió advertencias de hooks y Fast Refresh del repositorio. La compilación de producción y las siete pruebas específicas del flujo se ejecutaron también después de ajustar las dependencias del memo del formulario. Evidencia en `output/assy-sub-assy-check.log`, `output/assy-sub-assy-build.log` y `output/assy-sub-assy-final-tests.log`.
+- Los 24 recorridos de navegador aprobaron en 1366×768, 390×640 y 320×568. El recorrido ASSY comprueba dos lotes, conservación de captura, recarga desde PCB ausente o anterior, actualización de la tabla y contrato de guardado. El modal y el documento conservan los límites del viewport. Evidencia en `output/assy-sub-assy-browser.log` y las capturas `assy-sub-assy.png` bajo `output/browser-results/`.
+- El formato de los archivos de esta modificación se comprobó por separado. El chequeo global detectó diferencias de formato previas en `src/core/http.test.ts`, `src/core/http.ts`, `src/shared/ui/ActionGroup.tsx`, `.oxlintrc.json` y `package.json`. Evidencia en `output/assy-sub-assy-format.log` y `output/assy-sub-assy-format-scoped.log`.
+- La revisión utilizó respuestas HTTP controladas. La comprobación con cambios reales de RAW y una sesión de planta sigue pendiente.
+
+## Cierre de inventario de Embarques · 13 de noviembre de 2026
+
+- La vista recupera la distribución del MES original dentro del módulo. Presenta datos y acciones del cierre arriba, accuracy circular junto al preview y el historial debajo. La flecha regresa al inventario conservando sus filtros.
+- La carga del CSV, reinicio, recuperación de borradores, consulta de cierres y descarga de reportes usan los contratos existentes. Confirmar envía el identificador validado una sola vez y conserva la comparación visible. Cambiar el archivo exige volver a validarlo.
+- Las regresiones cubren cancelación fallida, reintento del baseline después de una cancelación completada y validación fallida con un borrador previo recuperable. Las lecturas conservan alcance de sesión y señales de aborto.
+- El preview usa filas de 38 px, virtualización y 500 registros por página. Se corrigió el componente compartido para iniciar cada página desde arriba, conservar el desplazamiento horizontal y mantener la posición al regresar a una pestaña con los mismos criterios.
+- `npm run check` aprobado con 686 pruebas en 68 archivos, 11 pruebas de herramientas, TypeScript y compilación de la plantilla. Arquitectura aprobada con 401 archivos y 76 módulos. La compilación de producción forma parte de `npm run test:browser`. Evidencia en `output/closure-check.log` y `output/closure-browser.log`.
+- Los 21 recorridos de navegador aprobaron en 1366×768, 390×640 y 320×568. El cierre se revisó también en 1920×1080, con campos y acciones alineados en una fila. Se comprobaron 1,033 partes, desplazamiento a la fila 500, cambio de página, archivos válidos e inválidos, confirmación, reinicio, historial y descargas. El documento conservó las dimensiones del viewport. Evidencia adicional en `output/closure-wide-browser.log` y las capturas `closure-*.png` bajo `output/browser-results/`.
+- La revisión funcional utilizó respuestas HTTP controladas. La confirmación y cancelación contra los datos reales de planta requieren validación en el entorno autorizado.
+
 ## Contexto, validaciones y recorridos de navegador · 12 de noviembre de 2026
 
 - El workspace publica su módulo activo mediante `ActiveModuleContext`, con ID, título, ruta e ID del panel. El asistente recibe ese contexto desde el proveedor y el router. Las pruebas verifican cambio de módulo, cierre de la última pestaña y funcionamiento del chat aunque cambien los atributos del HTML.

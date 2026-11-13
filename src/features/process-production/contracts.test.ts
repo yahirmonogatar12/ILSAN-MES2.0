@@ -318,6 +318,27 @@ describe("Fork de Control de producción en Control de proceso", () => {
       }),
     ).rejects.toThrow();
   });
+  it.each([null, "PCB/0001+A&B", undefined])(
+    "conserva sub-assy histórico %s",
+    async (subAssy) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => json([{ lot_no: "L1", sub_assy: subAssy }])),
+      );
+      expect(
+        (await createApi("live").plans("ASSY", defaults()))[0].sub_assy,
+      ).toBe(subAssy);
+    },
+  );
+  it("rechaza un sub-assy con forma inválida", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => json([{ lot_no: "L1", sub_assy: { pcb: "ERR" } }])),
+    );
+    await expect(createApi("live").plans("ASSY", defaults())).rejects.toThrow(
+      "plan inválido",
+    );
+  });
   it("porta el acomodo por líneas, descansos y fechas locales sin perder campos del lote", () => {
     const source: Row[] = [
       {

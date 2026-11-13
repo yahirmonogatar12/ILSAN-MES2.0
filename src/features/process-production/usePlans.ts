@@ -128,6 +128,18 @@ export function usePlans(kind: Kind) {
     setResult(value);
     context.saved();
   }
+  async function reloadSubAssy(lot: string) {
+    const refreshed = await query.refetch({
+      throwOnError: true,
+      cancelRefetch: false,
+    });
+    const plan = refreshed.data?.find((row) => row.lot_no === lot);
+    if (!plan)
+      throw new Error(
+        "El plan ya no está disponible. Actualiza la tabla para consultarlo.",
+      );
+    return plan.sub_assy ?? null;
+  }
   function submit() {
     if (dirty || savingOrder.current) return;
     const issue = rangeIssue(draft);
@@ -171,6 +183,7 @@ export function usePlans(kind: Kind) {
     reorder,
     moveGroup,
     done,
+    reloadSubAssy,
     submit,
     reset,
     discard: () => {

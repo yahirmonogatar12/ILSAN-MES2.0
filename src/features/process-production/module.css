@@ -298,3 +298,16 @@
     flex-shrink: 0;
   }
 }
+.process-production-sub-assy {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.process-production-sub-assy .ui-field {
+  flex: 1 1 200px;
+}
+.process-production-sub-assy .button {
+  flex-shrink: 0;
+}

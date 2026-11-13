@@ -67,6 +67,8 @@ Los recorridos comprueban filtros, paginación predeterminada de 500, filtros po
 
 El cierre de inventario de Embarques se recorre con 1,033 partes. Se comprueban la distribución interna de datos, accuracy, preview e historial, la selección nativa del CSV, las descargas, la última fila virtualizada, el cambio de página y el `batchId` enviado al confirmar o cancelar. Un archivo inválido o cambiado bloquea la confirmación. El regreso conserva los filtros del inventario.
 
+La edición ASSY comprueba la recarga de sub-assy para dos lotes, uno sin PCB y otro con un valor anterior. El modal conserva cantidad y modelo capturados, la tabla recibe la PCB consultada y el guardado mantiene su contrato. El recorrido revisa los límites del modal y del documento en cada tamaño.
+
 `e2e/fixtures.ts` intercepta las APIs del backend, mantiene los cambios de la sesión de prueba y falla ante un endpoint sin contrato o un error de JavaScript o consola. La fecha del navegador queda fijada para que los rangos sean reproducibles. `e2e/fixtures/materials.xlsx` contiene una hoja pequeña para verificar descarga y lectura real del visor compartido.
 
 El informe HTML queda en `output/browser-report/`. Los errores conservan capturas y trazas en `output/browser-results/`. Se puede abrir una traza con `npx playwright show-trace <archivo.zip>`.
