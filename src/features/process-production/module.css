@@ -233,12 +233,9 @@
   text-align: center;
 }
 .process-production-plans .process-production-sequence {
-  background: #3498db;
+  background: var(--mes-accent);
   color: #fff;
   font-weight: 700;
-}
-.process-production-assy .process-production-sequence {
-  background: #e74c3c;
 }
 .process-production-plans .process-production-row-cancelled > td {
   background: #6c6c6c;

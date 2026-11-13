@@ -128,7 +128,7 @@ export function PlansPage({ kind }: { kind: Kind }) {
             className:
               row.status === "CANCELADO"
                 ? "process-production-row-cancelled"
-                : row._overtime
+                : kind === "ASSY" && row._overtime
                   ? "process-production-overtime"
                   : undefined,
           })}

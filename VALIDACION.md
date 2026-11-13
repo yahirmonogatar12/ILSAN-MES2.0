@@ -1,5 +1,17 @@
 # Validación local
 
+## Color de la secuencia de ASSY · 13 de noviembre de 2026
+
+- Se retiró la regla roja específica de la columna SEC. de ASSY. Los tres procesos utilizan la regla común con `var(--mes-accent)` para el fondo habitual de sus números de orden.
+- Las 67 pruebas del módulo aprobaron en cinco archivos. La compilación de producción, TypeScript y arquitectura aprobaron. Evidencia en `output/assy-sequence-color-tests.log` y `output/assy-sequence-color-build.log`.
+- Playwright CLI comprobó el azul de la columna SEC. en ASSY, IMT y SMT, en 1366×768 y 390×640, con respuestas HTTP controladas. También verificó las filas de tiempo extra y canceladas. Evidencia en `output/playwright/assy-sequence-color-browser.log` y las capturas `sequence-color-*.png`.
+
+## Color de los planes IMT y SMT · 13 de noviembre de 2026
+
+- `PlansPage` aplica el resaltado de tiempo extra a ASSY. Las pruebas de los tres procesos comprueban un plan que termina a las 20:30 y la presentación de una fila cancelada.
+- Las 67 pruebas del módulo aprobaron en cinco archivos. La compilación de producción, TypeScript y arquitectura aprobaron. Evidencia en `output/imt-smt-color-tests.log` y `output/imt-smt-color-build.log`.
+- Playwright CLI comprobó el color calculado de las celdas de ASSY, IMT y SMT en 1366×768 y 390×640 con respuestas HTTP controladas. Las seis combinaciones aprobaron. Evidencia en `output/playwright/imt-smt-color-browser.log` y las capturas `plan-color-*.png`.
+
 ## Transición estable de la carga inicial · 13 de noviembre de 2026
 
 - El salto procedía de sustituir el esqueleto genérico de la descarga por el de la tabla, con otra posición y cantidad de columnas. `InitialLoadingBoundary` conserva una sola instancia mientras carga el código y terminan las consultas iniciales. Los controles y datos se montan detrás de esa capa y se muestran juntos al finalizar.

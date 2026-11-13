@@ -11,6 +11,10 @@ Fork del comportamiento de las cinco pantallas originales a React, sin modificar
 
 Los controles y tablas son compartidos; el cálculo de avance real, asignación de SCAN, numeración, consumo y restricciones permanecen en el servidor. Las escrituras no se reintentan automáticamente. El drag-and-drop usa `DataTable.rowProps`, con flechas como alternativa de teclado/táctil y guardado explícito del orden.
 
+El resaltado rojo de filas por tiempo extra se aplica a los planes ASSY.
+
+El fondo habitual de la columna SEC. usa el color de acento del tema para los tres procesos.
+
 [Contratos y límites](../../../docs/CONTROL_PROCESO.md).
 
 `PlanGroups.tsx` recupera las franjas, totales y destinos de grupo del ASSY original, y las divisiones por línea de IMT/SMT. Compone `DataGrid.grouping`; los encabezados no cuentan como registros. `moveToGroup` conserva el movimiento local hasta guardar, valida la fecha y también atiende la alternativa de formulario.

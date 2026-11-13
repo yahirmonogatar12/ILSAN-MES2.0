@@ -29,6 +29,50 @@ function mount(path: string) {
 }
 describe("Flujos de Control de proceso", () => {
   it.each(["ASSY", "IMT", "SMT"] as const)(
+    "aplica el resaltado de tiempo extra según el proceso %s",
+    async (kind) => {
+      const base = adapter.createApi("demo");
+      const lot = `COLOR-${kind}`;
+      const plan = {
+        lot_no: lot,
+        working_date: defaults().start,
+        part_no: "EBR23966228",
+        line: kind === "ASSY" ? "M1" : kind === "IMT" ? "P1" : "SA",
+        group_no: 1,
+        sequence: 1,
+        plan_count: 1200,
+        uph: 100,
+        status: "PLAN",
+      };
+      vi.spyOn(adapter, "createApi").mockReturnValue({
+        ...base,
+        plans: vi.fn().mockResolvedValue([
+          plan,
+          {
+            ...plan,
+            lot_no: `${lot}-CANCELADO`,
+            sequence: 2,
+            status: "CANCELADO",
+          },
+        ]),
+      });
+      mount(`/proceso/produccion-${kind.toLowerCase()}`);
+      const table = await screen.findByRole("table", {
+        name: `Planes ${kind}`,
+      });
+      const row = within(table).getByText(lot, { exact: true }).closest("tr")!;
+      expect(within(row).getByText("20:30")).toBeInTheDocument();
+      expect(row.classList.contains("process-production-overtime")).toBe(
+        kind === "ASSY",
+      );
+      const cancelled = within(table)
+        .getByText(`${lot}-CANCELADO`, { exact: true })
+        .closest("tr");
+      expect(cancelled).toHaveClass("process-production-row-cancelled");
+      expect(cancelled).not.toHaveClass("process-production-overtime");
+    },
+  );
+  it.each(["ASSY", "IMT", "SMT"] as const)(
     "consulta el estado de %s sin permitir iniciar, pausar o terminar desde el plan",
     async (kind) => {
       const base = adapter.createApi("demo"),
