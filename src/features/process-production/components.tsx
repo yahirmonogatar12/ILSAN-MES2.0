@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
 import { useForm } from "@/shared/hooks/useForm";
 import {
   Alert,
@@ -14,49 +12,10 @@ import {
   SelectField,
   TextField,
   TextareaField,
-  useToast,
-  type TableColumn,
 } from "@/shared/ui";
-import { createApi } from "./api";
+import { makeColumns } from "./columns";
 import { fieldIssues, record, text } from "./model";
 import type { Field, Row, Spec } from "./types";
-export function useProcess() {
-  const auth = useAuth(),
-    api = useMemo(() => createApi(auth.mode), [auth.mode]),
-    client = useQueryClient(),
-    toast = useToast();
-  return {
-    ...auth,
-    api,
-    client,
-    key: (...parts: unknown[]) => ["process-production", auth.scope, ...parts],
-    saved: (message = "Cambios guardados.") => {
-      void client.invalidateQueries({
-        queryKey: ["process-production", auth.scope],
-      });
-      toast(message);
-    },
-  };
-}
-export function makeColumns(
-  specs: readonly Spec[],
-  sortable = true,
-): TableColumn<Row>[] {
-  const total = specs.reduce((n, spec) => n + spec[2], 0);
-  return specs.map(([id, header, size]) => ({
-    id,
-    header,
-    width: `${(size / total) * 100}%`,
-    cell: (row) => text(row[id]) || "—",
-    textValue: (row) => text(row[id]),
-    ...(sortable
-      ? {
-          sortValue: (row: Row) =>
-            typeof row[id] === "number" ? (row[id] as number) : text(row[id]),
-        }
-      : {}),
-  }));
-}
 export function Fields({
   fields,
   values,

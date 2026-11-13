@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { usePermission } from "@/core/auth/usePermission";
 import { ASSISTANT_PERMISSION, assistantKeys } from "@/core/assistant/config";
 import {

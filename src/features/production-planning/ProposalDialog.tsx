@@ -14,7 +14,8 @@ import {
   TabBar,
   TextareaField,
 } from "@/shared/ui";
-import { FormDialog, usePlanning } from "./components";
+import { FormDialog } from "./components";
+import { usePlanning } from "./usePlanning";
 import { makeColumns, proposalCapacity, rows, text, TURNOS } from "./model";
 import type {
   PivotFilters,

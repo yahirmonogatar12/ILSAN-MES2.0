@@ -13,7 +13,7 @@ import {
   Modal,
   TableToolbar,
 } from "@/shared/ui";
-import { columnsFor } from "./ResultsTable";
+import { columnsFor } from "./resultColumns";
 import { comparisonRows, compareFields, testDetail } from "./machineViews";
 import { text } from "./model";
 import { useResults } from "./useResults";

@@ -1,9 +1,5 @@
-import { useMemo } from "react";
 import { X } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
 import { useForm } from "@/shared/hooks/useForm";
-import { exportSpreadsheet } from "@/shared/lib/spreadsheet";
 import {
   Alert,
   Button,
@@ -17,29 +13,9 @@ import {
   SelectField,
   TextField,
   TextareaField,
-  useToast,
 } from "@/shared/ui";
-import { createPlanningApi } from "./api";
 import { makeColumns, object, text } from "./model";
 import type { Field, Row, Spec } from "./types";
-export function usePlanning() {
-  const auth = useAuth(),
-    client = useQueryClient(),
-    toast = useToast(),
-    api = useMemo(() => createPlanningApi(auth.mode), [auth.mode]);
-  return {
-    ...auth,
-    api,
-    client,
-    key: (...parts: unknown[]) => ["production-planning", auth.scope, ...parts],
-    saved: (message = "Cambios guardados.") => {
-      toast(message);
-      void client.invalidateQueries({
-        queryKey: ["production-planning", auth.scope],
-      });
-    },
-  };
-}
 export function FormDialog({
   title,
   description,
@@ -278,26 +254,4 @@ export function ReportDialog({
       </DialogFooter>
     </Modal>
   );
-}
-export async function exportRows(
-  name: string,
-  specs: readonly Spec[],
-  records: readonly Row[],
-) {
-  await exportSpreadsheet(`${name}.xlsx`, [
-    {
-      name: "Consulta",
-      rows: [
-        specs.map((spec) => spec[1]),
-        ...records.map((row) =>
-          specs.map(([key]) => {
-            const value = row[key];
-            return typeof value === "number" || typeof value === "boolean"
-              ? value
-              : text(value);
-          }),
-        ),
-      ],
-    },
-  ]);
 }

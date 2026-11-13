@@ -5,10 +5,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";
-import { useToast } from "@/shared/ui/Toast";
+import { useToast } from "@/shared/ui/useToast";
 import { createMaterialsApi } from "./api";
 import { decodeFilters, DEFAULT_FILTERS, materialKeys } from "./config";
 import { EMPTY_CATALOGS, type Filters, type Material } from "./types";

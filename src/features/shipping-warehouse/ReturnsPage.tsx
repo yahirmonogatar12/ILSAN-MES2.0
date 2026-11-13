@@ -17,17 +17,18 @@ import {
   type TableColumn,
 } from "@/shared/ui";
 import {
-  columnsFor,
   ExportAction,
   MutationDialog,
   SearchBar,
   Stats,
+} from "./components";
+import {
   useFilters,
   useListing,
   useWarehouse,
-  type Field,
   type Warehouse,
-} from "./components";
+} from "./hooks";
+import { columnsFor, type Field } from "./warehouseModel";
 import { DualLists } from "./DualLists";
 import { integer, number, returnRows, rowKey, text } from "./model";
 import type { Attachment, Row } from "./types";

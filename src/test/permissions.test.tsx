@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { PanelsTopLeft } from "lucide-react";
 import { describe, expect, it, vi } from "vitest";
-import { createQueryClient } from "@/app/providers";
+import { createQueryClient } from "@/app/queryClient";
 import { Workspace } from "@/app/workspace/Workspace";
 import { AuthProvider } from "@/core/auth/AuthProvider";
 import { createAuthGateway } from "@/core/auth/api";

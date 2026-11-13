@@ -15,7 +15,8 @@ import {
   TabBar,
   tabIds,
 } from "@/shared/ui";
-import { AreaBadges, columnsFor, StateBadge } from "./components";
+import { AreaBadges, StateBadge } from "./components";
+import { columnsFor } from "./columns";
 import { ORIGINS, STAGES } from "./model";
 import type {
   Component,

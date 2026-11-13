@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import type { ProfileUpdate } from "@/core/auth/types";
 import { useForm } from "@/shared/hooks/useForm";
 import {

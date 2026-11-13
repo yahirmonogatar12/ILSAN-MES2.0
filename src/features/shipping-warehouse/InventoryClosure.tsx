@@ -9,7 +9,8 @@ import {
   ProgressRing,
   TextField,
 } from "@/shared/ui";
-import { ExportAction, type Warehouse } from "./components";
+import { ExportAction } from "./components";
+import type { Warehouse } from "./hooks";
 import { number, rowKey, text } from "./model";
 import { closureHistoryColumns, closurePreviewColumns } from "./closureColumns";
 import { useInventoryClosure } from "./useInventoryClosure";

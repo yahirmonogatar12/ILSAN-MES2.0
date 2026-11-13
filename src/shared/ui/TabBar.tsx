@@ -1,18 +1,8 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { Button, IconButton } from "./Button";
+import { tabIds, type TabItem } from "./tabs";
 import "./tabs.css";
-
-export interface TabItem {
-  id: string;
-  label: string;
-  title?: string;
-  icon?: ReactNode;
-}
-export function tabIds(prefix: string, id: string) {
-  const key = encodeURIComponent(id);
-  return { tab: `${prefix}-tab-${key}`, panel: `${prefix}-panel-${key}` };
-}
 /** Controlled tabs: no routes, session, persistence or business dependencies. */
 export function TabBar({
   id,

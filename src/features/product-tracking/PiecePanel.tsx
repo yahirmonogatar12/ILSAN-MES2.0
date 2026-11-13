@@ -9,7 +9,8 @@ import {
   ExportButton,
   FilterBar,
 } from "@/shared/ui";
-import { PieceSummary, stageColumns } from "./columns";
+import { stageColumns } from "./columns";
+import { PieceSummary } from "./components";
 import { useTracking } from "./useTracking";
 import type { PieceStage } from "./types";
 

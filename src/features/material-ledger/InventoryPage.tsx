@@ -1,7 +1,7 @@
 import { useCallback, useId, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, RefreshCw } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
   Alert,
@@ -45,6 +45,7 @@ export default function InventoryPage() {
     (page, size, signal) => api.lots(applied, searches, page, size, signal),
     view === "detail",
   );
+  const resetTable = table.reset;
   const query = view === "summary" ? summary : table.query;
   const toast = useToast();
   const download = useMutation({
@@ -62,9 +63,9 @@ export default function InventoryPage() {
       setApplied(next);
       setSearches({});
       setView("detail");
-      table.reset();
+      resetTable();
     },
-    [applied, table.reset],
+    [applied, resetTable],
   );
   const columns = useMemo(
     () => summaryColumns(applied.use_dates === "true", openLots),

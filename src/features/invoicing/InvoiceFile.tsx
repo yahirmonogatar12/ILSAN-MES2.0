@@ -10,7 +10,7 @@ import {
   Modal,
   SpreadsheetPreview,
 } from "@/shared/ui";
-import { useInvoicing } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import type { InvoiceScope } from "./types";
 export function InvoiceFile({
   scope,

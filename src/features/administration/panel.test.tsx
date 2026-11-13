@@ -6,7 +6,7 @@ import { App } from "@/App";
 import { AppProviders } from "@/app/providers";
 import { allowsRoles } from "@/core/auth/usePermission";
 import { createPanelApi, auditQuery } from "./panelApi";
-import { auditData, auditDefaults, auditFilterIssue } from "./PanelAudit";
+import { auditData, auditDefaults, auditFilterIssue } from "./auditModel";
 import { PanelRoleForm } from "./PanelRoleForm";
 import type { PanelUser } from "./panelTypes";
 

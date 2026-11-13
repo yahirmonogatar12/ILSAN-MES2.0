@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as http from "@/core/http";
 import * as scripts from "@/shared/lib/loadScript";
-import { exportRows } from "./components";
+import { exportRows } from "./exportRows";
 import {
   INVOICES_EXPORT,
   PACKING_EXPORT,

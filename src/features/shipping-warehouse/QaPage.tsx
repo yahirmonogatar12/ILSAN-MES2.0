@@ -14,14 +14,12 @@ import {
   type TableColumn,
 } from "@/shared/ui";
 import {
-  columnsFor,
   ExportAction,
   SearchBar,
   Stats,
-  useFilters,
-  useWarehouse,
-  type Warehouse,
 } from "./components";
+import { useFilters, useWarehouse, type Warehouse } from "./hooks";
+import { columnsFor } from "./warehouseModel";
 import { DualLists } from "./DualLists";
 import { rowKey, text } from "./model";
 import type { Filters, Listing, QaKind, Row } from "./types";

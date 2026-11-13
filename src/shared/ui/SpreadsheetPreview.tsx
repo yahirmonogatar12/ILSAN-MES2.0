@@ -5,7 +5,8 @@ import { SelectField } from "./Fields";
 import { WorksheetTable } from "./table/DataTable";
 import { worksheetView } from "../lib/worksheet";
 import { Button } from "./Button";
-import { TabBar, tabIds } from "./TabBar";
+import { TabBar } from "./TabBar";
+import { tabIds } from "./tabs";
 import "./preview.css";
 
 /** Cell text only: never render workbook HTML, scripts or hyperlinks. */

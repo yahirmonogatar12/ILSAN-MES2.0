@@ -7,7 +7,7 @@ import {
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { usePermission } from "@/core/auth/usePermission";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { rangeIssue } from "@/shared/lib/date";

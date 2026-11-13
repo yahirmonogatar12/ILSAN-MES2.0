@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { EditableCell, useCellEditor } from "./EditableCell";
+import { EditableCell } from "./EditableCell";
+import { useCellEditor } from "./useCellEditor";
 
 function Cells({
   visible = true,

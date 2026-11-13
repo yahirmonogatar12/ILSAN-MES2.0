@@ -10,6 +10,9 @@ import type {
 import { ArtifactCard } from "./ArtifactCard";
 import { Visualizations } from "./Visualizations";
 import { labels } from "./i18n";
+
+const EMPTY_MESSAGES: Thread["messages"] = [];
+
 export function Messages({
   thread,
   api,
@@ -33,8 +36,7 @@ export function Messages({
   const follow = useRef(true);
   const previousFirst = useRef<string | null>(null);
   const t = labels(language);
-  const entries = thread?.messages ?? [];
-  const last = entries.at(-1);
+  const entries = thread?.messages ?? EMPTY_MESSAGES;
   useEffect(() => {
     const element = host.current;
     const first = entries[0]?.key ?? null;
@@ -45,13 +47,7 @@ export function Messages({
     previousFirst.current = first;
     if (element && follow.current && !prepended)
       element.scrollTop = element.scrollHeight;
-  }, [
-    thread?.conversation.public_id,
-    entries.length,
-    last?.content,
-    last?.artifacts.length,
-    last?.visualizations.length,
-  ]);
+  }, [thread?.conversation.public_id, entries]);
   const attached = new Set(
     entries.flatMap((message) =>
       message.artifacts.map((artifact) => artifact.id),

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Boxes, RefreshCw } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";
 import {

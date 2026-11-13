@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   auditDefaults,
   auditFilterIssue,
-} from "@/features/administration/PanelAudit";
+} from "@/features/administration/auditModel";
 import * as invoices from "@/features/invoicing/model";
 import * as areas from "@/features/material-areas/model";
 import { todayIso } from "@/features/material-ledger/config";

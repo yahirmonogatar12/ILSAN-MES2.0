@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { usePermission } from "@/core/auth/usePermission";
-import { exportRows, usePlanning } from "./components";
+import { exportRows } from "./exportRows";
+import { usePlanning } from "./usePlanning";
 import { orderDefaults, PO_SPECS, WO_SPECS, rangeIssue } from "./model";
 import type { Row } from "./types";
 export type OrderDialog =

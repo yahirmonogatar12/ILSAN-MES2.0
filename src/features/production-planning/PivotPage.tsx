@@ -20,7 +20,6 @@ import { usePivot } from "./usePivot";
 import { PivotDialogs } from "./PivotDialogs";
 import "./module.css";
 
-export { pivotRows } from "./pivot";
 export function PivotPage({ projection = false }: { projection?: boolean }) {
   const pivot = usePivot(projection);
   const {

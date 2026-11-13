@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
-import { createQueryClient } from "@/app/providers";
+import { createQueryClient } from "@/app/queryClient";
 import { AuthProvider } from "@/core/auth/AuthProvider";
 import { assistantKeys } from "@/core/assistant/config";
 import {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Files, History, Plus, RefreshCw } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { usePermission } from "@/core/auth/usePermission";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";

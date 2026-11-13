@@ -13,15 +13,13 @@ import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { AdjustmentDialog } from "./AdjustmentDialog";
 import { InvoiceReceipt } from "./InvoiceReceipt";
 import {
-  columnsFor,
   ExportAction,
   ListingCard,
   MutationDialog,
   Stats,
-  useListing,
-  useWarehouse,
-  type Warehouse,
 } from "./components";
+import { useListing, useWarehouse, type Warehouse } from "./hooks";
+import { columnsFor } from "./warehouseModel";
 import { integer, number, recordId, rowKey, text } from "./model";
 import type { Row } from "./types";
 

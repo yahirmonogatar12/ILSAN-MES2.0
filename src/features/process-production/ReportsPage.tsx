@@ -15,7 +15,8 @@ import {
   useClientTable,
   type FilterField,
 } from "@/shared/ui";
-import { makeColumns, useProcess } from "./components";
+import { makeColumns } from "./columns";
+import { useProcess } from "./useProcess";
 import {
   defaults,
   OPERATION_SPECS,

@@ -1,7 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { RefreshCw } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
 import { useForm } from "@/shared/hooks/useForm";
 import {
   ActionGroup,
@@ -18,61 +16,15 @@ import {
   SelectField,
   TextareaField,
   TextField,
-  useToast,
   type FilterField,
   type TableColumn,
 } from "@/shared/ui";
-import { createWarehouseApi } from "./api";
-import {
-  filtersFor,
-  formatQuantity,
-  number,
-  rangeError,
-  rowKey,
-  text,
-} from "./model";
+import { formatQuantity, rowKey, text } from "./model";
+import type { FilterState, ListState, Warehouse } from "./hooks";
+import type { Field } from "./warehouseModel";
 import type { Filters, ListKind, Row } from "./types";
 import "./module.css";
 
-export function useWarehouse() {
-  const auth = useAuth();
-  const client = useQueryClient();
-  const toast = useToast();
-  const api = useMemo(() => createWarehouseApi(auth.mode), [auth.mode]);
-  const scope = ["shipping-warehouse", auth.scope];
-  return {
-    api,
-    profile: auth.profile,
-    key: (...parts: unknown[]) => [...scope, ...parts],
-    saved: (result?: Row, fallback = "Cambios guardados.") => {
-      void client.invalidateQueries({ queryKey: scope });
-      toast(text(result?.message) || fallback);
-    },
-  };
-}
-export type Warehouse = ReturnType<typeof useWarehouse>;
-export function useFilters(kind: ListKind | "qa") {
-  const [defaults] = useState(() => filtersFor(kind));
-  const [draft, setDraft] = useState(defaults);
-  const [applied, setApplied] = useState(defaults);
-  const [error, setError] = useState("");
-  const change = (patch: Partial<Filters>) =>
-    setDraft((previous) => ({ ...previous, ...patch }));
-  const submit = (refresh?: () => void) => {
-    const issue = rangeError(draft);
-    setError(issue);
-    if (issue) return;
-    if (JSON.stringify(applied) === JSON.stringify(draft)) refresh?.();
-    else setApplied({ ...draft });
-  };
-  const reset = () => {
-    setDraft(defaults);
-    setApplied(defaults);
-    setError("");
-  };
-  return { defaults, draft, applied, error, change, submit, reset };
-}
-export type FilterState = ReturnType<typeof useFilters>;
 const all = { value: "", label: "Todos" };
 const moveOptions = [
   all,
@@ -169,37 +121,6 @@ export function SearchBar({
       )}
     </>
   );
-}
-export function useListing(warehouse: Warehouse, kind: ListKind) {
-  const filters = useFilters(kind);
-  const query = useQuery({
-    queryKey: warehouse.key(kind, filters.applied),
-    queryFn: ({ signal }) => warehouse.api.list(kind, filters.applied, signal),
-  });
-  return { filters, query };
-}
-export type ListState = ReturnType<typeof useListing>;
-export type ColumnSpec = readonly [
-  key: string,
-  label: string,
-  width: number,
-  quantity?: boolean,
-];
-export function columnsFor(specs: readonly ColumnSpec[]): TableColumn<Row>[] {
-  const total = specs.reduce((sum, spec) => sum + spec[2], 0);
-  return specs.map(([id, header, width, quantity]) => ({
-    id,
-    header,
-    width: (100 * width) / total + "%",
-    cell: (row) =>
-      row[id] == null || row[id] === ""
-        ? "—"
-        : quantity
-          ? formatQuantity(row[id])
-          : text(row[id]),
-    textValue: (row) => text(row[id]),
-    sortValue: (row) => (quantity ? number(row[id]) : text(row[id])),
-  }));
 }
 export function Stats({
   items,
@@ -323,32 +244,6 @@ export function ListingCard({
   );
 }
 
-export interface Field {
-  key: string;
-  label: string;
-  type?:
-    "date" | "datetime-local" | "time" | "number" | "password" | "textarea";
-  options?: readonly { value: string; label: string }[];
-  min?: number;
-  step?: number | "any";
-  required?: boolean;
-  readOnly?: boolean;
-  maxLength?: number;
-}
-export const deleteFields: Field[] = [
-  {
-    key: "password",
-    label: "Contraseña actual",
-    type: "password",
-    required: true,
-  },
-  {
-    key: "notes",
-    label: "Comentario de eliminación",
-    type: "textarea",
-    required: true,
-  },
-];
 export function Fields({
   fields,
   values,

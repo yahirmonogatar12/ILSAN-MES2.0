@@ -30,14 +30,14 @@ import "./materials.css";
 /** Composition only: definitions/state are in this feature; controls are shared. */
 export default function MaterialsPage() {
   const state = useMaterials();
-  const { dialog, setDialog } = state;
+  const { dialog, setDialog, openingCode, openRecord } = state;
   const columns = useMemo(
     () =>
       materialColumns({
-        openingCode: state.openingCode,
-        open: (record, action) => void state.openRecord(record, action),
+        openingCode,
+        open: (record, action) => void openRecord(record, action),
       }),
-    [state.openingCode, state.openRecord],
+    [openingCode, openRecord],
   );
   const rows = state.list.data?.records || [];
   const fields: FilterField<Filters>[] = [

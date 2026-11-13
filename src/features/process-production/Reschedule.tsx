@@ -11,7 +11,9 @@ import {
   Modal,
   type FilterField,
 } from "@/shared/ui";
-import { FormDialog, makeColumns, useProcess } from "./components";
+import { FormDialog } from "./components";
+import { makeColumns } from "./columns";
+import { useProcess } from "./useProcess";
 import { rangeIssue, text } from "./model";
 import type { Filters, Kind, Row } from "./types";
 export function Reschedule({

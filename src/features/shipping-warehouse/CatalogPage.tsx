@@ -12,15 +12,12 @@ import {
   type TableColumn,
 } from "@/shared/ui";
 import {
-  columnsFor,
-  deleteFields,
   ListingCard,
   MutationDialog,
   Stats,
-  useListing,
-  useWarehouse,
-  type Field,
 } from "./components";
+import { useListing, useWarehouse } from "./hooks";
+import { columnsFor, deleteFields, type Field } from "./warehouseModel";
 import { integer, recordId, text } from "./model";
 import type { Row } from "./types";
 const base = columnsFor([

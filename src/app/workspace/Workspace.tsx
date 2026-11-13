@@ -8,7 +8,7 @@ import {
   allowsRoles,
   usePermissions,
 } from "@/core/auth/usePermission";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import type { ModuleDefinition, SectionDefinition } from "@/core/modules/types";
 import type { RuntimeMode } from "@/core/runtime";
 import {

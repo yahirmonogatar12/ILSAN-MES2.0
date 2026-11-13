@@ -108,6 +108,7 @@ export function UploadDialog(props: UploadProps) {
     },
   });
   const invoice = props.kind === "invoice";
+  const invoiceScope = props.kind === "invoice" ? props.scope : null;
   const sync =
     preview && "sync" in preview && object(preview.sync) ? preview.sync : null;
   const tables = useMemo(() => {
@@ -118,7 +119,7 @@ export function UploadDialog(props: UploadProps) {
       : [];
     const specs: ColumnSpec[] = invoice
       ? [
-          ...(props.kind === "invoice" && props.scope === "ALMACEN"
+          ...(invoiceScope === "ALMACEN"
             ? [["pallet_no", "PALLET", 70] as ColumnSpec]
             : []),
           ...LINES,
@@ -179,13 +180,7 @@ export function UploadDialog(props: UploadProps) {
         }
       }
     return items;
-  }, [
-    preview,
-    invoice,
-    sync,
-    props.kind,
-    props.kind === "invoice" ? props.scope : null,
-  ]);
+  }, [preview, invoice, sync, invoiceScope]);
   const active = tables.find((item) => item.id === tab) || tables[0];
   const columns = useMemo(() => makeColumns(active.specs), [active.specs]);
   const blocked =

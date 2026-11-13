@@ -1,6 +1,6 @@
 import { ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/useAuth";
 import { allowsRoles, usePermission } from "../auth/usePermission";
 import type { PermissionRule } from "../auth/types";
 import { Card } from "@/shared/ui/Layout";

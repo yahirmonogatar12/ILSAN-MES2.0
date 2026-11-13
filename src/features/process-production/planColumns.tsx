@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ArrowDown, ArrowUp, Ban, MoveRight, Pencil } from "lucide-react";
 import { TableRowActions, type TableColumn } from "@/shared/ui";
-import { makeColumns } from "./components";
+import { makeColumns } from "./columns";
 import { lineName, PLAN_SPECS, text } from "./model";
 import type { Kind, Plan, PlanDialog } from "./types";
 

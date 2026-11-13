@@ -2,7 +2,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
-import { createQueryClient } from "@/app/providers";
+import { createQueryClient } from "@/app/queryClient";
 import { createAssistantApi } from "@/core/assistant/api";
 import { artifact } from "@/core/assistant/model";
 import { saveDownload } from "@/core/http";

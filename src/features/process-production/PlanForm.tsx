@@ -11,7 +11,8 @@ import {
   Modal,
   TextField,
 } from "@/shared/ui";
-import { Fields, useProcess } from "./components";
+import { Fields } from "./components";
+import { useProcess } from "./useProcess";
 import { fieldIssues, planFields, planPayload, text } from "./model";
 import type { Kind, Row } from "./types";
 export function PlanForm({
@@ -66,6 +67,7 @@ export function PlanForm({
   });
   const busy = form.pending || subAssyForm.pending;
   const part = text(form.values.part_no).trim();
+  const initialPart = text(initial.part_no).trim();
   const revisions = useQuery({
     queryKey: context.key("revisions", part),
     queryFn: ({ signal }) => context.api.revisions(part, signal),
@@ -106,11 +108,11 @@ export function PlanForm({
         label: "Revisión BOM asignada",
         type: "select",
         options,
-        readOnly: part !== text(initial.part_no).trim(),
+        readOnly: part !== initialPart,
       });
     }
     return fields;
-  }, [kind, editing, revisions.data, form.values, initial.part_no, part]);
+  }, [kind, editing, revisions.data, form.values, initialPart, part]);
   return (
     <Modal
       title={`${editing ? "Editar" : "Nuevo"} plan ${kind}${editing ? ` · ${text(initial.lot_no)}` : ""}`}

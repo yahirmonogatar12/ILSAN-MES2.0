@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { useToast } from "@/shared/ui";
 import { createAdministrationApi } from "./api";
 import { administrationKeys as keys } from "./config";

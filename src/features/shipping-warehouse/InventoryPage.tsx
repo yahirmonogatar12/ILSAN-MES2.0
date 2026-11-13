@@ -2,12 +2,11 @@ import { useState } from "react";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { Page } from "@/shared/ui";
 import {
-  columnsFor,
   ListingCard,
   Stats,
-  useListing,
-  useWarehouse,
 } from "./components";
+import { useListing, useWarehouse } from "./hooks";
+import { columnsFor } from "./warehouseModel";
 import { InventoryClosure } from "./InventoryClosure";
 import { number } from "./model";
 const columns = columnsFor([

@@ -14,17 +14,14 @@ import {
   type TableColumn,
 } from "@/shared/ui";
 import {
-  columnsFor,
-  deleteFields,
   ExportAction,
   ListingCard,
   MutationDialog,
   SearchBar,
   Stats,
-  useListing,
-  useWarehouse,
-  type Warehouse,
 } from "./components";
+import { useListing, useWarehouse, type Warehouse } from "./hooks";
+import { columnsFor, deleteFields } from "./warehouseModel";
 import { integer, movementKey, rowKey, text } from "./model";
 import type { Row } from "./types";
 

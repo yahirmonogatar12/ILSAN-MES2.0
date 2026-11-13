@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
-import { useProcess } from "./components";
+import { useProcess } from "./useProcess";
 import { defaults, rangeIssue } from "./model";
 import { planGrouping } from "./PlanGroups";
 import {
@@ -12,6 +12,8 @@ import {
   orderPayload,
 } from "./timeline";
 import type { Kind, Plan, PlanDialog, Row } from "./types";
+
+const EMPTY_PLANS: Plan[] = [];
 
 export function usePlans(kind: Kind) {
   const context = useProcess();
@@ -29,7 +31,7 @@ export function usePlans(kind: Kind) {
     queryFn: ({ signal }) => context.api.plans(kind, applied, signal),
     refetchOnWindowFocus: false,
   });
-  const source = localOrder ?? query.data ?? [];
+  const source = localOrder ?? query.data ?? EMPTY_PLANS;
   const calculated = useMemo(
     () => calculateTimeline(kind, source, applied.view),
     [kind, source, applied.view],

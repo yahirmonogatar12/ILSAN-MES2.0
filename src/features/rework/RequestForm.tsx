@@ -82,15 +82,17 @@ export function RequestForm({
     [programming.data],
   );
   const enabled = form.values.programmingEnabled;
+  const programmingPart = form.values.programmingPart;
+  const setValues = form.setValues;
   useEffect(() => {
     if (
       !enabled ||
       !programming.isSuccess ||
       programming.isFetching ||
-      form.values.programmingPart === part
+      programmingPart === part
     )
       return;
-    form.setValues((previous) =>
+    setValues((previous) =>
       !previous.programmingEnabled ||
       normalizePart(previous.np_destino) !== part
         ? previous
@@ -109,8 +111,8 @@ export function RequestForm({
     programming.isSuccess,
     programming.isFetching,
     groups,
-    form.values.programmingPart,
-    form.setValues,
+    programmingPart,
+    setValues,
   ]);
   const updateComponent = (
     key: string,

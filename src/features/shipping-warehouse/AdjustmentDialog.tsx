@@ -12,14 +12,9 @@ import {
   SelectField,
   TextField,
 } from "@/shared/ui";
-import {
-  columnsFor,
-  ExportAction,
-  Fields,
-  Stats,
-  type Field,
-  type Warehouse,
-} from "./components";
+import { ExportAction, Fields, Stats } from "./components";
+import type { Warehouse } from "./hooks";
+import { columnsFor, type Field } from "./warehouseModel";
 import { integer, rowKey, text } from "./model";
 import type { BatchPreview, Row } from "./types";
 

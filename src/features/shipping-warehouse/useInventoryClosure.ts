@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
 import { records } from "./api";
-import type { Warehouse } from "./components";
+import type { Warehouse } from "./hooks";
 import { recordId, text } from "./model";
 import type { BatchPreview, Row } from "./types";
 

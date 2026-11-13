@@ -1,5 +1,7 @@
 import { Button, type TableColumn } from "@/shared/ui";
-import { columnsFor, ExportAction, type Warehouse } from "./components";
+import { ExportAction } from "./components";
+import type { Warehouse } from "./hooks";
+import { columnsFor } from "./warehouseModel";
 import { formatQuantity, recordId, text } from "./model";
 import type { Row } from "./types";
 

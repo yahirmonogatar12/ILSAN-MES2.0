@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { useForm } from "@/shared/hooks/useForm";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";

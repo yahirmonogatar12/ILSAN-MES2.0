@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./useAuth";
 import type { PermissionRule, PermissionSnapshot, Profile } from "./types";
 import type { RuntimeMode } from "../runtime";
 

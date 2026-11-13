@@ -18,7 +18,7 @@ import {
   TextField,
   type TableColumn,
 } from "@/shared/ui";
-import { columnsFor } from "./ResultsTable";
+import { columnsFor } from "./resultColumns";
 import { number, object, text } from "./model";
 import { useResults } from "./useResults";
 import { closureColumns } from "./views";

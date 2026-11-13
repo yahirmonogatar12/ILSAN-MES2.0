@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/core/http";
 import { assistantKeys } from "@/core/assistant/config";
@@ -235,6 +235,11 @@ export function useChatStream(api: AssistantApi, scope: string) {
       }
     }
   }
+  const clearRetry = useCallback(() => {
+    last.current = null;
+    setCanRetry(false);
+    setError("");
+  }, []);
   return {
     pending,
     canRetry,
@@ -253,10 +258,6 @@ export function useChatStream(api: AssistantApi, scope: string) {
       };
       return send(previous.conversation, payload, previous.files, true);
     },
-    clearRetry: () => {
-      last.current = null;
-      setCanRetry(false);
-      setError("");
-    },
+    clearRetry,
   };
 }

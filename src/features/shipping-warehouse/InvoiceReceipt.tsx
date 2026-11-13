@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePermission } from "@/core/auth/usePermission";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { useForm } from "@/shared/hooks/useForm";
 import {
   Button,
@@ -14,7 +14,9 @@ import {
   TextField,
   type TableColumn,
 } from "@/shared/ui";
-import { columnsFor, Stats, type Warehouse } from "./components";
+import { Stats } from "./components";
+import type { Warehouse } from "./hooks";
+import { columnsFor } from "./warehouseModel";
 import { number, receiptLines, recordId, rowKey, text } from "./model";
 import type { Row } from "./types";
 

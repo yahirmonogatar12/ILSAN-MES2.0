@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "@/App";
 import { AppProviders } from "@/app/providers";
 import { modules } from "@/app/registry";
-import { createPurchaseApi } from "./api";
+import { createInvoiceApi, createPurchaseApi } from "./api";
 import { UploadDialog } from "./UploadDialog";
 import { UploadPanel } from "./UploadPanel";
 import type { DataRow } from "./types";
@@ -28,6 +28,38 @@ function mount(path: string, demo = true) {
   );
 }
 describe("Facturas sobre la base compartida", () => {
+  it("recalcula las columnas de la vista previa cuando cambia el scope", () => {
+    const api = createInvoiceApi("demo");
+    const props = {
+      kind: "invoice" as const,
+      api,
+      prepared: {
+        upload: {
+          file: new File(["invoice"], "invoice.xlsx"),
+          numero_invoice: "INV-TEST",
+          tipo: "LG",
+        },
+        preview: {
+          numero_invoice: "INV-TEST",
+          lines: [{ pallet_no: "PALLET-01", part_no: "EBR00000001" }],
+          warnings: [],
+          duplicado: null,
+        },
+      },
+      onClose: vi.fn(),
+      onLoaded: vi.fn(),
+    };
+    const view = render(<UploadDialog {...props} scope="EMBARQUES" />);
+
+    expect(screen.queryByRole("columnheader", { name: "PALLET" })).toBeNull();
+
+    view.rerender(<UploadDialog {...props} scope="ALMACEN" />);
+
+    expect(
+      screen.getByRole("columnheader", { name: "PALLET" }),
+    ).toBeInTheDocument();
+  });
+
   it("conserva la captura lateral y envía el modo del botón, con una sola confirmación del archivo revisado", async () => {
     const file = new File(["original"], "lista-original.xlsx");
     const api = {

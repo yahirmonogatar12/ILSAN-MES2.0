@@ -1,6 +1,7 @@
 import { Clock3, Pencil, Trash2 } from "lucide-react";
 import { Button, TableRowActions, type TableColumn } from "@/shared/ui";
 import { formatCost, hasCost } from "./model";
+import { CostValues } from "./CostValues";
 import type { Material, VendorCost } from "./types";
 
 interface MaterialActions {
@@ -135,19 +136,6 @@ export function materialColumns(
       ),
     },
   ];
-}
-export function CostValues({ costs }: { costs: readonly VendorCost[] }) {
-  if (!costs.some(hasCost))
-    return <span className="no-cost">Sin registrar</span>;
-  return (
-    <span className="material-costs">
-      {costs.map((cost) => (
-        <span className="cost-value" key={cost.vendedor} title={cost.vendedor}>
-          {formatCost(cost)}
-        </span>
-      ))}
-    </span>
-  );
 }
 export const historyColumns: TableColumn<VendorCost>[] = [
   { id: "vendor", header: "Vendedor", cell: (row) => row.vendedor },

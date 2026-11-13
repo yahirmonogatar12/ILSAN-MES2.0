@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { CheckboxField, DataGrid, TabBar } from "@/shared/ui";
-import { makeColumns } from "./components";
+import { makeColumns } from "./columns";
 import { record, rows, text } from "./model";
 import type { ProposalDiff, Row } from "./types";
 export function ProposalComparison({

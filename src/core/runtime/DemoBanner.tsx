@@ -1,4 +1,4 @@
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/useAuth";
 export function DemoBanner() {
   const { mode } = useAuth();
   if (mode !== "demo") return null;

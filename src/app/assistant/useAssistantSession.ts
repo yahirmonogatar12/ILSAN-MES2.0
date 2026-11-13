@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { useActiveModule } from "@/core/modules/ActiveModule";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { usePermission } from "@/core/auth/usePermission";
 import { createAssistantApi } from "@/core/assistant/api";
 import {
@@ -50,6 +50,8 @@ export function useAssistantSession(open: boolean) {
   const operation = useRef<AbortController | null>(null);
   const resumed = useRef(false);
   const stream = useChatStream(api, scope);
+  const streamPending = stream.pending;
+  const clearRetry = stream.clearRetry;
   const bootstrap = useQuery({
     queryKey: assistantKeys.bootstrap(scope),
     queryFn: ({ signal }) => api.bootstrap(signal),
@@ -73,16 +75,19 @@ export function useAssistantSession(open: boolean) {
       operation.current?.abort();
     };
   }, []);
-  function select(conversation: Conversation | null) {
-    if (lock.current || stream.pending) return;
-    selectedRef.current = conversation?.public_id ?? null;
-    setSelected(selectedRef.current);
-    setFiles([]);
-    setCanLoadOlder(true);
-    stream.clearRetry();
-    setError("");
-    if (conversation) setLanguage(conversation.language);
-  }
+  const select = useCallback(
+    (conversation: Conversation | null) => {
+      if (lock.current || streamPending) return;
+      selectedRef.current = conversation?.public_id ?? null;
+      setSelected(selectedRef.current);
+      setFiles([]);
+      setCanLoadOlder(true);
+      clearRetry();
+      setError("");
+      if (conversation) setLanguage(conversation.language);
+    },
+    [clearRetry, setLanguage, streamPending],
+  );
   useEffect(() => {
     if (!open || resumed.current || !history.isSuccess) return;
     resumed.current = true;
@@ -90,7 +95,7 @@ export function useAssistantSession(open: boolean) {
       (conversation) => conversation.status === "active",
     );
     if (current && !selectedRef.current) select(current);
-  }, [open, history.data, history.isSuccess]);
+  }, [open, history.data, history.isSuccess, select]);
   async function run(action: (signal: AbortSignal) => Promise<void>) {
     if (lock.current || stream.pending) return false;
     lock.current = true;

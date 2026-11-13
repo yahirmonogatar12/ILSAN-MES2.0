@@ -5,7 +5,7 @@ import {
   type SetStateAction,
 } from "react";
 import { useCellEditor } from "@/shared/ui";
-import type { usePlanning } from "./components";
+import type { usePlanning } from "./usePlanning";
 import { cellInteger, object, text } from "./model";
 import type { PivotRow, Row } from "./types";
 

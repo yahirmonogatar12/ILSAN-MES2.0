@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useMemo,
   type ReactNode,
@@ -9,22 +7,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";
 import { SESSION_EXPIRED_EVENT, userScope, type RuntimeMode } from "../runtime";
 import { createAuthGateway } from "./api";
-import type { AuthGateway, Profile, ProfileUpdate } from "./types";
-
-interface AuthState {
-  mode: RuntimeMode;
-  profile: Profile | null;
-  scope: string;
-  checking: boolean;
-  error: Error | null;
-  gateway: AuthGateway;
-  switchMode: (mode: RuntimeMode) => void;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  saveProfile: (values: ProfileUpdate) => Promise<void>;
-  retry: () => Promise<unknown>;
-}
-const AuthContext = createContext<AuthState | null>(null);
+import type { Profile, ProfileUpdate } from "./types";
+import { AuthContext } from "./useAuth";
 const decodeMode = (value: unknown): RuntimeMode =>
   value === "demo" ? "demo" : "live";
 
@@ -106,9 +90,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-export function useAuth(): AuthState {
-  const value = useContext(AuthContext);
-  if (!value) throw new Error("useAuth requiere AuthProvider.");
-  return value;
 }

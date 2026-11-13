@@ -13,7 +13,8 @@ import {
   Pagination,
   type FilterField,
 } from "@/shared/ui";
-import { ResultNotice, useInvoicing } from "./components";
+import { ResultNotice } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import { VALUATION, makeColumns } from "./columns";
 import { EMPTY_ROWS, amount, text, valuationDefaults } from "./model";
 import { BackfillDialog } from "./BackfillDialog";

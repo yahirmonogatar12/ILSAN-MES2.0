@@ -1,4 +1,3 @@
-import { rangeIssue as dateRangeIssue, localDate } from "@/shared/lib/date";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Activity, Eye, RefreshCw } from "lucide-react";
@@ -20,42 +19,10 @@ import {
   type TableColumn,
 } from "@/shared/ui";
 import { PanelLayout } from "./PanelLayout";
+import { auditData, auditDefaults, auditFilterIssue } from "./auditModel";
 import { panelKeys, usePanel } from "./usePanel";
-import type { AuditFilters, AuditRecord, PanelApi } from "./panelTypes";
+import type { AuditRecord, PanelApi } from "./panelTypes";
 
-export function auditDefaults(): AuditFilters {
-  const date = localDate();
-  return {
-    fecha_inicio: date,
-    fecha_fin: date,
-    usuario: "",
-    modulo: "",
-    accion: "",
-    resultado: "",
-    limite: "500",
-  };
-}
-export function auditFilterIssue(filters: AuditFilters) {
-  return dateRangeIssue(filters.fecha_inicio, filters.fecha_fin);
-}
-/** Audit can contain JSON strings or parsed objects, including historical records. */
-export function auditData(value: unknown): string {
-  let parsed = value;
-  if (typeof parsed === "string") {
-    try {
-      parsed = JSON.parse(parsed);
-    } catch {
-      return String(value) || "—";
-    }
-  }
-  if (parsed === null || parsed === undefined || parsed === "") return "—";
-  return JSON.stringify(
-    parsed,
-    (key, item) =>
-      /password|contrase[nñ]a|token|secret/i.test(key) ? "••••••" : item,
-    2,
-  );
-}
 function AuditDetail({
   id,
   api,

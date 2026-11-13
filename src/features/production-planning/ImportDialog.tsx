@@ -14,7 +14,7 @@ import {
   SpreadsheetPreview,
   TextField,
 } from "@/shared/ui";
-import { usePlanning } from "./components";
+import { usePlanning } from "./usePlanning";
 import {
   fileIssue,
   makeColumns,

@@ -66,6 +66,9 @@ export function FileManager({
     mutationFn: (file: FileRecord) => api.download(id, file),
   });
   const busy = upload.isPending || deletion.isPending;
+  const downloadFile = download.mutate;
+  const downloadPending = download.isPending;
+  const resetDeletion = deletion.reset;
   useEffect(() => {
     onBusy?.(busy);
     return () => onBusy?.(false);
@@ -97,8 +100,8 @@ export function FileManager({
                 id: "download",
                 label: `Descargar ${row.nombre_original}`,
                 icon: <Download size={15} />,
-                disabled: download.isPending,
-                onClick: () => download.mutate(row),
+                disabled: downloadPending,
+                onClick: () => downloadFile(row),
               },
               ...(canCreate && status !== "APPROVED"
                 ? [
@@ -109,7 +112,7 @@ export function FileManager({
                       tone: "danger" as const,
                       disabled: busy,
                       onClick: () => {
-                        deletion.reset();
+                        resetDeletion();
                         setRemove(row);
                       },
                     },
@@ -120,7 +123,7 @@ export function FileManager({
         ),
       },
     ],
-    [canCreate, status, busy, download.isPending],
+    [canCreate, status, busy, downloadFile, downloadPending, resetDeletion],
   );
   return (
     <section className="bom-files">

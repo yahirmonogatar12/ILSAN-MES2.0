@@ -1,12 +1,6 @@
-import { useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Download } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
 import { useForm } from "@/shared/hooks/useForm";
-import {
-  exportSpreadsheet,
-  type SpreadsheetCell,
-} from "@/shared/lib/spreadsheet";
 import {
   Alert,
   Button,
@@ -16,72 +10,12 @@ import {
   FormMessages,
   Modal,
   TextareaField,
-  useToast,
 } from "@/shared/ui";
-import { createInvoiceApi, createPurchaseApi, createValuationApi } from "./api";
+import { exportRows, type ExportSheet } from "./exportRows";
 import { amount, object, text } from "./model";
 import type { ColumnSpec } from "./columns";
 import type { DataRow } from "./types";
 
-export function useInvoicing() {
-  const { mode, scope } = useAuth();
-  const client = useQueryClient();
-  const toast = useToast();
-  const invoices = useMemo(() => createInvoiceApi(mode), [mode]);
-  const purchases = useMemo(() => createPurchaseApi(mode), [mode]);
-  const valuation = useMemo(() => createValuationApi(mode), [mode]);
-  const key = (...parts: unknown[]) => ["invoicing", scope, ...parts];
-  function saved(message = "Operación completada.") {
-    toast(message);
-    // Do not report a completed write as failed if its subsequent refresh fails.
-    void client.invalidateQueries({ queryKey: ["invoicing", scope] });
-  }
-  return { mode, scope, client, invoices, purchases, valuation, key, saved };
-}
-export interface ExportSheet {
-  name: string;
-  specs: readonly ColumnSpec[];
-  rows: readonly DataRow[];
-}
-export async function exportRows(
-  name: string,
-  columns: readonly ColumnSpec[],
-  rows: readonly DataRow[],
-  extraSheets: readonly ExportSheet[] = [],
-) {
-  const sheetRows = (
-    specs: readonly ColumnSpec[],
-    data: readonly DataRow[],
-  ): SpreadsheetCell[][] => [
-    specs.map((column) => column[1]),
-    ...data.map((row) =>
-      specs.map(([key, , , numeric]) => {
-        const value =
-          key === "archivo_nombre"
-            ? row.archivo_nombre || row.archivo_ruta
-            : key === "pallet_no"
-              ? row.pallet_no || row.pallet_no_original
-              : row[key];
-        return value == null
-          ? ""
-          : numeric &&
-              text(value).trim() !== "" &&
-              Number.isFinite(Number(value))
-            ? Number(value)
-            : typeof value === "boolean"
-              ? value
-              : text(value);
-      }),
-    ),
-  ];
-  await exportSpreadsheet(`${name}.xlsx`, [
-    { name: "Consulta", rows: sheetRows(columns, rows) },
-    ...extraSheets.map((sheet) => ({
-      name: sheet.name,
-      rows: sheetRows(sheet.specs, sheet.rows),
-    })),
-  ]);
-}
 export function ExportButton({
   name,
   specs,

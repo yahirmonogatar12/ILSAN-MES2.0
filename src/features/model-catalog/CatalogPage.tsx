@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { normalizeSearch } from "@/shared/lib/text";
@@ -60,6 +60,7 @@ export function CatalogPage({ kind }: { kind: CatalogKind }) {
     mutationFn: (record: ModelRow) => api.remove(record),
     onSuccess: saved,
   });
+  const resetRemove = remove.reset;
   const columns = useMemo<TableColumn<ModelRow>[]>(
     () => [
       ...(list.data?.columns || []).filter(visibleColumn).map((column) => ({
@@ -91,7 +92,7 @@ export function CatalogPage({ kind }: { kind: CatalogKind }) {
                 disabled:
                   !ready || (kind === "models" && !record.id && !record.ID),
                 onClick: () => {
-                  remove.reset();
+                  resetRemove();
                   setDialog({ type: "delete", record });
                 },
               },
@@ -100,7 +101,7 @@ export function CatalogPage({ kind }: { kind: CatalogKind }) {
         ),
       },
     ],
-    [list.data?.columns, ready, kind],
+    [list.data?.columns, ready, kind, resetRemove],
   );
   return (
     <Page className="model-catalog-module" banner={<DemoBanner />}>

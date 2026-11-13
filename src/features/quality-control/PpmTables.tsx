@@ -3,20 +3,7 @@ import type { Row } from "./types";
 import type { PpmPeriod, PpmReport } from "./reportTypes";
 import { reportColumns } from "./reportColumns";
 import { number, text } from "./model";
-
-const metrics = [
-  ["inspected", "TTL PDN"],
-  ["target", "TARGET"],
-  ["defects", "TTL DEFECT"],
-  ["ppm", "PPM"],
-] as const;
-export function pivotRows(periods: PpmPeriod[]) {
-  return metrics.map(([key, label]) => ({
-    item: label,
-    metric: key,
-    ...Object.fromEntries(periods.map((period) => [period.key, period[key]])),
-  }));
-}
+import { pivotRows, weeklyRows } from "./reportRows";
 function periodColumns(
   periods: { key: string; label: string }[],
   leading: TableColumn<Row>[],
@@ -106,24 +93,6 @@ export function PpmTopTable({ report }: { report: PpmReport }) {
       layout="fixed"
       minWidth={680}
     />
-  );
-}
-export function weeklyRows(report: PpmReport) {
-  return report.weekly.rows.flatMap((group) =>
-    metrics
-      .filter(([key]) => key !== "target")
-      .map(([key, label], index) => ({
-        line: group.line,
-        item: label,
-        metric: key,
-        index,
-        ...Object.fromEntries(
-          group.weeks.flatMap((week) => [
-            [week.key, week[key]],
-            ["target:" + week.key, week.target],
-          ]),
-        ),
-      })),
   );
 }
 export function PpmWeeklyTable({ report }: { report: PpmReport }) {

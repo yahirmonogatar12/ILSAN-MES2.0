@@ -11,7 +11,8 @@ import {
   MasterDetailLayout,
   type FilterField,
 } from "@/shared/ui";
-import { ExportButton, ResultNotice, useInvoicing } from "./components";
+import { ExportButton, ResultNotice } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import { PURCHASES, makeColumns } from "./columns";
 import { EMPTY_ROWS, dateIssue, purchaseDefaults, text } from "./model";
 import { PurchaseDetail } from "./PurchaseDetail";

@@ -4,15 +4,20 @@ interface Props {
   fallback: (error: Error, reset: () => void) => ReactNode;
   resetKey?: string;
 }
+interface State {
+  error: Error | null;
+  resetKey?: string;
+}
 /** Isolates unexpected render errors; the application chooses recovery behavior. */
-export class ErrorBoundary extends Component<Props, { error: Error | null }> {
-  state = { error: null as Error | null };
+export class ErrorBoundary extends Component<Props, State> {
+  state: State = { error: null, resetKey: this.props.resetKey };
+  static getDerivedStateFromProps(props: Props, state: State) {
+    return props.resetKey !== state.resetKey
+      ? { error: null, resetKey: props.resetKey }
+      : null;
+  }
   static getDerivedStateFromError(error: Error) {
     return { error };
-  }
-  componentDidUpdate(previous: Props) {
-    if (previous.resetKey !== this.props.resetKey && this.state.error)
-      this.setState({ error: null });
   }
   render() {
     return this.state.error

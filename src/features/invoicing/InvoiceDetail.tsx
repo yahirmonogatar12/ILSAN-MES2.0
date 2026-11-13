@@ -19,8 +19,8 @@ import {
   ActionDialog,
   ExportButton,
   ResultNotice,
-  useInvoicing,
 } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import {
   LINES,
   LINKS,

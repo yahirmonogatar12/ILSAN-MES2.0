@@ -1,5 +1,5 @@
 import { Button, PercentageBar, type TableColumn } from "@/shared/ui";
-import { columnsFor } from "./ResultsTable";
+import { columnsFor } from "./resultColumns";
 import { number, text } from "./model";
 import type { TestKind } from "./machineViews";
 import type { Row, ViewSpec } from "./types";

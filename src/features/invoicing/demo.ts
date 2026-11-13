@@ -718,7 +718,7 @@ export const demoValuation: ValuationApi = {
     return structuredClone([...groups.values()]);
   },
   async export(filters) {
-    const { exportRows } = await import("./components");
+    const { exportRows } = await import("./exportRows");
     const { VALUATION } = await import("./columns");
     await exportRows(
       "valorizacion_demostracion",

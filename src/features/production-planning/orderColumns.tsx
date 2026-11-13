@@ -100,6 +100,8 @@ export function useOrderColumns(state: OrdersController) {
       list.isError,
       canCreateWO.data,
       canCreateWO.isError,
+      setSelected,
+      setDialog,
     ],
   );
   return columns;

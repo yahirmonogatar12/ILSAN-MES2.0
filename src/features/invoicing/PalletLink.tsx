@@ -11,7 +11,7 @@ import {
   SelectField,
   TextField,
 } from "@/shared/ui";
-import { useInvoicing } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import { amount, object, text } from "./model";
 import type { DataRow, InvoiceScope } from "./types";
 export function PalletLink({

@@ -8,7 +8,9 @@ import {
   DialogFooter,
   Modal,
 } from "@/shared/ui";
-import { FormDialog, makeColumns, useProcess } from "./components";
+import { FormDialog } from "./components";
+import { makeColumns } from "./columns";
+import { useProcess } from "./useProcess";
 import { ProposalComparison } from "./ProposalComparison";
 import { assyPayloads } from "./requests";
 import type { AssyToolProps, Proposal, ProposalDiff, Row } from "./types";

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/ui";
-import { exportRows, usePlanning } from "./components";
+import { exportRows } from "./exportRows";
+import { usePlanning } from "./usePlanning";
 import { object, rangeIssue, text, week } from "./model";
 import { pivotExport, pivotRows } from "./pivot";
 import { usePivotCells } from "./usePivotCells";

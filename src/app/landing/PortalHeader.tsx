@@ -13,7 +13,7 @@ import {
   Settings,
   UserRound,
 } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { useForm } from "@/shared/hooks/useForm";
 import {
   Alert,

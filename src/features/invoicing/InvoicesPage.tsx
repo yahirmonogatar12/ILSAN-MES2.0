@@ -14,7 +14,8 @@ import {
   TableRowActions,
   type FilterField,
 } from "@/shared/ui";
-import { ActionDialog, ExportButton, useInvoicing } from "./components";
+import { ActionDialog, ExportButton } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import {
   INVOICES,
   INVOICES_EXPORT,

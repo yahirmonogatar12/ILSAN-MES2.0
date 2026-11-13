@@ -1,4 +1,4 @@
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { useLocation } from "react-router-dom";
 import { ModuleCatalogProvider } from "@/core/modules/ModuleCatalog";
 import { modules, sections } from "./app/registry";

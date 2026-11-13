@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
-import { useModuleCatalog } from "@/core/modules/ModuleCatalog";
+import { useModuleCatalog } from "@/core/modules/useModuleCatalog";
 import {
   Alert,
   Button,

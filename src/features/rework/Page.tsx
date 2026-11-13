@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, Plus, RefreshCw } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { DemoBanner } from "@/core/runtime/DemoBanner";
 import {
   Alert,
@@ -17,7 +17,8 @@ import {
   type TableColumn,
 } from "@/shared/ui";
 import { createReworkApi } from "./api";
-import { AreaBadges, columnsFor, ListSummary, StateBadge } from "./components";
+import { AreaBadges, ListSummary, StateBadge } from "./components";
+import { columnsFor } from "./columns";
 import { Detail } from "./Detail";
 import { areaText, defaultFilters, filterIssue, STATES } from "./model";
 import { RequestForm } from "./RequestForm";

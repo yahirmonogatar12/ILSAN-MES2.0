@@ -10,7 +10,7 @@ import {
   ppmDefaults,
   ppmReport,
 } from "./reportModel";
-import { pivotRows, weeklyRows } from "./PpmTables";
+import { pivotRows, weeklyRows } from "./reportRows";
 import type { Row } from "./types";
 
 afterEach(() => vi.restoreAllMocks());

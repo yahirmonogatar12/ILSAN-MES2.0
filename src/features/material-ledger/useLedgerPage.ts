@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import { DEFAULT_PAGE_SIZE } from "@/shared/ui";
 import type { LedgerPage } from "./types";
 /** One remote paging controller for histories and inventory lots. */

@@ -17,8 +17,8 @@ import {
   ActionDialog,
   ExportButton,
   ResultNotice,
-  useInvoicing,
 } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import { PURCHASE_LINES, PURCHASE_LINKS, makeColumns } from "./columns";
 import { PurchaseFiles } from "./PurchaseFiles";
 import { text } from "./model";

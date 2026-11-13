@@ -14,7 +14,7 @@ import {
   PanelLeft,
   X,
 } from "lucide-react";
-import { useAuth } from "@/core/auth/AuthProvider";
+import { useAuth } from "@/core/auth/useAuth";
 import type { ModuleDefinition, SectionDefinition } from "@/core/modules/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";

@@ -1,15 +1,6 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import type { ModuleDefinition, SectionDefinition } from "./types";
-import type { PermissionRule } from "../auth/types";
-
-export interface ModulePermission {
-  id: string;
-  title: string;
-  section: string;
-  group: string;
-  permission: PermissionRule;
-}
-const Catalog = createContext<readonly ModulePermission[]>([]);
+import { ModuleCatalogContext } from "./useModuleCatalog";
 /** Presentation metadata only: no feature imports or screen preloading. */
 export function ModuleCatalogProvider({
   modules,
@@ -39,6 +30,9 @@ export function ModuleCatalogProvider({
       ),
     [modules, sections],
   );
-  return <Catalog.Provider value={catalog}>{children}</Catalog.Provider>;
+  return (
+    <ModuleCatalogContext.Provider value={catalog}>
+      {children}
+    </ModuleCatalogContext.Provider>
+  );
 }
-export const useModuleCatalog = () => useContext(Catalog);

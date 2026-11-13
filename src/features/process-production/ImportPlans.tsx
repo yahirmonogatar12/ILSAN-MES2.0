@@ -10,7 +10,7 @@ import {
   SpreadsheetPreview,
   TextField,
 } from "@/shared/ui";
-import { useProcess } from "./components";
+import { useProcess } from "./useProcess";
 import { validDate } from "./model";
 import type { Kind, Row } from "./types";
 export function ImportPlans({

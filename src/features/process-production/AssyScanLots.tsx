@@ -9,7 +9,9 @@ import {
   FilterBar,
   Modal,
 } from "@/shared/ui";
-import { FormDialog, makeColumns, useProcess } from "./components";
+import { FormDialog } from "./components";
+import { makeColumns } from "./columns";
+import { useProcess } from "./useProcess";
 import { text } from "./model";
 import { assyPayloads } from "./requests";
 import { ASSY_DATE_FIELDS, useAssyFilters } from "./useAssyFilters";

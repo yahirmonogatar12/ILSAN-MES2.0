@@ -9,7 +9,7 @@ import {
   Modal,
   SelectField,
 } from "@/shared/ui";
-import { useInvoicing } from "./components";
+import { useInvoicing } from "./useInvoicing";
 import { makeColumns, reserveWidth } from "./columns";
 import { PurchaseFile } from "./InvoiceFile";
 import type { DataRow } from "./types";
