@@ -1,5 +1,9 @@
 import { useEffect, useId, useMemo, useState } from "react";
-import { spreadsheetEngine, type Workbook } from "../lib/spreadsheet";
+import {
+  spreadsheetEngine,
+  validateSpreadsheetSize,
+  type Workbook,
+} from "../lib/spreadsheet";
 import { Alert, Loading } from "./Feedback";
 import { SelectField } from "./Fields";
 import { WorksheetTable } from "./table/DataTable";
@@ -28,8 +32,13 @@ export function SpreadsheetPreview({
     setError(null);
     void (async () => {
       try {
+        validateSpreadsheetSize(blob.size);
         const engine = await spreadsheetEngine();
-        const result = engine.read(await blob.arrayBuffer(), {
+        if (!alive) return;
+        const buffer = await blob.arrayBuffer();
+        if (!alive) return;
+        validateSpreadsheetSize(buffer.byteLength);
+        const result = engine.read(buffer, {
           type: "array",
           cellHTML: false,
           cellFormula: false,

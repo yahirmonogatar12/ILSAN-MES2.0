@@ -29,6 +29,37 @@ const initial: Thread = {
   messages: [],
   artifacts: [],
 };
+function storedThread(status = "complete"): Thread {
+  return {
+    ...initial,
+    messages: [
+      {
+        id: 10,
+        key: "10",
+        client_message_id: payload.client_message_id,
+        role: "user",
+        content: payload.content,
+        status: "complete",
+        created_at: null,
+        attachments: files,
+        artifacts: [],
+        visualizations: [],
+      },
+      {
+        id: 11,
+        key: "11",
+        client_message_id: null,
+        role: "assistant",
+        content: status === "complete" ? "Respuesta guardada" : "",
+        status,
+        created_at: null,
+        attachments: [],
+        artifacts: [],
+        visualizations: [],
+      },
+    ],
+  };
+}
 function setup(overrides: Partial<AssistantApi>) {
   const client = createQueryClient();
   client.setQueryData(
@@ -115,7 +146,10 @@ describe("assistant streaming lifecycle", () => {
       .fn<AssistantApi["send"]>()
       .mockRejectedValueOnce(new Error("Connection lost"))
       .mockRejectedValueOnce(new ApiError("Processed", 409));
-    const thread = vi.fn().mockResolvedValue(stored);
+    const thread = vi
+      .fn()
+      .mockResolvedValueOnce(initial)
+      .mockResolvedValue(stored);
     const view = setup({ send, thread });
     await act(() => view.result.current.send("chat", payload, files));
     expect(send).toHaveBeenCalledOnce();
@@ -124,7 +158,7 @@ describe("assistant streaming lifecycle", () => {
       "request-1",
       "request-1",
     ]);
-    expect(thread).toHaveBeenCalledOnce();
+    expect(thread).toHaveBeenCalledTimes(2);
     expect(
       view.client.getQueryData<Thread>(
         assistantKeys.thread("live:first", "chat"),
@@ -132,19 +166,195 @@ describe("assistant streaming lifecycle", () => {
     ).toEqual(stored.messages);
     expect(view.result.current.canRetry).toBe(false);
   });
-  it("assigns a new id on explicit retry after server acknowledgment", async () => {
+  it("recovers a completed acknowledged reply without generating another request", async () => {
     const send = vi
       .fn<AssistantApi["send"]>()
       .mockImplementation(async (_id, _payload, receive) => {
-        receive({ type: "ack", userId: 1, assistantId: 2 });
+        receive({ type: "ack", userId: 10, assistantId: 11 });
         throw new Error("Connection lost");
       });
-    const view = setup({ send });
+    const thread = vi.fn().mockResolvedValue(storedThread());
+    const view = setup({ send, thread });
     await act(() => view.result.current.send("chat", payload, files));
     await act(() => view.result.current.retry());
-    expect(send.mock.calls[1][1].client_message_id).not.toBe("request-1");
-    expect(send.mock.calls[1][1].file_refs).toEqual(["file-1"]);
-    expect(send).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenCalledOnce();
+    expect(thread).toHaveBeenCalledOnce();
+    expect(view.result.current.canRetry).toBe(false);
+    expect(
+      view.client.getQueryData<Thread>(
+        assistantKeys.thread("live:first", "chat"),
+      )?.messages,
+    ).toEqual(storedThread().messages);
+  });
+  it("recovers an existing reply when the ACK was lost", async () => {
+    const send = vi
+      .fn<AssistantApi["send"]>()
+      .mockRejectedValue(new Error("Connection lost"));
+    const thread = vi.fn().mockResolvedValue(storedThread());
+    const view = setup({ send, thread });
+    await act(() => view.result.current.send("chat", payload, files));
+    await act(() => view.result.current.retry());
+    expect(send).toHaveBeenCalledOnce();
+    expect(view.result.current.canRetry).toBe(false);
+  });
+  it("checks a streaming reply without creating another request or losing partial text", async () => {
+    const send = vi
+      .fn<AssistantApi["send"]>()
+      .mockImplementation(async (_id, _payload, receive) => {
+        receive({ type: "ack", userId: 10, assistantId: 11 });
+        receive({ type: "delta", text: "Texto parcial" });
+        throw new Error("Connection lost");
+      });
+    const thread = vi.fn().mockResolvedValue(storedThread("streaming"));
+    const view = setup({ send, thread });
+    await act(() => view.result.current.send("chat", payload, files));
+    await act(() => view.result.current.retry());
+    await act(() => view.result.current.retry());
+    expect(send).toHaveBeenCalledOnce();
+    expect(thread).toHaveBeenCalledTimes(2);
+    expect(view.result.current.canRetry).toBe(true);
+    expect(view.result.current.error).toContain("todavía está procesando");
+    expect(
+      view.client.getQueryData<Thread>(
+        assistantKeys.thread("live:first", "chat"),
+      )?.messages[1].content,
+    ).toBe("Texto parcial");
+  });
+  it.each(["failed", "cancelled", "interrupted"])(
+    "creates a new id only after the server confirms status %s",
+    async (status) => {
+      const send = vi
+        .fn<AssistantApi["send"]>()
+        .mockImplementationOnce(async (_id, _payload, receive) => {
+          receive({ type: "ack", userId: 10, assistantId: 11 });
+          throw new Error("Connection lost");
+        })
+        .mockImplementationOnce(async (_id, _payload, receive) => {
+          receive({ type: "ack", userId: 12, assistantId: 13 });
+          receive({
+            type: "done",
+            messageId: 13,
+            artifacts: [],
+            visualizations: [],
+          });
+        });
+      const thread = vi.fn().mockResolvedValue(storedThread(status));
+      const view = setup({ send, thread });
+      await act(() => view.result.current.send("chat", payload, files));
+      await act(() => view.result.current.retry());
+      expect(thread).toHaveBeenCalledOnce();
+      expect(send.mock.calls[1][1]).toEqual({
+        ...payload,
+        client_message_id: expect.any(String),
+      });
+      expect(send.mock.calls[1][1].client_message_id).not.toBe(
+        payload.client_message_id,
+      );
+      expect(thread.mock.invocationCallOrder[0]).toBeLessThan(
+        send.mock.invocationCallOrder[1],
+      );
+      expect(send).toHaveBeenCalledTimes(2);
+    },
+  );
+  it("keeps the original identity when a failed reply has no acknowledged association", async () => {
+    const send = vi
+      .fn<AssistantApi["send"]>()
+      .mockRejectedValue(new Error("Connection lost"));
+    const view = setup({
+      send,
+      thread: vi.fn().mockResolvedValue(storedThread("failed")),
+    });
+    await act(() => view.result.current.send("chat", payload, files));
+    await act(() => view.result.current.retry());
+    expect(send).toHaveBeenCalledOnce();
+    expect(view.result.current.canRetry).toBe(true);
+    expect(view.result.current.error).toContain("solicitud original");
+  });
+  it("uses the acknowledged reply id and retrieves a page outside the latest history", async () => {
+    const recent: Thread = {
+      ...initial,
+      messages: storedThread().messages.map((message) => ({
+        ...message,
+        id: message.id + 100,
+        key: String(message.id + 100),
+        client_message_id: null,
+        content: "Otro turno",
+      })),
+    };
+    const send = vi
+      .fn<AssistantApi["send"]>()
+      .mockImplementation(async (_id, _payload, receive) => {
+        receive({ type: "ack", userId: 10, assistantId: 11 });
+        throw new Error("Connection lost");
+      });
+    const thread = vi
+      .fn()
+      .mockResolvedValueOnce(recent)
+      .mockResolvedValueOnce(storedThread());
+    const view = setup({ send, thread });
+    await act(() => view.result.current.send("chat", payload, files));
+    await act(() => view.result.current.retry());
+    expect(thread.mock.calls[1]).toEqual(["chat", expect.any(AbortSignal), 12]);
+    expect(send).toHaveBeenCalledOnce();
+    expect(view.result.current.canRetry).toBe(false);
+    expect(
+      view.client
+        .getQueryData<Thread>(assistantKeys.thread("live:first", "chat"))
+        ?.messages.map((message) => message.id),
+    ).toEqual([10, 11, 110, 111]);
+  });
+  it("preserves a failed read for explicit retry without resending a message", async () => {
+    const send = vi
+      .fn<AssistantApi["send"]>()
+      .mockImplementation(async (_id, _payload, receive) => {
+        receive({ type: "ack", userId: 10, assistantId: 11 });
+        throw new Error("Connection lost");
+      });
+    const thread = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("History unavailable"))
+      .mockResolvedValue(storedThread());
+    const view = setup({ send, thread });
+    await act(() => view.result.current.send("chat", payload, files));
+    await act(() => view.result.current.retry());
+    expect(send).toHaveBeenCalledOnce();
+    expect(view.result.current.error).toBe("History unavailable");
+    await act(() => view.result.current.retry());
+    expect(send).toHaveBeenCalledOnce();
+    expect(view.result.current.canRetry).toBe(false);
+  });
+  it("serializes recovery and cancels it without writing late private data", async () => {
+    let finish!: (value: Thread) => void;
+    const send = vi
+      .fn<AssistantApi["send"]>()
+      .mockRejectedValue(new Error("Connection lost"));
+    const thread = vi.fn<AssistantApi["thread"]>().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const view = setup({ send, thread });
+    await act(() => view.result.current.send("chat", payload, files));
+    let recovery!: Promise<void>;
+    act(() => {
+      recovery = view.result.current.retry();
+    });
+    await waitFor(() => expect(thread).toHaveBeenCalledOnce());
+    await act(() => view.result.current.retry());
+    expect(thread).toHaveBeenCalledOnce();
+    const cached = structuredClone(
+      view.client.getQueryData(assistantKeys.thread("live:first", "chat")),
+    );
+    const signal = thread.mock.calls[0][1];
+    view.unmount();
+    expect(signal?.aborted).toBe(true);
+    finish(storedThread());
+    await recovery;
+    expect(send).toHaveBeenCalledOnce();
+    expect(
+      view.client.getQueryData(assistantKeys.thread("live:first", "chat")),
+    ).toEqual(cached);
   });
   it("aborts on session unmount and discards late events", async () => {
     let signal!: AbortSignal,

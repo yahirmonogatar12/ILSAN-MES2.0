@@ -238,6 +238,7 @@ test("chat receives workspace context, survives tab changes and previews generat
   await expect(
     preview.getByRole("cell", { name: "QA-001", exact: true }),
   ).toBeVisible();
+  expect(await page.evaluate(() => window.XLSX?.version)).toBe("0.20.3");
   await preview.getByRole("button", { name: "Cerrar", exact: true }).click();
   await chat.getByRole("button", { name: "Cerrar ventana" }).click();
   await projection(page);

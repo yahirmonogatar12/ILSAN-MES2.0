@@ -69,6 +69,8 @@ El cierre de inventario de Embarques se recorre con 1,033 partes. Se comprueban 
 
 La edición ASSY comprueba la recarga de sub-assy para dos lotes, uno sin PCB y otro con un valor anterior. El modal conserva cantidad y modelo capturados, la tabla recibe la PCB consultada y el guardado mantiene su contrato. El recorrido revisa los límites del modal y del documento en cada tamaño.
 
+La recuperación del chat comprueba que una conexión interrumpida recupere una respuesta completada y consulte una respuesta en curso conservando un solo POST. El visor rechaza un Excel mayor de 20 MiB antes de solicitar el motor. El recorrido de Excel existente comprueba la versión real cargada en el navegador.
+
 `e2e/fixtures.ts` intercepta las APIs del backend, mantiene los cambios de la sesión de prueba y falla ante un endpoint sin contrato o un error de JavaScript o consola. La fecha del navegador queda fijada para que los rangos sean reproducibles. `e2e/fixtures/materials.xlsx` contiene una hoja pequeña para verificar descarga y lectura real del visor compartido.
 
 El informe HTML queda en `output/browser-report/`. Los errores conservan capturas y trazas en `output/browser-results/`. Se puede abrir una traza con `npx playwright show-trace <archivo.zip>`.
@@ -77,7 +79,7 @@ El workflow de GitHub ejecuta `npm ci`, `npm run check`, `npm run format:check`,
 
 ## Límites de las pruebas
 
-Vitest usa jsdom, con cuatro workers de threads y aislamiento por archivo. La espera de consultas asíncronas de Testing Library es de cinco segundos para permitir la compilación inicial de rutas lazy en equipos Windows ocupados. No se reintentan ni se omiten pruebas. Su preparación simula `showModal`, que no dispone de la capa modal nativa del navegador. La contención de foco, el scroll, los overlays y el diseño se revisan además en navegador real.
+Vitest usa jsdom para componentes y Node para las pruebas del recurso SheetJS y la configuración de Vite, con cuatro workers de threads y aislamiento por archivo. La espera de consultas asíncronas de Testing Library es de cinco segundos para permitir la compilación inicial de rutas lazy en equipos Windows ocupados. No se reintentan ni se omiten pruebas. Su preparación simula `showModal`, que no dispone de la capa modal nativa del navegador. La contención de foco, el scroll, los overlays y el diseño se revisan además en navegador real.
 
 En la prueba de importación ECO, jsdom no sincroniza la validez interna del archivo requerido con el `FileList` de `userEvent.upload`: se envía el evento del formulario y se comprueba además la validación del dominio. La selección y el envío nativos se verificaron separadamente en navegador real, con un XLSX local y adaptador demo. Esto no valida el análisis del Excel por openpyxl ni la escritura de un ECO real.
 

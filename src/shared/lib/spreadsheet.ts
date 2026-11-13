@@ -1,11 +1,16 @@
 import { loadScript } from "./loadScript";
 
+export const SPREADSHEET_VERSION = "0.20.3";
+export const SPREADSHEET_SCRIPT = "/vendor/xlsx-0.20.3.full.min.js";
+export const MAX_SPREADSHEET_BYTES = 20 * 1024 * 1024;
+
 export type SpreadsheetCell = string | number | boolean | null;
 export interface Workbook {
   SheetNames: string[];
   Sheets: Record<string, Record<string, unknown>>;
 }
 interface SpreadsheetEngine {
+  version: string;
   read(buffer: ArrayBuffer, options: Record<string, unknown>): Workbook;
   writeFile(workbook: Workbook, filename: string): void;
   write(workbook: Workbook, options: Record<string, unknown>): ArrayBuffer;
@@ -37,9 +42,19 @@ declare global {
 }
 /** Optional local engine. No network/CDN dependency or initial bundle import. */
 export async function spreadsheetEngine() {
-  await loadScript("/vendor/xlsx.full.min.js");
-  if (!window.XLSX) throw new Error("No se pudo cargar el lector de Excel.");
+  await loadScript(SPREADSHEET_SCRIPT);
+  if (window.XLSX?.version !== SPREADSHEET_VERSION)
+    throw new Error(
+      "No se pudo cargar la versión actual del lector de Excel. Recarga la página.",
+    );
   return window.XLSX;
+}
+/** Check before loading the engine or allocating the file's ArrayBuffer. */
+export function validateSpreadsheetSize(size: number) {
+  if (!Number.isSafeInteger(size) || size <= 0 || size > MAX_SPREADSHEET_BYTES)
+    throw new Error(
+      "La vista previa de Excel admite archivos con datos de hasta 20 MB.",
+    );
 }
 export async function exportSpreadsheet(
   name: string,

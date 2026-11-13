@@ -1,0 +1,2 @@
+# Preserve the upstream release bytes used by the integrity check.
+public/vendor/xlsx-0.20.3.full.min.js -text

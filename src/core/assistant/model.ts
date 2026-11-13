@@ -180,7 +180,7 @@ export function fileIssue(file: File): string {
     return "El archivo debe contener datos y pesar hasta 20 MB.";
   return "";
 }
-export function mergeById<T extends { id: string }>(
+export function mergeById<T extends { id: string | number }>(
   current: T[],
   next: T[],
 ): T[] {

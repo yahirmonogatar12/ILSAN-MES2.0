@@ -2,6 +2,8 @@
 
 El backend y las tablas no se modifican. El frontend usa las rutas actuales mediante el proxy `/backend` de Vite, conservando la cookie de sesión.
 
+El ejemplo versionado `.env.example` define `MES_API_TARGET=http://127.0.0.1:5000`, que también es el valor predeterminado del proxy de desarrollo y preview. Copiarlo a `.env.local` permite configurar el servidor de cada computadora. Reiniciar Vite después de cambiarlo. El servidor de producción configura su propio proxy del mismo origen.
+
 **Facturas** incorpora Invoice Almacén / Embarques, Valorización de inventario y Lista de compras. Los adaptadores consumen `/api/material_admin/invoices`, `/inventory/valuation` y `/compras` con los ámbitos, campos multipart y permisos originales. Previsualización y confirmación son pasos separados; no se reinterpretan archivos ni se recalcula inventario real en React. Ver [contratos y límites de Facturas](FACTURAS.md).
 
 Los cuatro módulos administrativos de **Control de material** consumen `/api/material_admin/history/:tipo` y `/api/material_admin/inventory/*`, con paginación `limit`/`offset`, filtros remotos `cf_` y exportadores Excel existentes. No utilizan el inventario de embarques ni realizan movimientos de almacén. [Contrato completo](MOVIMIENTOS_MATERIAL.md).

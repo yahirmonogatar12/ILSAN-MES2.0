@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   // Only the frontend development server sees this URL. No database secrets.
-  const target = env.MES_API_TARGET || "http://192.168.1.10:80";
+  const target = env.MES_API_TARGET || "http://127.0.0.1:5000";
   const original = {
     target,
     changeOrigin: true,

@@ -263,6 +263,7 @@ describe("contratos de Facturas con el backend original", () => {
     const append = vi.fn();
     const write = vi.fn();
     window.XLSX = {
+      version: "0.20.3",
       utils: {
         book_new: () => ({ SheetNames: [], Sheets: {} }),
         aoa_to_sheet: (values: unknown) => ({ values }),

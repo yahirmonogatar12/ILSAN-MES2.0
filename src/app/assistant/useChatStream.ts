@@ -13,12 +13,14 @@ import type {
   UploadedFile,
 } from "@/core/assistant/types";
 import { clientId } from "@/shared/lib/id";
+import { recoverChat } from "./chatRecovery";
 
 interface Attempt {
   conversation: string;
   payload: SendRequest;
   files: UploadedFile[];
   accepted: boolean;
+  assistantId?: number;
 }
 export function useChatStream(api: AssistantApi, scope: string) {
   const client = useQueryClient();
@@ -36,11 +38,35 @@ export function useChatStream(api: AssistantApi, scope: string) {
       active.current?.abort();
     };
   }, []);
+  async function recover(attempt: Attempt, controller: AbortController) {
+    const result = await recoverChat(api, attempt, controller.signal);
+    controller.signal.throwIfAborted();
+    if (!alive.current) throw new DOMException("Session ended", "AbortError");
+    attempt.accepted ||= result.accepted;
+    if (!result.accepted && attempt.accepted) return result;
+    const key = assistantKeys.thread(scope, attempt.conversation);
+    client.setQueryData<Thread>(key, (current) => {
+      const previous = new Map(
+        current?.messages.map((message) => [message.id, message]),
+      );
+      return {
+        ...result.thread,
+        messages: result.thread.messages.map((message) => {
+          const partial = previous.get(message.id);
+          return message.status === "streaming" &&
+            !message.content &&
+            partial?.content
+            ? { ...message, content: partial.content }
+            : message;
+        }),
+      };
+    });
+    return result;
+  }
   async function send(
     conversation: string,
     payload: SendRequest,
     files: UploadedFile[],
-    retry = false,
   ) {
     if (active.current) return;
     const controller = new AbortController();
@@ -119,6 +145,7 @@ export function useChatStream(api: AssistantApi, scope: string) {
         switch (event.type) {
           case "ack":
             attempt.accepted = true;
+            attempt.assistantId = event.assistantId;
             update((thread) => ({
               ...thread,
               messages: thread.messages.map((message) =>
@@ -187,27 +214,22 @@ export function useChatStream(api: AssistantApi, scope: string) {
     } catch (cause) {
       if (!alive.current) return;
       if (controller.signal.aborted) edit({ status: "interrupted" });
-      else if (cause instanceof ApiError && cause.status === 409 && retry) {
+      else if (cause instanceof ApiError && cause.status === 409) {
         attempt.accepted = true;
         try {
-          const stored = await api.thread(conversation, controller.signal);
-          const index = stored.messages.findIndex(
-            (message) =>
-              message.client_message_id === payload.client_message_id,
-          );
-          const answer = index >= 0 ? stored.messages[index + 1] : undefined;
-          done = answer?.role === "assistant" && answer.status === "complete";
-          client.setQueryData(key, stored);
+          const result = await recover(attempt, controller);
+          done = result.answer?.status === "complete";
           if (!done)
             setError(
-              "El servidor ya recibió este mensaje. Puedes revisar la respuesta o reintentar.",
+              "El servidor ya recibió este mensaje. Reintenta para recuperar su respuesta.",
             );
         } catch (refreshError) {
-          setError(
-            refreshError instanceof Error
-              ? refreshError.message
-              : "No se pudo recuperar la conversación.",
-          );
+          if (alive.current && !controller.signal.aborted)
+            setError(
+              refreshError instanceof Error
+                ? refreshError.message
+                : "No se pudo recuperar la conversación.",
+            );
         }
       } else {
         edit({ status: "failed" });
@@ -240,6 +262,59 @@ export function useChatStream(api: AssistantApi, scope: string) {
     setCanRetry(false);
     setError("");
   }, []);
+  async function retry() {
+    const previous = last.current;
+    if (!previous || active.current) return;
+    const controller = new AbortController();
+    active.current = controller;
+    setPending(true);
+    setCanRetry(false);
+    setError("");
+    setProgress("Recuperando la respuesta original…");
+    let payload: SendRequest | null = null;
+    let done = false;
+    try {
+      await client.cancelQueries({
+        queryKey: assistantKeys.thread(scope, previous.conversation),
+        exact: true,
+      });
+      controller.signal.throwIfAborted();
+      const stored = await recover(previous, controller);
+      done = stored.answer?.status === "complete";
+      if (done) {
+        last.current = null;
+        void client.invalidateQueries({
+          queryKey: assistantKeys.bootstrap(scope),
+        });
+      } else if (stored.failed) {
+        payload = { ...previous.payload, client_message_id: clientId() };
+      } else if (!previous.accepted) {
+        payload = previous.payload;
+      } else {
+        setError(
+          stored.answer?.status === "streaming"
+            ? "El servidor todavía está procesando la solicitud original. Reintenta para consultar su estado."
+            : "El servidor recibió la solicitud original. Revisa la conversación o reintenta para recuperar su respuesta.",
+        );
+      }
+    } catch (cause) {
+      if (alive.current && !controller.signal.aborted)
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "No se pudo recuperar la respuesta original.",
+        );
+    } finally {
+      if (active.current === controller) active.current = null;
+      if (alive.current) {
+        setPending(false);
+        setProgress("");
+        setCanRetry(!done);
+      }
+    }
+    if (payload && alive.current && !controller.signal.aborted)
+      await send(previous.conversation, payload, previous.files);
+  }
   return {
     pending,
     canRetry,
@@ -247,17 +322,7 @@ export function useChatStream(api: AssistantApi, scope: string) {
     progress,
     send,
     stop: () => active.current?.abort(),
-    retry: () => {
-      const previous = last.current;
-      if (!previous || active.current) return Promise.resolve();
-      const payload = {
-        ...previous.payload,
-        client_message_id: previous.accepted
-          ? clientId()
-          : previous.payload.client_message_id,
-      };
-      return send(previous.conversation, payload, previous.files, true);
-    },
+    retry,
     clearRetry,
   };
 }

@@ -60,7 +60,11 @@ Se procesan confirmaciones, texto incremental, avances de herramientas, archivos
 
 Un envío activo bloquea el siguiente. El cierre del panel conserva la respuesta en curso. Detener, cerrar la sesión o revocar el permiso aborta la conexión.
 
-Un reintento manual conserva el UUID cuando el servidor todavía no confirmó la aceptación. Si el servidor responde 409, se recupera la conversación para reconciliar el mensaje recibido. Después de una aceptación confirmada, el reintento usa un UUID nuevo. Los adjuntos y el contexto permanecen asociados al intento.
+Un reintento manual consulta primero la conversación para recuperar la respuesta original. Si recibió ACK, utiliza el identificador exacto de la respuesta y consulta su página de historial cuando quedó fuera de los últimos 100 mensajes. Conserva el texto parcial mientras el servidor sigue procesando y permite volver a consultar su estado.
+
+Una respuesta completada se recupera desde el historial. Si el servidor confirma que la respuesta identificada por ACK terminó en `failed`, `cancelled` o `interrupted`, el reintento explícito inicia otro envío con UUID nuevo. Mientras el estado original sea incierto se conserva su identidad. Cuando el servidor todavía no recibió el mensaje, se vuelve a enviar el UUID original y un 409 recupera el historial. Los adjuntos y el contexto permanecen asociados al intento. Un error al recuperar el historial permite reintentar la lectura.
+
+`chatRecovery.ts` concentra la identificación de la respuesta y la recuperación de su página. El bloqueo de operaciones también cubre esta consulta, que se cancela al desmontar la sesión.
 
 Los archivos generados usan rutas construidas desde su identificador. Excel y CSV reutilizan `SpreadsheetPreview`, las imágenes utilizan `ImageViewer` y los demás documentos utilizan `FilePreview`. La descarga se cancela al abandonar su vista y descarta respuestas tardías.
 

@@ -45,6 +45,8 @@ Copiar `.env.example` a `.env.local` y definir la dirección del backend existen
 MES_API_TARGET=http://127.0.0.1:5000
 ```
 
+El proxy de desarrollo y preview usa `http://127.0.0.1:5000` por defecto. Para un MES en otra computadora, configurar `MES_API_TARGET` con la dirección de ese servidor en `.env.local`.
+
 Reiniciar Vite y entrar con una cuenta MES autorizada. El frontend utiliza el formulario de login y la cookie existentes; no copiar aquí MySQL, `SECRET_KEY` ni secretos del servidor. Este proyecto no inicia ni modifica el backend. Las operaciones realizadas en modo real sí actúan sobre sus datos según los permisos actuales.
 
 ## Cómo se reutiliza
