@@ -124,6 +124,22 @@ test("oversized Excel is rejected before loading the parser", async ({
 }, testInfo) => {
   mes.allowAssistant = true;
   const vendor: string[] = [];
+  // Exercise the browser's size guard without allocating a 200 MiB test file.
+  await page.addInitScript(() => {
+    const originalSize = Object.getOwnPropertyDescriptor(
+      Blob.prototype,
+      "size",
+    )!.get!;
+    Object.defineProperty(Blob.prototype, "size", {
+      configurable: true,
+      get(this: Blob) {
+        return this.type ===
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ? 200 * 1024 * 1024 + 1
+          : originalSize.call(this);
+      },
+    });
+  });
   page.on("request", (request) => {
     if (request.url().includes("/vendor/xlsx")) vendor.push(request.url());
   });
@@ -134,7 +150,7 @@ test("oversized Excel is rejected before loading the parser", async ({
         contentType:
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers: { "Content-Disposition": 'attachment; filename="large.xlsx"' },
-        body: Buffer.alloc(20 * 1024 * 1024 + 1),
+        body: Buffer.alloc(1),
       }),
   );
   const chat = await openChat(page);
@@ -148,7 +164,7 @@ test("oversized Excel is rejected before loading the parser", async ({
   });
   await expect(
     preview.getByText(
-      "La vista previa de Excel admite archivos con datos de hasta 20 MB.",
+      "La vista previa de Excel admite archivos con datos de hasta 200 MB.",
       { exact: true },
     ),
   ).toBeVisible();

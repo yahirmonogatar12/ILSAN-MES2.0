@@ -69,7 +69,7 @@ El cierre de inventario de Embarques se recorre con 1,033 partes. Se comprueban 
 
 La edición ASSY comprueba la recarga de sub-assy para dos lotes, uno sin PCB y otro con un valor anterior. El modal conserva cantidad y modelo capturados, la tabla recibe la PCB consultada y el guardado mantiene su contrato. El recorrido revisa los límites del modal y del documento en cada tamaño.
 
-La recuperación del chat comprueba que una conexión interrumpida recupere una respuesta completada y consulte una respuesta en curso conservando un solo POST. El visor rechaza un Excel mayor de 20 MiB antes de solicitar el motor. El recorrido de Excel existente comprueba la versión real cargada en el navegador.
+La recuperación del chat comprueba que una conexión interrumpida recupere una respuesta completada y consulte una respuesta en curso conservando un solo POST. El visor rechaza un Excel mayor de 200 MiB antes de solicitar el motor. La prueba de navegador simula el tamaño del Blob para comprobar ese límite sin reservar un archivo de 200 MiB en cada ejecución. El recorrido de Excel existente comprueba la versión real cargada en el navegador.
 
 `e2e/fixtures.ts` intercepta las APIs del backend, mantiene los cambios de la sesión de prueba y falla ante un endpoint sin contrato o un error de JavaScript o consola. La fecha del navegador queda fijada para que los rangos sean reproducibles. `e2e/fixtures/materials.xlsx` contiene una hoja pequeña para verificar descarga y lectura real del visor compartido.
 

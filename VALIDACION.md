@@ -1,5 +1,10 @@
 # Validación local
 
+## Límite de vista previa Excel · 13 de noviembre de 2026
+
+- El máximo de entrada del visor se elevó a 200 MiB, mostrado como 200 MB. Las pruebas comprueban aceptación de 100 MiB y del límite exacto, y rechazo por encima del máximo antes de cargar el motor.
+- TypeScript, compilación de producción y 17 pruebas del visor y motor aprobaron. El recorrido de rechazo aprobó en 1366×768, 390×640 y 320×568, simulando el tamaño del Blob para evitar reservar un archivo de 200 MiB por ejecución. Evidencia en `output/excel-200mb-browser.log`.
+
 ## Motor Excel, recuperación IA y configuración · 13 de noviembre de 2026
 
 - Se actualizó el recurso local a SheetJS CE 0.20.3 desde la distribución oficial y se retiró el recurso anterior. La URL lleva la versión y el adaptador comprueba la versión cargada. La prueba del motor comprueba SHA-256 y aviso de licencia. `.gitattributes` conserva los bytes del proveedor en Windows. Los avisos del proveedor documentan las correcciones incorporadas. [Distribución oficial](https://docs.sheetjs.com/docs/getting-started/installation/standalone/), [prototype pollution](https://cdn.sheetjs.com/advisories/CVE-2023-30533), [ReDoS](https://cdn.sheetjs.com/advisories/CVE-2024-22363).

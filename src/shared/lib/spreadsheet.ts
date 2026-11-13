@@ -2,7 +2,7 @@ import { loadScript } from "./loadScript";
 
 export const SPREADSHEET_VERSION = "0.20.3";
 export const SPREADSHEET_SCRIPT = "/vendor/xlsx-0.20.3.full.min.js";
-export const MAX_SPREADSHEET_BYTES = 20 * 1024 * 1024;
+export const MAX_SPREADSHEET_BYTES = 200 * 1024 * 1024;
 
 export type SpreadsheetCell = string | number | boolean | null;
 export interface Workbook {
@@ -53,7 +53,7 @@ export async function spreadsheetEngine() {
 export function validateSpreadsheetSize(size: number) {
   if (!Number.isSafeInteger(size) || size <= 0 || size > MAX_SPREADSHEET_BYTES)
     throw new Error(
-      "La vista previa de Excel admite archivos con datos de hasta 20 MB.",
+      "La vista previa de Excel admite archivos con datos de hasta 200 MB.",
     );
 }
 export async function exportSpreadsheet(

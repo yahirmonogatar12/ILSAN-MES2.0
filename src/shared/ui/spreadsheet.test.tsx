@@ -23,15 +23,22 @@ it.each([0, -1, NaN, Infinity, MAX_SPREADSHEET_BYTES + 1])(
       />,
     );
     await screen.findByText(
-      "La vista previa de Excel admite archivos con datos de hasta 20 MB.",
+      "La vista previa de Excel admite archivos con datos de hasta 200 MB.",
     );
     expect(load).not.toHaveBeenCalled();
     expect(arrayBuffer).not.toHaveBeenCalled();
   },
 );
 it("accepts the exact preview size limit", () => {
+  expect(MAX_SPREADSHEET_BYTES).toBe(200 * 1024 * 1024);
   expect(() => validateSpreadsheetSize(MAX_SPREADSHEET_BYTES)).not.toThrow();
 });
+it.each([20 * 1024 * 1024 + 1, 100 * 1024 * 1024])(
+  "accepts %s bytes within the increased limit",
+  (size) => {
+    expect(() => validateSpreadsheetSize(size)).not.toThrow();
+  },
+);
 it("stops before allocating a buffer when the viewer closes during engine loading", async () => {
   let finish!: () => void;
   vi.spyOn(scripts, "loadScript").mockImplementation(
