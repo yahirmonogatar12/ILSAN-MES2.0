@@ -12,6 +12,8 @@ Este es un frontend independiente. Trabajar dentro de esta carpeta; el backend F
 
 ## Reutilización y estilos
 
+- **Si dos módulos necesitan el mismo comportamiento, ese comportamiento debe existir en un componente compartido que ambos reutilicen.** Aplicar el mismo criterio a hooks y utilidades cuando la lógica carezca de interfaz.
+- Compartir comportamiento requiere reglas de negocio equivalentes. Las funcionalidades que solo se parecen visualmente y tienen reglas de negocio diferentes permanecen en sus módulos y reutilizan los controles comunes mediante composición.
 - Usar `Button`, `IconButton`, campos, `Modal`, `ConfirmDialog`, `DataGrid`, `DataTable`, `Pagination`, `FilterBar`, `Card` y `Page` de `@/shared/ui`. `DataGrid` agrega filtros por columna al mismo estilo de tabla; no sustituir el tema ILSAN al ampliar su comportamiento.
 - No introducir `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` o `<table>` nativos fuera de sus componentes propietarios compartidos. Una variante nueva se agrega al componente común.
 - La lógica de negocio pertenece al módulo; extender los componentes con propiedades/composición, sin importar tipos de Materiales en `shared`.
