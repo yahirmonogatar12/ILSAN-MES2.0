@@ -28,11 +28,11 @@ describe("integración del módulo con la base compartida", () => {
       name: "Secciones del MES",
     });
     expect(
-      within(navigation).getByRole("link", { name: "Control de material" }),
-    ).toHaveAttribute("aria-current", "page");
+      within(navigation).getByRole("button", { name: "Control de material" }),
+    ).toHaveAttribute("aria-pressed", "true");
     expect(
-      within(navigation).getByRole("link", { name: "Información básica" }),
-    ).toHaveAttribute("href", "/informacion-basica/usuarios");
+      within(navigation).getByRole("button", { name: "Información básica" }),
+    ).toHaveAttribute("aria-pressed", "false");
     await userEvent.type(
       screen.getByRole("searchbox", { name: "Buscar materiales" }),
       "QA/74-11",
@@ -117,11 +117,8 @@ describe("integración del módulo con la base compartida", () => {
       name: "Secciones del MES",
     });
     expect(
-      within(navigation).getByRole("link", { name: "Control de material" }),
-    ).toHaveAttribute("href", "/material/materiales");
-    expect(
-      within(navigation).getByRole("link", { name: "Control de material" }),
-    ).toHaveAttribute("aria-current", "page");
+      within(navigation).getByRole("button", { name: "Control de material" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
   it("un permiso denegado impide montar el módulo y sus acciones", async () => {
     vi.stubGlobal(

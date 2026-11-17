@@ -45,10 +45,19 @@ export function PortalHeader() {
   }, []);
   const [profileOpen, setProfileOpen] = useState(false);
   const [entryNotice, setEntryNotice] = useState(false);
+  // Size of the login pill when submitted: the account circle grows out of it
+  // and shrinks into place. Null on a restored session, so no animation then.
+  const loginForm = useRef<HTMLFormElement>(null);
+  const [collapseFrom, setCollapseFrom] = useState<DOMRect | null>(null);
+  // And the reverse on logout: the circle opens back into the login pill.
+  const [loggedOut, setLoggedOut] = useState(false);
   const logout = useForm({
     initialValues: {},
     validate: () => [],
-    onSubmit: () => auth.logout(),
+    onSubmit: () => {
+      setLoggedOut(true);
+      return auth.logout();
+    },
   });
   const login = useForm({
     initialValues: { username: "", password: "" },
@@ -58,6 +67,7 @@ export function PortalHeader() {
         : [],
     onSubmit: async (values) => {
       setEntryNotice(false);
+      setCollapseFrom(loginForm.current?.getBoundingClientRect() ?? null);
       try {
         await auth.login(values.username, values.password);
       } finally {
@@ -73,7 +83,18 @@ export function PortalHeader() {
   }
   return (
     <>
-      <header ref={header} className="landing-header">
+      <header
+        ref={header}
+        className="landing-header"
+        style={
+          collapseFrom
+            ? ({
+                "--login-width": collapseFrom.width + "px",
+                "--login-height": collapseFrom.height + "px",
+              } as CSSProperties)
+            : undefined
+        }
+      >
         <Link
           to="/inicio"
           className="landing-identity"
@@ -89,7 +110,7 @@ export function PortalHeader() {
         {auth.profile ? (
           <DisclosureMenu
             align="right"
-            className="landing-account"
+            className={`landing-account ${collapseFrom ? "landing-account-enter" : ""}`}
             label={
               <>
                 <UserRound size={21} fill="currentColor" />
@@ -126,7 +147,8 @@ export function PortalHeader() {
           </DisclosureMenu>
         ) : (
           <form
-            className="landing-login"
+            ref={loginForm}
+            className={`landing-login ${loggedOut ? "landing-login-enter" : ""}`}
             onSubmit={login.handleSubmit}
             aria-label="Iniciar sesión"
           >

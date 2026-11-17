@@ -47,8 +47,15 @@ export function Shell({
   const activeModule =
     modules.find((module) => matchPath(module.path, location.pathname)) ||
     modules[0];
+  // A section tile only lists its modules; opening one stays the user's choice.
+  // The pick lasts until the route changes, then the list follows the route.
+  const [picked, setPicked] = useState<{ id: string; at: string } | null>(null);
+  const activeSectionId =
+    picked?.at === location.pathname ? picked.id : activeModule?.sectionId;
+  const pickSection = (id: string) =>
+    setPicked({ id, at: location.pathname });
   const activeSection = sections.find(
-    (section) => section.id === activeModule?.sectionId,
+    (section) => section.id === activeSectionId,
   );
   const sectionModules = modules.filter(
     (module) => module.sectionId === activeSection?.id,
@@ -62,14 +69,20 @@ export function Shell({
     false,
     (value) => value === true,
   );
+  // After collapsing, the browser keeps the toggle :hover until the mouse moves,
+  // so the button would flash over the logo. Hold the hover reveal until then.
+  const [revealLocked, setRevealLocked] = useState(false);
   const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
+  const [railGroup, setRailGroup] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [exitError, setExitError] = useState<Error | null>(null);
   const hidden = isMobile ? !mobileOpen : collapsed;
   const compactIdentity = !isMobile && collapsed;
   const home = modules[0]?.path || "/inicio";
   return (
-    <div className={`app-shell ${compactIdentity ? "sidebar-collapsed" : ""}`}>
+    <div
+      className={`app-shell ${compactIdentity ? "sidebar-collapsed" : ""} ${revealLocked ? "reveal-locked" : ""}`}
+    >
       <header className="mes-header">
         <div className="header-identity">
           <Link to={home} aria-label="ILSAN MES inicio">
@@ -83,26 +96,35 @@ export function Shell({
               ? "Modo demostración"
               : `Bienvenido, ${profile?.nombre_completo || ""}`}
           </div>
+          <IconButton
+            className="sidebar-toggle"
+            aria-controls="mes-sidebar"
+            aria-expanded={!hidden}
+            label={
+              isMobile
+                ? "Abrir menú"
+                : collapsed
+                  ? "Mostrar lista lateral"
+                  : "Ocultar lista lateral"
+            }
+            icon={isMobile ? <Menu size={22} /> : <PanelLeft size={18} />}
+            onClick={() => {
+              if (isMobile) return setMobileOpen(!mobileOpen);
+              if (!collapsed) {
+                setRevealLocked(true);
+                window.addEventListener(
+                  "pointermove",
+                  () => setRevealLocked(false),
+                  { once: true },
+                );
+              }
+              setCollapsed(!collapsed);
+            }}
+          />
         </div>
-        <IconButton
-          className="sidebar-toggle"
-          aria-controls="mes-sidebar"
-          aria-expanded={!hidden}
-          label={
-            isMobile
-              ? "Abrir menú"
-              : collapsed
-                ? "Mostrar lista lateral"
-                : "Ocultar lista lateral"
-          }
-          icon={isMobile ? <Menu size={22} /> : <PanelLeft size={18} />}
-          onClick={() =>
-            isMobile ? setMobileOpen(!mobileOpen) : setCollapsed(!collapsed)
-          }
-        />
         <nav className="section-navigation" aria-label="Secciones del MES">
           {sections.map((section) => {
-            const firstModule = modules.find(
+            const hasModules = modules.some(
               (module) => module.sectionId === section.id,
             );
             const breakAt = section.title.lastIndexOf(" ");
@@ -118,15 +140,18 @@ export function Shell({
                 )}
               </span>
             );
-            return firstModule ? (
-              <NavLink
-                className={`section-tile ${section.id === activeSection?.id ? "active" : ""}`}
-                to={firstModule.path}
+            const selected = section.id === activeSection?.id;
+            return hasModules ? (
+              <Button
+                variant="plain"
+                className={`section-tile ${selected ? "active" : ""}`}
+                aria-pressed={selected}
                 key={section.id}
+                onClick={() => pickSection(section.id)}
               >
                 <img src={`/brand/${section.image}.png`} alt="" />
                 {label}
-              </NavLink>
+              </Button>
             ) : (
               <Button
                 variant="plain"
@@ -187,71 +212,128 @@ export function Shell({
         id="mes-sidebar"
         className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}
         aria-label="Navegación principal"
-        inert={hidden}
-        aria-hidden={hidden || undefined}
+        inert={isMobile && hidden}
+        aria-hidden={(isMobile && hidden) || undefined}
       >
-        <IconButton
-          className="mobile-close"
-          label="Cerrar menú"
-          icon={<X size={18} />}
-          onClick={() => setMobileOpen(false)}
-        />
-        {isMobile && (
-          <SelectField
-            label="Sección"
-            containerClassName="mobile-section-picker"
-            value={activeSection?.id || ""}
-            options={sections
-              .filter((section) =>
-                modules.some((module) => module.sectionId === section.id),
-              )
-              .map((section) => ({ value: section.id, label: section.title }))}
-            onChange={(event) => {
-              const target = modules.find(
-                (module) => module.sectionId === event.target.value,
-              );
-              if (target) void navigate(target.path);
-            }}
+        <div
+          className="sidebar-expanded-content"
+          inert={hidden}
+          aria-hidden={hidden || undefined}
+        >
+          <IconButton
+            className="mobile-close"
+            label="Cerrar menú"
+            icon={<X size={18} />}
+            onClick={() => setMobileOpen(false)}
           />
-        )}
-        <div className="sidebar-navigation">
-          {groups.map((group) => (
-            <div key={group} className="nav-group">
-              <Button
-                variant="plain"
-                className="nav-parent"
-                aria-expanded={!closedGroups[group]}
-                onClick={() =>
-                  setClosedGroups((previous) => ({
-                    ...previous,
-                    [group]: !previous[group],
-                  }))
-                }
-              >
-                <span>{group}</span>
-                <ChevronDown
-                  size={12}
-                  className={closedGroups[group] ? "" : "nav-caret-expanded"}
-                />
-              </Button>
-              {!closedGroups[group] && (
-                <div className="nav-children">
-                  {sectionModules
-                    .filter((module) => module.group === group)
-                    .map((module) => (
-                      <NavLink
-                        to={module.path}
-                        key={module.id}
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {module.title}
-                      </NavLink>
-                    ))}
-                </div>
-              )}
-            </div>
-          ))}
+          {isMobile && (
+            <SelectField
+              label="Sección"
+              containerClassName="mobile-section-picker"
+              value={activeSection?.id || ""}
+              options={sections
+                .filter((section) =>
+                  modules.some((module) => module.sectionId === section.id),
+                )
+                .map((section) => ({
+                  value: section.id,
+                  label: section.title,
+                }))}
+              onChange={(event) => pickSection(event.target.value)}
+            />
+          )}
+          <div className="sidebar-navigation">
+            {groups.map((group) => (
+              <div key={group} className="nav-group">
+                <Button
+                  variant="plain"
+                  className="nav-parent"
+                  aria-expanded={!closedGroups[group]}
+                  onClick={() =>
+                    setClosedGroups((previous) => ({
+                      ...previous,
+                      [group]: !previous[group],
+                    }))
+                  }
+                >
+                  <span>{group}</span>
+                  <ChevronDown
+                    size={12}
+                    className={closedGroups[group] ? "" : "nav-caret-expanded"}
+                  />
+                </Button>
+                {!closedGroups[group] && (
+                  <div className="nav-children">
+                    {sectionModules
+                      .filter((module) => module.group === group)
+                      .map((module) => (
+                        <NavLink
+                          to={module.path}
+                          key={module.id}
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          {module.title}
+                        </NavLink>
+                      ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+        {compactIdentity && (
+          <nav className="sidebar-rail" aria-label="Accesos de módulos">
+            {/* One button per group; its modules open in a flyout on hover/click. */}
+            {groups.map((group) => {
+              const items = sectionModules.filter(
+                (module) => module.group === group,
+              );
+              const Icon = items[0]!.icon;
+              const open = railGroup === group;
+              return (
+                <div
+                  key={group}
+                  className="sidebar-rail-group"
+                  onPointerEnter={() => setRailGroup(group)}
+                  onPointerLeave={() => setRailGroup(null)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget))
+                      setRailGroup(null);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") setRailGroup(null);
+                  }}
+                >
+                  <button
+                    type="button"
+                    className={`sidebar-rail-link ${items.some((module) => matchPath(module.path, location.pathname)) ? "active" : ""}`}
+                    aria-label={group}
+                    aria-expanded={open}
+                    onClick={() => setRailGroup(group)}
+                  >
+                    <Icon size={20} aria-hidden="true" />
+                  </button>
+                  {open && (
+                    <div className="sidebar-rail-flyout">
+                      <div className="sidebar-rail-panel">
+                        <span className="sidebar-rail-title">{group}</span>
+                        {items.map((module) => (
+                          <NavLink
+                            key={module.id}
+                            to={module.path}
+                            onClick={() => setRailGroup(null)}
+                          >
+                            {module.title}
+                          </NavLink>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </nav>
+        )}
       </aside>
       <div className="main-shell">
         <div className="workspace-tabs">

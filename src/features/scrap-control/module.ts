@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { List } from "lucide-react";
+import { Recycle } from "lucide-react";
 import type { ModuleDefinition } from "@/core/modules/types";
 
 export const scrapControlModule: ModuleDefinition = {
@@ -9,7 +9,7 @@ export const scrapControlModule: ModuleDefinition = {
   title: "Control de Scrap",
   sectionId: "proceso",
   group: "Control de material Scrap",
-  icon: List,
+  icon: Recycle,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Control de material Scrap",

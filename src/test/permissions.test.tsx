@@ -249,7 +249,7 @@ describe("visibilidad y autorización compartidas", () => {
     expect(reads).not.toHaveBeenCalled();
     await update({ ...snapshot([]), rol: "superadmin" });
     expect(
-      await screen.findByRole("link", { name: "Información básica" }),
+      await screen.findByRole("button", { name: "Información básica" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Inventario actual" }),

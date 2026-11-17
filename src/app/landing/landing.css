@@ -247,6 +247,48 @@
   background: #01874c;
   border: 2px solid #ffffff4d;
 }
+/* Right after login: the login pill shrinks into the account circle. */
+@keyframes landing-login-collapse {
+  from {
+    width: var(--login-width);
+    height: var(--login-height);
+    border-radius: 999px;
+    background: #ffffff08;
+    border-color: #ffffff14;
+  }
+}
+.landing-account-enter > summary {
+  animation: landing-login-collapse 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Right after logout: the green circle (42px, right edge) opens into the pill. */
+@keyframes landing-login-expand {
+  from {
+    clip-path: inset(6px 0 6px calc(100% - 42px) round 999px);
+    background: #01874c;
+  }
+  to {
+    /* explicit end: an inset() can't interpolate to the default "none" */
+    clip-path: inset(0 round 999px);
+  }
+}
+@keyframes landing-login-content-in {
+  from {
+    opacity: 0;
+  }
+}
+.landing-login-enter {
+  animation: landing-login-expand 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.landing-login-enter > * {
+  animation: landing-login-content-in 0.45s ease-in;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-account-enter > summary,
+  .landing-login-enter,
+  .landing-login-enter > * {
+    animation: none;
+  }
+}
 .landing-account .disclosure-menu-content {
   width: 200px;
   padding: 0;

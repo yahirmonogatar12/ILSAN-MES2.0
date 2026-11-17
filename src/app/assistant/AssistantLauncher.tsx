@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/core/auth/useAuth";
 import { usePermission } from "@/core/auth/usePermission";
@@ -33,6 +33,7 @@ export function AssistantLauncher() {
 function AuthorizedAssistant({ scope }: { scope: string }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const launcher = useRef<HTMLButtonElement>(null);
   const position = useLauncherPosition(scope);
   const moveLogo = useAssistantLogoTransition();
   const [expanded, setExpanded] = usePersistentState(
@@ -42,9 +43,13 @@ function AuthorizedAssistant({ scope }: { scope: string }) {
   );
   const toggle = () => setExpanded((value) => !value);
   const close = () => moveLogo(() => setOpen(false));
+  useEffect(() => {
+    if (!open && mounted) launcher.current?.focus({ preventScroll: true });
+  }, [open, mounted]);
   return (
     <>
       <IconButton
+        ref={launcher}
         {...position.handlers}
         className="assistant-launcher"
         label="Abrir asistente IA"

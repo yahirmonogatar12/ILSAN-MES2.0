@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { List } from "lucide-react";
+import { CircuitBoard, Cpu, History, ListOrdered, Truck } from "lucide-react";
 import type { ModuleDefinition } from "@/core/modules/types";
 
 /** Original process-production permissions; SMT Plan differs from machine control SMT. */
@@ -10,7 +10,7 @@ export const processProductionModule: ModuleDefinition = {
   title: "Control de produccion ASSY",
   sectionId: "proceso",
   group: "Control de producción",
-  icon: List,
+  icon: ListOrdered,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Control de produccion",
@@ -25,7 +25,7 @@ export const imtProductionModule: ModuleDefinition = {
   title: "Control de produccion IMT",
   sectionId: "proceso",
   group: "Control de producción",
-  icon: List,
+  icon: CircuitBoard,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Control de produccion",
@@ -40,7 +40,7 @@ export const smtProductionModule: ModuleDefinition = {
   title: "Control de produccion SMT",
   sectionId: "proceso",
   group: "Control de producción",
-  icon: List,
+  icon: Cpu,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Control de produccion",
@@ -58,7 +58,7 @@ export const processOperationsModule: ModuleDefinition = {
   title: "Historial de operacion por proceso",
   sectionId: "proceso",
   group: "Control de producción",
-  icon: List,
+  icon: History,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Control de produccion",
@@ -73,7 +73,7 @@ export const lineOutputsModule: ModuleDefinition = {
   title: "Control de salida de lineas",
   sectionId: "proceso",
   group: "Control de producción",
-  icon: List,
+  icon: Truck,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Control de produccion",

@@ -1,5 +1,13 @@
 import { lazy } from "react";
-import { Warehouse } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Barcode,
+  ClipboardCheck,
+  PackageMinus,
+  PackagePlus,
+  Undo2,
+  Warehouse,
+} from "lucide-react";
 import type { ModuleDefinition } from "@/core/modules/types";
 
 export const shippingWarehouseModule: ModuleDefinition = {
@@ -12,7 +20,7 @@ export const shippingWarehouseModule: ModuleDefinition = {
   title: "Entradas almacen embarques",
   sectionId: "proceso",
   group: "Almacén de Embarques",
-  icon: Warehouse,
+  icon: PackagePlus,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Almacén de Embarques",
@@ -31,7 +39,7 @@ export const shippingExitsModule: ModuleDefinition = {
   title: "Salidas almacen embarques",
   sectionId: "proceso",
   group: "Almacén de Embarques",
-  icon: Warehouse,
+  icon: PackageMinus,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Almacén de Embarques",
@@ -50,7 +58,7 @@ export const shippingReturnsModule: ModuleDefinition = {
   title: "Retorno almacen embarques",
   sectionId: "proceso",
   group: "Almacén de Embarques",
-  icon: Warehouse,
+  icon: Undo2,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Almacén de Embarques",
@@ -69,7 +77,7 @@ export const shippingMovementsModule: ModuleDefinition = {
   title: "Modificar movimientos embarques",
   sectionId: "proceso",
   group: "Almacén de Embarques",
-  icon: Warehouse,
+  icon: ArrowLeftRight,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Almacén de Embarques",
@@ -107,7 +115,7 @@ export const shippingCatalogModule: ModuleDefinition = {
   title: "Catálogo números de parte embarques",
   sectionId: "proceso",
   group: "Almacén de Embarques",
-  icon: Warehouse,
+  icon: Barcode,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Almacén de Embarques",
@@ -126,7 +134,7 @@ export const shippingQaModule: ModuleDefinition = {
   title: "Pendientes QA Embarques",
   sectionId: "proceso",
   group: "Almacén de Embarques",
-  icon: Warehouse,
+  icon: ClipboardCheck,
   permission: {
     pagina: "LISTA_CONTROL_DE_PROCESO",
     seccion: "Almacén de Embarques",

@@ -122,6 +122,63 @@ function mount(
 }
 
 describe("pestañas del workspace", () => {
+  it("navega desde la franja compacta y conserva las capturas al abrir la lista", async () => {
+    const { modules } = sampleModules();
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "Captura A" }),
+      "Mi captura",
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Ocultar lista lateral" }),
+    );
+    const rail = screen.getByRole("navigation", { name: "Accesos de módulos" });
+    // One rail button per group; the inert expanded list exposes none.
+    const group = within(rail).getByRole("button", { name: "Pruebas" });
+    expect(screen.getByRole("button", { name: "Pruebas" })).toBe(group);
+    expect(within(rail).queryByRole("link")).toBeNull();
+    await userEvent.click(group);
+    expect(within(rail).getAllByRole("link")).toHaveLength(3);
+    await userEvent.click(within(rail).getByRole("link", { name: "B" }));
+    await screen.findByRole("table", { name: "Tabla B" });
+    expect(within(rail).queryByRole("link")).toBeNull();
+    expect(group).toHaveClass("active");
+    await userEvent.click(group);
+    expect(within(rail).getByRole("link", { name: "B" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await userEvent.click(within(rail).getByRole("link", { name: "A" }));
+    expect(
+      await screen.findByRole("textbox", { name: "Captura A" }),
+    ).toHaveValue("Mi captura");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mostrar lista lateral" }),
+    );
+    expect(
+      screen.queryByRole("navigation", { name: "Accesos de módulos" }),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "Pruebas" })).toBeVisible();
+    expect(localStorage.getItem("mes-v2:sidebar-collapsed")).toBe("false");
+  });
+
+  it("restaura los accesos de la franja al recuperar una lista contraída", async () => {
+    localStorage.setItem("mes-v2:sidebar-collapsed", "true");
+    const { modules } = sampleModules();
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    const rail = screen.getByRole("navigation", { name: "Accesos de módulos" });
+    await userEvent.click(within(rail).getByRole("button", { name: "Pruebas" }));
+    expect(within(rail).getByRole("link", { name: "A" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      screen.getByRole("button", { name: "Mostrar lista lateral" }),
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("conserva el mismo esqueleto mientras carga código y datos y muestra el módulo al terminar", async () => {
     let resolve!: (value: { default: () => React.ReactNode }) => void;
     const pending = new Promise<{ default: () => React.ReactNode }>((done) => {
@@ -365,7 +422,12 @@ describe("pestañas del workspace", () => {
     await userEvent.click(
       within(
         screen.getByRole("navigation", { name: "Secciones del MES" }),
-      ).getByRole("link", { name: "Información básica" }),
+      ).getByRole("button", { name: "Información básica" }),
+    );
+    // The tile only lists the section; opening a module is the user's choice.
+    expect(screen.getAllByRole("tab")).toHaveLength(1);
+    await userEvent.click(
+      screen.getByRole("link", { name: "Administración de usuario" }),
     );
     await screen.findByRole("table", { name: "Usuarios registrados" });
     expect(screen.getAllByRole("tab")).toHaveLength(2);
