@@ -1,4 +1,13 @@
-import { Activity, Suspense, useMemo, type ReactNode } from "react";
+import {
+  Activity,
+  Suspense,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { PanelsTopLeft } from "lucide-react";
 import { ModuleAccess } from "@/core/modules/ModuleAccess";
@@ -20,7 +29,7 @@ import {
   ModuleSkeleton,
   tabIds,
 } from "@/shared/ui";
-import { Shell } from "../layout/Shell";
+import { Shell, type WorkspaceSplit } from "../layout/Shell";
 import { EMPTY_WORKSPACE } from "./tabs";
 import { useWorkspaceTabs } from "./useWorkspaceTabs";
 
@@ -77,6 +86,29 @@ function AuthorizedWorkspace({
   children,
 }: Props & { available: readonly ModuleDefinition[] }) {
   const tabs = useWorkspaceTabs(available, scope);
+  // Split view: the active tab (route-driven) plus one more open tab beside it.
+  // ponytail: not persisted across reloads; store it with the tabs if asked.
+  const [split, setSplit] = useState<WorkspaceSplit | null>(null);
+  const splitModule =
+    split && split.id !== tabs.activeModule?.id
+      ? tabs.opened.find((module) => module.id === split.id)
+      : undefined;
+  const activeSplit = splitModule ? split : null;
+  // Primary pane share (%). While dragging, the CSS variable is written straight
+  // to the DOM so the heavy module trees don't re-render on every pointer move;
+  // the final value is committed on release.
+  const [splitSize, setSplitSize] = useState(50);
+  const dragSize = useRef<number | null>(null);
+  const panels = useRef<HTMLDivElement>(null);
+  const clampSize = (value: number) => Math.min(80, Math.max(20, value));
+  const sizeAt = (event: PointerEvent<HTMLDivElement>) => {
+    const box = panels.current!.getBoundingClientRect();
+    return clampSize(
+      activeSplit?.rows
+        ? ((event.clientY - box.top) / box.height) * 100
+        : ((event.clientX - box.left) / box.width) * 100,
+    );
+  };
   const home = available[0]?.path || EMPTY_WORKSPACE;
   const remembered =
     available.find((module) => module.id === tabs.lastActiveId)?.path || home;
@@ -105,60 +137,122 @@ function AuthorizedWorkspace({
         }
         tabs={tabs.opened}
         activeTabId={tabs.activeModule?.id || null}
-        onActivateTab={tabs.activate}
+        split={activeSplit}
+        onSplit={setSplit}
+        onActivateTab={(id) => {
+          // Clicking the tab shown in the second pane swaps the two panes.
+          const current = tabs.activeModule?.id;
+          if (activeSplit && id === activeSplit.id && current)
+            setSplit({ ...activeSplit, id: current });
+          tabs.activate(id);
+        }}
         onCloseTab={tabs.close}
       >
-        {tabs.opened.map((module) => {
-          const active = module.id === tabs.activeModule?.id;
-          const ids = tabIds("workspace", module.id);
-          const Component = module.component;
-          return (
-            <section
-              key={module.id}
-              id={ids.panel}
-              role="tabpanel"
-              aria-labelledby={ids.tab}
-              className="workspace-panel"
-              hidden={!active}
-              inert={!active}
-              tabIndex={-1}
-            >
-              {tabs.visited.includes(module.id) && (
-                <ModuleAccess
-                  permission={module.permission}
-                  demoOnly={module.demoOnly}
-                  requiredRoles={module.requiredRoles}
-                >
-                  <Activity
-                    mode={active ? "visible" : "hidden"}
-                    name={module.id}
+        <div
+          ref={panels}
+          className={`workspace-panels ${activeSplit ? (activeSplit.rows ? "workspace-split-rows" : "workspace-split-columns") : ""}`}
+          style={{ "--split-size": splitSize + "%" } as CSSProperties}
+        >
+          {activeSplit && (
+            <div
+              role="separator"
+              aria-label="Redimensionar paneles (doble clic para centrar)"
+              aria-orientation={activeSplit.rows ? "horizontal" : "vertical"}
+              aria-valuemin={20}
+              aria-valuemax={80}
+              aria-valuenow={Math.round(splitSize)}
+              tabIndex={0}
+              className="workspace-split-divider"
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                panels.current!.classList.add("workspace-split-dragging");
+              }}
+              onPointerMove={(event) => {
+                if (!event.currentTarget.hasPointerCapture(event.pointerId))
+                  return;
+                dragSize.current = sizeAt(event);
+                panels.current!.style.setProperty(
+                  "--split-size",
+                  dragSize.current + "%",
+                );
+              }}
+              // Fires after pointerup and after pointercancel alike, so the
+              // committed size always matches what was last drawn.
+              onLostPointerCapture={() => {
+                panels.current!.classList.remove("workspace-split-dragging");
+                if (dragSize.current !== null) setSplitSize(dragSize.current);
+                dragSize.current = null;
+              }}
+              onDoubleClick={() => setSplitSize(50)}
+              onKeyDown={(event) => {
+                const step = {
+                  ArrowLeft: -5,
+                  ArrowUp: -5,
+                  ArrowRight: 5,
+                  ArrowDown: 5,
+                }[event.key];
+                if (!step) return;
+                event.preventDefault();
+                setSplitSize((size) => clampSize(size + step));
+              }}
+            />
+          )}
+          {tabs.opened.map((module) => {
+            const active = module.id === tabs.activeModule?.id;
+            const secondary = module.id === splitModule?.id;
+            const visible = active || secondary;
+            const ids = tabIds("workspace", module.id);
+            const Component = module.component;
+            return (
+              <section
+                key={module.id}
+                id={ids.panel}
+                role="tabpanel"
+                aria-labelledby={ids.tab}
+                className={`workspace-panel ${active && splitModule ? "workspace-panel-primary" : ""} ${secondary ? "workspace-panel-secondary" : ""}`}
+                hidden={!visible}
+                inert={!visible}
+                tabIndex={-1}
+              >
+                {(tabs.visited.includes(module.id) || secondary) && (
+                  <ModuleAccess
+                    permission={module.permission}
+                    demoOnly={module.demoOnly}
+                    requiredRoles={module.requiredRoles}
                   >
-                    <ErrorBoundary
-                      resetKey={`${scope}:${module.id}`}
-                      fallback={(error, reset) => (
-                        <ErrorState
-                          error={error}
-                          title="No se pudo mostrar el módulo"
-                          onRetry={reset}
-                        />
-                      )}
+                    <Activity
+                      mode={visible ? "visible" : "hidden"}
+                      name={module.id}
                     >
-                      <InitialLoadingBoundary
-                        fallback={
-                          <ModuleSkeleton label={`Cargando ${module.title}…`} />
-                        }
+                      <ErrorBoundary
+                        resetKey={`${scope}:${module.id}`}
+                        fallback={(error, reset) => (
+                          <ErrorState
+                            error={error}
+                            title="No se pudo mostrar el módulo"
+                            onRetry={reset}
+                          />
+                        )}
                       >
-                        <Suspense fallback={<LoadingPending />}>
-                          <Component />
-                        </Suspense>
-                      </InitialLoadingBoundary>
-                    </ErrorBoundary>
-                  </Activity>
-                </ModuleAccess>
-              )}
-            </section>
-          );
-        })}
+                        <InitialLoadingBoundary
+                          fallback={
+                            <ModuleSkeleton
+                              label={`Cargando ${module.title}…`}
+                            />
+                          }
+                        >
+                          <Suspense fallback={<LoadingPending />}>
+                            <Component />
+                          </Suspense>
+                        </InitialLoadingBoundary>
+                      </ErrorBoundary>
+                    </Activity>
+                  </ModuleAccess>
+                )}
+              </section>
+            );
+          })}
+        </div>
         <Routes>
           {available.map((module) => (
             <Route key={module.id} path={module.path} element={null} />

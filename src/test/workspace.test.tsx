@@ -169,7 +169,9 @@ describe("pestañas del workspace", () => {
     mount(modules);
     await screen.findByRole("table", { name: "Tabla A" });
     const rail = screen.getByRole("navigation", { name: "Accesos de módulos" });
-    await userEvent.click(within(rail).getByRole("button", { name: "Pruebas" }));
+    await userEvent.click(
+      within(rail).getByRole("button", { name: "Pruebas" }),
+    );
     expect(within(rail).getByRole("link", { name: "A" })).toHaveAttribute(
       "aria-current",
       "page",
@@ -177,6 +179,40 @@ describe("pestañas del workspace", () => {
     expect(
       screen.getByRole("button", { name: "Mostrar lista lateral" }),
     ).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("divide la pantalla con otra pestaña, intercambia paneles y conserva capturas", async () => {
+    const { modules } = sampleModules();
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    await userEvent.type(screen.getByLabelText("Captura A"), "Mi captura");
+    await userEvent.click(screen.getByRole("link", { name: "B" }));
+    await screen.findByRole("table", { name: "Tabla B" });
+    await userEvent.click(screen.getByText("Dividir"));
+    await userEvent.click(screen.getByRole("button", { name: "A" }));
+    // Both panes visible: B (active) and A beside it, with A's capture intact.
+    expect(screen.getByRole("table", { name: "Tabla B" })).toBeVisible();
+    expect(screen.getByLabelText("Captura A")).toHaveValue("Mi captura");
+    expect(screen.getAllByRole("tabpanel")).toHaveLength(2);
+    // Clicking the second pane's tab swaps panes instead of dropping one.
+    await userEvent.click(screen.getByRole("tab", { name: "A" }));
+    expect(screen.getAllByRole("tabpanel")).toHaveLength(2);
+    expect(screen.getByRole("tab", { name: "A" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const divider = screen.getByRole("separator", {
+      name: /Redimensionar paneles/,
+    });
+    expect(divider).toHaveAttribute("aria-valuenow", "50");
+    divider.focus();
+    await userEvent.keyboard("{ArrowRight}{ArrowRight}");
+    expect(divider).toHaveAttribute("aria-valuenow", "60");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Quitar división" }),
+    );
+    expect(screen.getAllByRole("tabpanel")).toHaveLength(1);
+    expect(screen.getByLabelText("Captura A")).toHaveValue("Mi captura");
   });
 
   it("conserva el mismo esqueleto mientras carga código y datos y muestra el módulo al terminar", async () => {

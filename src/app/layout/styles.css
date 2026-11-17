@@ -384,6 +384,123 @@
 .workspace-panel[hidden] {
   display: none;
 }
+/* Split view. Without a split the wrapper is layout-transparent, so a single
+   panel lays out exactly as before. Panes: primary (order 0), divider (1),
+   secondary (2); --split-size is the primary pane's share, set by dragging. */
+.workspace-panels {
+  display: contents;
+}
+.workspace-split-columns,
+.workspace-split-rows {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.workspace-split-rows {
+  flex-direction: column;
+}
+.workspace-panels > .workspace-panel-primary {
+  flex: 0 0 var(--split-size, 50%);
+  min-width: 0;
+  min-height: 0;
+}
+.workspace-panels > .workspace-panel-secondary {
+  order: 2;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+}
+.workspace-split-divider {
+  order: 1;
+  flex: none;
+  position: relative;
+  background: #20688c;
+  touch-action: none;
+  transition: background 0.15s;
+}
+.workspace-split-columns > .workspace-split-divider {
+  width: 6px;
+  cursor: col-resize;
+}
+.workspace-split-rows > .workspace-split-divider {
+  height: 6px;
+  cursor: row-resize;
+}
+/* Grip dots so the bar reads as draggable. */
+.workspace-split-divider::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 2px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  background: #ffffff80;
+}
+.workspace-split-rows > .workspace-split-divider::after {
+  width: 24px;
+  height: 2px;
+}
+.workspace-split-divider:hover,
+.workspace-split-divider:active,
+.workspace-split-divider:focus-visible {
+  outline: none;
+  background: #4a90e2;
+}
+.workspace-split-dragging {
+  user-select: none;
+}
+.workspace-split-controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+  border-left: 1px solid #ffffff14;
+}
+.workspace-split-controls .icon-button {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 4px;
+}
+.workspace-split-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #bdc8d5;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.workspace-split-menu > summary:hover,
+.workspace-split-menu[open] > summary {
+  color: #8ed0ff;
+  background: #3498db22;
+}
+.workspace-split-menu .disclosure-menu-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  top: calc(100% + 3px);
+  border-radius: 8px;
+}
+.workspace-split-hint {
+  padding: 6px 10px 4px;
+  color: #a9b0bd;
+  font-size: 11px;
+}
+.workspace-split-menu .disclosure-menu-content .ui-plain {
+  justify-content: flex-start;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: left;
+}
+.workspace-split-menu .disclosure-menu-content .ui-plain:hover {
+  background: #ffffff14;
+}
 .sidebar-collapsed .sidebar {
   width: var(--sidebar-rail-width);
 }
@@ -435,7 +552,11 @@
     width var(--navigation-duration) var(--navigation-easing),
     opacity 120ms ease;
 }
-.sidebar-collapsed:not(.reveal-locked):has(.sidebar:hover, .sidebar-toggle:hover) .brand,
+.sidebar-collapsed:not(.reveal-locked):has(
+    .sidebar:hover,
+    .sidebar-toggle:hover
+  )
+  .brand,
 .sidebar-collapsed:has(.sidebar-toggle:focus-visible) .brand {
   opacity: 0;
 }

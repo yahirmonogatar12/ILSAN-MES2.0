@@ -8,10 +8,13 @@ import {
 } from "react-router-dom";
 import {
   ChevronDown,
+  Columns2,
   FlaskConical,
+  ListOrdered,
   LogOut,
   Menu,
   PanelLeft,
+  Rows2,
   X,
 } from "lucide-react";
 import { useAuth } from "@/core/auth/useAuth";
@@ -19,15 +22,29 @@ import type { ModuleDefinition, SectionDefinition } from "@/core/modules/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";
 import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
-import { Alert, Button, IconButton, SelectField, TabBar } from "@/shared/ui";
+import {
+  Alert,
+  Button,
+  DisclosureMenu,
+  IconButton,
+  SelectField,
+  TabBar,
+} from "@/shared/ui";
 import { Brand } from "./Brand";
 
+/** Second open tab shown beside the active one; rows = stacked top/bottom. */
+export interface WorkspaceSplit {
+  id: string;
+  rows: boolean;
+}
 interface Props {
   modules: readonly ModuleDefinition[];
   sections: readonly SectionDefinition[];
   children: ReactNode;
   tabs: readonly ModuleDefinition[];
   activeTabId: string | null;
+  split?: WorkspaceSplit | null;
+  onSplit?: (split: WorkspaceSplit | null) => void;
   onActivateTab: (id: string) => void;
   onCloseTab: (id: string) => void;
 }
@@ -38,6 +55,8 @@ export function Shell({
   children,
   tabs,
   activeTabId,
+  split = null,
+  onSplit,
   onActivateTab,
   onCloseTab,
 }: Props) {
@@ -52,8 +71,7 @@ export function Shell({
   const [picked, setPicked] = useState<{ id: string; at: string } | null>(null);
   const activeSectionId =
     picked?.at === location.pathname ? picked.id : activeModule?.sectionId;
-  const pickSection = (id: string) =>
-    setPicked({ id, at: location.pathname });
+  const pickSection = (id: string) => setPicked({ id, at: location.pathname });
   const activeSection = sections.find(
     (section) => section.id === activeSectionId,
   );
@@ -288,7 +306,6 @@ export function Shell({
               const items = sectionModules.filter(
                 (module) => module.group === group,
               );
-              const Icon = items[0]!.icon;
               const open = railGroup === group;
               return (
                 <div
@@ -311,7 +328,7 @@ export function Shell({
                     aria-expanded={open}
                     onClick={() => setRailGroup(group)}
                   >
-                    <Icon size={20} aria-hidden="true" />
+                    <ListOrdered size={20} aria-hidden="true" />
                   </button>
                   {open && (
                     <div className="sidebar-rail-flyout">
@@ -344,11 +361,63 @@ export function Shell({
               id: module.id,
               label: module.title,
               title: `${module.title} · ${sections.find((section) => section.id === module.sectionId)?.title || ""}`,
+              // Marks the tab showing in the second pane.
+              icon:
+                module.id === split?.id ? (
+                  <Columns2 size={12} aria-hidden="true" />
+                ) : undefined,
             }))}
             activeId={activeTabId}
             onChange={onActivateTab}
             onClose={onCloseTab}
           />
+          {onSplit && tabs.length > 1 && (
+            <div className="workspace-split-controls">
+              {split ? (
+                <>
+                  <IconButton
+                    label={
+                      split.rows
+                        ? "Dividir lado a lado"
+                        : "Dividir arriba y abajo"
+                    }
+                    icon={
+                      split.rows ? <Columns2 size={15} /> : <Rows2 size={15} />
+                    }
+                    onClick={() => onSplit({ ...split, rows: !split.rows })}
+                  />
+                  <IconButton
+                    label="Quitar división"
+                    icon={<X size={15} />}
+                    onClick={() => onSplit(null)}
+                  />
+                </>
+              ) : (
+                <DisclosureMenu
+                  align="right"
+                  className="workspace-split-menu"
+                  label={
+                    <>
+                      <Columns2 size={14} /> Dividir
+                    </>
+                  }
+                >
+                  <span className="workspace-split-hint">Mostrar junto a:</span>
+                  {tabs
+                    .filter((module) => module.id !== activeTabId)
+                    .map((module) => (
+                      <Button
+                        variant="plain"
+                        key={module.id}
+                        onClick={() => onSplit({ id: module.id, rows: false })}
+                      >
+                        {module.title}
+                      </Button>
+                    ))}
+                </DisclosureMenu>
+              )}
+            </div>
+          )}
         </div>
         {exitError && (
           <Alert tone="danger" className="shell-error">
