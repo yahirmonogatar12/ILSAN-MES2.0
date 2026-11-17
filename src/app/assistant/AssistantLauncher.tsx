@@ -14,6 +14,7 @@ import { usePersistentState } from "@/shared/hooks/usePersistentState";
 import { AssistantPanel } from "./AssistantPanel";
 import { AssistantLoading } from "./AssistantSkeleton";
 import { useLauncherPosition } from "./useLauncherPosition";
+import { useAssistantLogoTransition } from "./useAssistantLogoTransition";
 import "./launcher.css";
 
 const AssistantWorkspace = lazy(() => import("./AssistantWorkspace"));
@@ -33,13 +34,14 @@ function AuthorizedAssistant({ scope }: { scope: string }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const position = useLauncherPosition(scope);
+  const moveLogo = useAssistantLogoTransition();
   const [expanded, setExpanded] = usePersistentState(
     "mes-ai-expanded:" + scope,
     false,
     (value) => value === true,
   );
   const toggle = () => setExpanded((value) => !value);
-  const close = () => setOpen(false);
+  const close = () => moveLogo(() => setOpen(false));
   return (
     <>
       <IconButton
@@ -55,8 +57,10 @@ function AuthorizedAssistant({ scope }: { scope: string }) {
         aria-expanded={open}
         icon={<img src="/brand/assistant.svg" alt="" draggable={false} />}
         onClick={() => {
-          setMounted(true);
-          setOpen(true);
+          moveLogo(() => {
+            setMounted(true);
+            setOpen(true);
+          });
         }}
       />
       {mounted && (

@@ -66,15 +66,19 @@ export function Shell({
   const [leaving, setLeaving] = useState(false);
   const [exitError, setExitError] = useState<Error | null>(null);
   const hidden = isMobile ? !mobileOpen : collapsed;
+  const compactIdentity = !isMobile && collapsed;
   const home = modules[0]?.path || "/inicio";
   return (
-    <div className={`app-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
+    <div className={`app-shell ${compactIdentity ? "sidebar-collapsed" : ""}`}>
       <header className="mes-header">
         <div className="header-identity">
           <Link to={home} aria-label="ILSAN MES inicio">
             <Brand />
           </Link>
-          <div className="welcome-text">
+          <div
+            className="welcome-text"
+            aria-hidden={compactIdentity || undefined}
+          >
             {mode === "demo"
               ? "Modo demostración"
               : `Bienvenido, ${profile?.nombre_completo || ""}`}
@@ -82,6 +86,8 @@ export function Shell({
         </div>
         <IconButton
           className="sidebar-toggle"
+          aria-controls="mes-sidebar"
+          aria-expanded={!hidden}
           label={
             isMobile
               ? "Abrir menú"
@@ -99,6 +105,19 @@ export function Shell({
             const firstModule = modules.find(
               (module) => module.sectionId === section.id,
             );
+            const breakAt = section.title.lastIndexOf(" ");
+            const label = (
+              <span className="section-tile-label">
+                {breakAt < 0 ? (
+                  section.title
+                ) : (
+                  <>
+                    <span>{section.title.slice(0, breakAt)}</span>{" "}
+                    <span>{section.title.slice(breakAt + 1)}</span>
+                  </>
+                )}
+              </span>
+            );
             return firstModule ? (
               <NavLink
                 className={`section-tile ${section.id === activeSection?.id ? "active" : ""}`}
@@ -106,7 +125,7 @@ export function Shell({
                 key={section.id}
               >
                 <img src={`/brand/${section.image}.png`} alt="" />
-                <span>{section.title}</span>
+                {label}
               </NavLink>
             ) : (
               <Button
@@ -117,7 +136,7 @@ export function Shell({
                 key={section.id}
               >
                 <img src={`/brand/${section.image}.png`} alt="" />
-                <span>{section.title}</span>
+                {label}
               </Button>
             );
           })}
@@ -165,6 +184,7 @@ export function Shell({
         />
       )}
       <aside
+        id="mes-sidebar"
         className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}
         aria-label="Navegación principal"
         inert={hidden}

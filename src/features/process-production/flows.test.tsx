@@ -2,7 +2,14 @@ import { Activity } from "react";
 import { AssyProposals } from "./AssyProposals";
 import type { Api } from "./types";
 import { extraDecoders } from "./contracts";
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -107,9 +114,15 @@ describe("Flujos de Control de proceso", () => {
         }),
       ).not.toBeInTheDocument();
       expect(action).not.toHaveBeenCalled();
-      await userEvent.click(
-        screen.getByRole("button", { name: `Editar ${lot}` }),
-      );
+      expect(
+        within(table).queryByRole("columnheader", { name: "ACCIONES" }),
+      ).toBeNull();
+      const row = within(table).getByRole("row", {
+        name: `Plan ${lot}`,
+      });
+      await userEvent.click(row);
+      expect(screen.queryByRole("dialog")).toBeNull();
+      await userEvent.dblClick(row);
       const form = screen.getByRole("dialog");
       if (kind !== "ASSY")
         expect(
@@ -133,6 +146,127 @@ describe("Flujos de Control de proceso", () => {
       expect(payload).not.toHaveProperty("status");
       expect(payload).not.toHaveProperty("pause_reason");
       expect(payload).not.toHaveProperty("end_reason");
+    },
+  );
+  it.each(["ASSY", "IMT", "SMT"] as const)(
+    "cancela y reactiva %s desde edición, conserva la captura al desistir y permite reintentar errores",
+    async (kind) => {
+      const base = adapter.createApi("demo");
+      const plan = {
+        lot_no: `CANCEL-${kind}`,
+        working_date: defaults().start,
+        part_no: "EBR23966228",
+        line: kind === "ASSY" ? "M1" : kind === "IMT" ? "P1" : "SA",
+        group_no: 1,
+        sequence: 1,
+        plan_count: 100,
+        uph: 1000,
+        status: "PLAN",
+      };
+      const plans = vi.fn().mockImplementation(async () => [{ ...plan }]);
+      let finish!: (value: Row) => void;
+      const action = vi
+        .fn<typeof base.action>()
+        .mockRejectedValueOnce(new Error("No se pudo cancelar el plan"))
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finish = resolve;
+            }),
+        )
+        .mockImplementation(async (_kind, _operation, payload) => {
+          Object.assign(plan, payload);
+          return { success: true };
+        });
+      vi.spyOn(adapter, "createApi").mockReturnValue({
+        ...base,
+        plans,
+        action,
+      });
+      mount(`/proceso/produccion-${kind.toLowerCase()}`);
+      const row = await screen.findByRole("row", {
+        name: `Plan ${plan.lot_no}`,
+      });
+      row.focus();
+      await userEvent.keyboard("{Enter}");
+      const editor = screen.getByRole("dialog");
+      const quantity = within(editor).getByLabelText(/^Cantidad del plan/);
+      await userEvent.clear(quantity);
+      await userEvent.type(quantity, "125");
+      await userEvent.click(
+        within(editor).getByRole("button", { name: "Cancelar plan" }),
+      );
+      let confirmation = screen.getByRole("dialog", {
+        name: "Cancelar plan",
+      });
+      expect(action).not.toHaveBeenCalled();
+      await userEvent.click(
+        within(confirmation).getByRole("button", {
+          name: "Cancelar",
+        }),
+      );
+      expect(quantity).toHaveValue(125);
+      await userEvent.click(
+        within(editor).getByRole("button", { name: "Cancelar plan" }),
+      );
+      confirmation = screen.getByRole("dialog", {
+        name: "Cancelar plan",
+      });
+      await userEvent.click(
+        within(confirmation).getByRole("button", { name: "Cancelar plan" }),
+      );
+      await within(confirmation).findByText("No se pudo cancelar el plan");
+      expect(action).toHaveBeenCalledTimes(1);
+      expect(quantity).toHaveValue(125);
+      await userEvent.dblClick(
+        within(confirmation).getByRole("button", { name: "Cancelar plan" }),
+      );
+      expect(action).toHaveBeenCalledTimes(2);
+      expect(
+        within(confirmation).getByRole("button", {
+          name: "Cancelar",
+        }),
+      ).toBeDisabled();
+      expect(quantity).toBeDisabled();
+      expect(action.mock.calls[1]).toEqual([
+        kind,
+        "update",
+        { lot_no: plan.lot_no, status: "CANCELADO" },
+      ]);
+      await act(async () => {
+        plan.status = "CANCELADO";
+        finish({ success: true });
+      });
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      const cancelled = await screen.findByRole("row", {
+        name: `Plan ${plan.lot_no}`,
+      });
+      await waitFor(() =>
+        expect(cancelled).toHaveClass("process-production-row-cancelled"),
+      );
+      expect(plans.mock.calls.length).toBeGreaterThan(1);
+      await userEvent.dblClick(cancelled);
+      await userEvent.click(
+        within(screen.getByRole("dialog")).getByRole("button", {
+          name: "Reactivar plan",
+        }),
+      );
+      await userEvent.click(
+        within(
+          screen.getByRole("dialog", { name: "Reactivar plan" }),
+        ).getByRole("button", { name: "Reactivar plan" }),
+      );
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      expect(action.mock.calls[2]).toEqual([
+        kind,
+        "update",
+        { lot_no: plan.lot_no, status: "PLAN" },
+      ]);
+      await waitFor(() =>
+        expect(
+          screen.getByRole("row", { name: `Plan ${plan.lot_no}` }),
+        ).not.toHaveClass("process-production-row-cancelled"),
+      );
     },
   );
   it("asigna el grupo SCAN al plan elegido sin extenderlo de forma implícita", async () => {
@@ -253,16 +387,27 @@ describe("Flujos de Control de proceso", () => {
     );
     const result = (await action.mock.results[0].value) as Row,
       top = String(result.lot_top);
-    await screen.findByRole("button", { name: `Cancelar ${top}` });
-    await userEvent.click(
-      screen.getByRole("button", { name: `Cancelar ${top}` }),
+    await userEvent.dblClick(
+      await screen.findByRole("row", { name: `Plan ${top}` }),
     );
     await userEvent.click(
       within(screen.getByRole("dialog")).getByRole("button", {
-        name: "Confirmar",
+        name: "Cancelar plan",
       }),
     );
-    await screen.findByRole("button", { name: `Reactivar ${top}` });
+    await userEvent.click(
+      within(screen.getByRole("dialog", { name: "Cancelar plan" })).getByRole(
+        "button",
+        {
+          name: "Cancelar plan",
+        },
+      ),
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await userEvent.dblClick(
+      await screen.findByRole("row", { name: `Plan ${top}` }),
+    );
+    await screen.findByRole("button", { name: "Reactivar plan" });
     expect(action).toHaveBeenLastCalledWith("SMT", "update", {
       lot_no: top,
       status: "CANCELADO",
@@ -276,14 +421,15 @@ describe("Flujos de Control de proceso", () => {
     vi.spyOn(adapter, "createApi").mockReturnValue({ ...base, action });
     mount("/proceso/produccion-assy");
     await screen.findByRole("table", { name: "Planes ASSY" });
-    await userEvent.click(
-      screen.getByRole("button", { name: "Bajar ASSY-DEMO-002" }),
-    );
+    fireEvent.drop(screen.getByRole("row", { name: "Plan ASSY-DEMO-004" }), {
+      dataTransfer: { getData: () => "ASSY-DEMO-002" },
+    });
     await screen.findByText(/Orden sin guardar/);
     expect(action).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("button", { name: "Editar ASSY-DEMO-004" }),
-    ).toBeDisabled();
+    await userEvent.dblClick(
+      screen.getByRole("row", { name: "Plan ASSY-DEMO-004" }),
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
     await userEvent.click(
       screen.getAllByRole("button", { name: "Guardar orden" })[0],
     );

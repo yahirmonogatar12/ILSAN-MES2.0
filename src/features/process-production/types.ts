@@ -34,7 +34,7 @@ export interface Plan extends Row {
 }
 export type PlanDialog =
   | { type: "new" }
-  | { type: "edit" | "cancel" | "group"; row: Plan }
+  | { type: "edit"; row: Plan }
   | { type: "import" | "reschedule" | "wos" | "scan" | "proposals" }
   | null;
 export interface PlanValues extends Row {

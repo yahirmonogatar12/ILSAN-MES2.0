@@ -161,7 +161,6 @@ export function usePlans(kind: Kind) {
   }
   return {
     kind,
-    context,
     initial,
     draft,
     setDraft,
@@ -170,7 +169,6 @@ export function usePlans(kind: Kind) {
     dialog,
     setDialog,
     result,
-    setResult,
     source,
     calculated,
     data,
@@ -183,7 +181,6 @@ export function usePlans(kind: Kind) {
     query,
     grouping,
     reorder,
-    moveGroup,
     done,
     reloadSubAssy,
     submit,

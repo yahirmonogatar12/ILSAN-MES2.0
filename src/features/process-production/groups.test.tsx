@@ -188,7 +188,10 @@ describe("Presentación original de los planes", () => {
     );
     await waitFor(() => expect(action).toHaveBeenCalledOnce());
     expect(screen.getByRole("button", { name: "Auto acomodo" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Bajar LOCK-A" })).toBeDisabled();
+    expect(screen.getByRole("row", { name: "Plan LOCK-A" })).toHaveAttribute(
+      "draggable",
+      "false",
+    );
     const target = within(table)
       .getByRole("cell", { name: "LOCK-B" })
       .closest("tr")!;

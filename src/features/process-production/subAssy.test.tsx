@@ -53,8 +53,10 @@ function mount(subAssy: string | null = null) {
   return { ...rendered, plan, plans, action };
 }
 async function edit() {
-  await userEvent.click(
-    await screen.findByRole("button", { name: "Editar ASSY-01/A+02&B" }),
+  await userEvent.dblClick(
+    await screen.findByRole("row", {
+      name: "Plan ASSY-01/A+02&B",
+    }),
   );
   return within(
     screen.getByRole("dialog", { name: "Editar plan ASSY · ASSY-01/A+02&B" }),
@@ -128,7 +130,7 @@ describe("ASSY sub-assy reload from RAW", () => {
       modal.getByRole("button", { name: "Recargar sub-assy" }),
     );
     await modal.findByText("Sub-assy actualizado desde RAW.");
-    await userEvent.click(modal.getByRole("button", { name: "Cancelar" }));
+    await userEvent.click(modal.getByRole("button", { name: "Cerrar" }));
     expect(
       within(screen.getByRole("table", { name: "Planes ASSY" })).getByText(
         "PCB-NUEVA",
@@ -197,7 +199,7 @@ describe("ASSY sub-assy reload from RAW", () => {
     );
     expect(plans).toHaveBeenCalledTimes(2);
     expect(modal.getByRole("button", { name: "Guardar plan" })).toBeDisabled();
-    expect(modal.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    expect(modal.getByRole("button", { name: "Cerrar" })).toBeDisabled();
     expect(modal.getByLabelText(/^Cantidad del plan/)).toBeDisabled();
     const signal = plans.mock.calls[1][2];
     expect(signal?.aborted).toBe(false);

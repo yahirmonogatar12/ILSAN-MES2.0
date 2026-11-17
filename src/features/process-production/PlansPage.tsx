@@ -13,7 +13,7 @@ import { PlanActions, PlanOrderControls } from "./PlanActions";
 import { PlanDialogs } from "./PlanDialogs";
 import { usePlanColumns } from "./planColumns";
 import { usePlans } from "./usePlans";
-import type { Filters, Kind } from "./types";
+import type { Filters, Kind, Plan } from "./types";
 import "./module.css";
 export function PlansPage({ kind }: { kind: Kind }) {
   const state = usePlans(kind);
@@ -27,22 +27,18 @@ export function PlansPage({ kind }: { kind: Kind }) {
     query,
     data,
     grouping,
-    calculated,
     ready,
     dirty,
     orderForm,
     exportForm,
     reorder,
   } = state;
-  const columns = usePlanColumns({
-    kind,
-    calculated,
-    ready,
-    dirty,
-    busy: orderForm.pending,
-    open: state.setDialog,
-    reorder,
-  });
+  const columns = usePlanColumns(kind);
+  const canMove = ready && !orderForm.pending;
+  const canEdit = canMove && !dirty;
+  function edit(row: Plan) {
+    if (canEdit) state.setDialog({ type: "edit", row });
+  }
   const fields: FilterField<Filters>[] = [
     { key: "start", label: "Fecha desde", type: "date" },
     { key: "end", label: "Fecha hasta", type: "date" },
@@ -105,21 +101,39 @@ export function PlansPage({ kind }: { kind: Kind }) {
           loading={query.isPending}
           error={query.error}
           onRetry={() => void query.refetch()}
-          minWidth={kind === "ASSY" ? 1850 : 1750}
+          minWidth={1000}
           layout="fixed"
           resetKey={`${kind}:${applied.start}:${applied.end}:${applied.line}:${applied.view}`}
           rowProps={(row) => ({
-            draggable: ready && !orderForm.pending,
+            tabIndex: canEdit ? 0 : undefined,
+            "aria-label": `Plan ${text(row.lot_no)}`,
+            "aria-keyshortcuts": "Enter",
+            title: canEdit
+              ? "Doble clic o Enter para editar el plan"
+              : dirty
+                ? "Guarda o descarta el orden para editar el plan"
+                : undefined,
+            onDoubleClick: () => edit(row),
+            onKeyDown: (event) => {
+              if (
+                event.key === "Enter" &&
+                event.target === event.currentTarget
+              ) {
+                event.preventDefault();
+                edit(row);
+              }
+            },
+            draggable: canMove,
             onDragStart: (event) => {
               event.dataTransfer.setData("text/plain", text(row.lot_no));
               event.dataTransfer.effectAllowed = "move";
             },
             onDragOver: (event) => {
-              if (ready) event.preventDefault();
+              if (canMove) event.preventDefault();
             },
             onDrop: (event) => {
               event.preventDefault();
-              if (ready)
+              if (canMove)
                 reorder(
                   event.dataTransfer.getData("text/plain"),
                   text(row.lot_no),

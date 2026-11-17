@@ -99,6 +99,8 @@ Al cambiar de página, tamaño, orden o criterios, `DataGrid` vuelve al inicio v
 
 `DataTable` continúa disponible como presentación controlada. `filters`, `filterOptions` y `onColumnFilterChange` permiten conectar el mismo selector a una consulta remota. En ese caso el módulo aplica los filtros en el servidor y proporciona las opciones completas; no usar `DataGrid` sobre una sola página remota.
 
+El título de cada columna expone su texto completo al pasar el cursor. Esto permite que un consumidor compacte encabezados con puntos suspensivos mediante sus estilos sin perder el nombre de la columna ni el filtro accesible.
+
 Para una API que admite texto libre por columna, `DataTable` recibe `columnSearches: Record<string, string>` y `onColumnSearchChange(id, texto)`. `ColumnSearch` muestra el criterio, una lista de valores cargados y las acciones Aplicar, Quitar filtro y Cancelar. La lista usa las filas recibidas, incluidas las virtualizadas, o las opciones que el módulo suministra en `filterOptions`. Elegir un valor completa el criterio enviado al servidor. Se puede escribir cualquier otro texto para buscar en todo el historial. Enter aplica y Escape o clic fuera cancela y restaura el foco. El consumidor conserva criterios, reinicia página, consulta el servidor y exporta con esos mismos criterios. Los encabezados permanecen disponibles con consultas vacías para retirar un filtro.
 
 `TableColumn.searchValue(fila)` adapta una sugerencia a la representación esperada por la API, como una duración en segundos. `searchLabel` permite indicar la semántica del criterio. `textValue` entrega el valor real de celdas con formato y evita interpretar el marcador visual de una celda vacía como contenido.

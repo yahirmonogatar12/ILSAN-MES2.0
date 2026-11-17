@@ -1,4 +1,5 @@
 .assistant-launcher.icon-button {
+  view-transition-name: assistant-logo;
   position: fixed;
   left: 20px;
   bottom: 18px;
@@ -16,6 +17,11 @@
   transition:
     transform 160ms ease,
     box-shadow 160ms ease;
+}
+.assistant-launcher.icon-button[aria-expanded="true"] {
+  visibility: hidden;
+  pointer-events: none;
+  view-transition-name: none;
 }
 .assistant-launcher.icon-button:hover:not(:disabled) {
   background: #fff;
@@ -59,4 +65,20 @@
   .assistant-launcher.icon-button {
     transition: none;
   }
+}
+html.assistant-logo-transition::view-transition-group(root),
+html.assistant-logo-transition::view-transition-new(root) {
+  animation: none;
+}
+html.assistant-logo-transition::view-transition-old(root) {
+  display: none;
+}
+html.assistant-logo-transition::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+html.assistant-logo-transition::view-transition-group(assistant-logo),
+html.assistant-logo-transition::view-transition-old(assistant-logo),
+html.assistant-logo-transition::view-transition-new(assistant-logo) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }

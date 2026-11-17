@@ -171,9 +171,17 @@
 }
 .process-production-plans .ui-data-table th {
   font-size: 9px;
+  letter-spacing: 0;
 }
 .process-production-plans .table-overflow {
   container-type: inline-size;
+}
+@container (max-width: 1200px) {
+  .process-production-plans .table-column-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 .process-production-plans .table-group-header > th {
   background: #2c3e50;
@@ -236,6 +244,16 @@
   background: var(--mes-accent);
   color: #fff;
   font-weight: 700;
+}
+.process-production-plans .ui-data-table tr[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--mes-accent);
+  outline-offset: -2px;
+}
+.process-production-plans .ui-data-table tr[tabindex="0"] {
+  touch-action: manipulation;
+}
+.process-production-plan-status {
+  margin-right: auto;
 }
 .process-production-plans .process-production-row-cancelled > td {
   background: #6c6c6c;

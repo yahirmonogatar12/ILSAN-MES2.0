@@ -118,6 +118,10 @@ El workspace ocupa la altura del viewport. El listado principal se compone con `
 
 La barra lateral utiliza el patrón del MES original: grupos con título en negrita, separadores, opciones con sangría y selección azul sólida. El botón de la cabecera pliega la lista en escritorio; el botón de menú abre la navegación en móvil. Tanto el aspecto como el comportamiento pertenecen a `app/layout`, y los grupos y opciones siguen proviniendo de los descriptores registrados.
 
+Los botones superiores mantienen los títulos en dos líneas y se adaptan al ancho de la ventana. Sus dimensiones, iconos y tipografía se concentran en variables de `app-shell` en `app/layout/styles.css`. La cabecera de escritorio mide 88 px y utiliza una escala visual compacta; en móvil se conserva el selector del menú y su altura propia.
+
+En escritorio, contraer la lista también reduce la marca al símbolo y oculta la bienvenida. La identidad, la lista y el margen del contenido comparten duración y curva de transición mediante variables de `app-shell`; al expandir se restaura la cabecera. El símbolo se muestra recortando el mismo recurso de marca, sin cargar otra imagen. La preferencia persiste y se aplica únicamente al modo de escritorio; en móvil la navegación continúa como panel superpuesto. El botón expone `aria-controls` y `aria-expanded`, y las transiciones respetan la preferencia global de movimiento reducido.
+
 ## Extensiones previstas
 
 `features/invoicing` reúne las cuatro pantallas de Facturas. Almacén y Embarques comparten pantalla y detalles con adaptador parametrizado por ámbito; compras y valorización comparten confirmaciones, exportación y componentes del mismo dominio. El visor y la infraestructura Excel pertenecen a `shared`, con motor local opcional bajo demanda. Los cuatro descriptores participan automáticamente en permisos y pestañas. Ver [Facturas](FACTURAS.md).

@@ -1,5 +1,47 @@
 # Validación local
 
+## Navbar compacto según la referencia visual · 17 de noviembre de 2026
+
+- Se redujo la cabecera de escritorio de 100 a 88 px. Los botones anchos pasan de 120×90 a 108×78 px, con iconos de 34 px y texto de 11 px. Las variantes intermedias usan 90×78 px y las estrechas 80×72 px. Se conservan los títulos en dos líneas, el símbolo contraído de 56 px y la transición sincronizada.
+- Compilación de producción, arquitectura y formato aprobados. Playwright CLI comprobó siete escenarios de escritorio, móvil y movimiento reducido con respuestas HTTP controladas: dimensiones compactas, textos sin recortes, contracción/expansión, persistencia y ausencia de scroll exterior. Se revisaron las capturas de escritorio y móvil. Evidencia en `output/navbar-visual-compact-build.log`, `output/navbar-visual-compact-browser.log` y `output/playwright/navbar-visual-compact-*.png`.
+
+## Medidas de navegación comparadas con el original · 17 de noviembre de 2026
+
+- Se copiaron los tamaños efectivos de `app/templates/MainTemplate.html`, que prevalecen sobre la base de `styleHeader.css`: 120×90 px con iconos de 40 px y texto de 13 px desde 1600 px; 96×90 px, iconos de 36 px y texto de 10.5 px desde 1200 px; 84×80 px, iconos de 32 px y texto de 8 px por debajo. Se aplican peso 700, interlineado 1.08 y títulos en dos líneas. Se retiró el tamaño adicional por altura que alteraba la comparación en escritorio.
+- Playwright CLI renderizó como referencia las reglas extraídas de ambos archivos originales y comparó ancho, alto, iconos, fuente, peso, interlineado y altura de las etiquetas con React. Las medidas coincidieron en ocho escenarios de escritorio, incluidos los límites 1199/1200 y 1599/1600 y una ventana de 1920×640. Otros dos escenarios comprobaron el menú móvil. También se conservaron expansión, contracción sincronizada, persistencia y dimensiones del documento. Evidencia en `output/navbar-parity-browser.log`, las capturas `output/playwright/navbar-parity-*.png` y `output/playwright/navbar-original-reference-*.png`.
+- Compilación de producción, arquitectura, lint y las 13 pruebas de aplicación/workspace aprobaron. Evidencia en `output/navbar-parity-build.log` y `output/navbar-parity-tests.log`. La comprobación visual usa respuestas HTTP controladas.
+
+## Ajuste compacto de la barra superior · 17 de noviembre de 2026
+
+- Se revisaron `app/static/styleHeader.css` y las variantes de `MainTemplate.html` del MES original. Se tomó su ancho base de 90 px para reducir el aumento anterior. Los botones quedan en 90×80 px, iconos de 32 px y texto de 10 px; en ventanas de hasta 800 px de alto usan 62 px de altura, iconos de 28 px y texto de 9 px. Se conserva el logo ampliado y la animación sincronizada.
+- Compilación de producción y arquitectura aprobadas. Playwright CLI repitió los siete escenarios de escritorio, móvil y movimiento reducido; comprobó etiquetas sin recortes, contracción, expansión, persistencia y dimensiones del documento. Evidencia en `output/original-size-navbar-build.log`, `output/original-size-navbar-browser.log` y las capturas `output/playwright/original-size-navbar-*.png`.
+
+## Botones superiores más grandes · 17 de noviembre de 2026
+
+- Las secciones de la barra superior pasan a 100×90 px, con iconos de 38 px y texto de 11 px. En ventanas de hasta 800 px de alto mantienen 70 px de altura, iconos de 30 px y texto de 10 px. Los anchos se ajustan a 90/84 px en ventanas estrechas. La cabecera acompaña el tamaño de los botones y el modo móvil conserva su altura anterior.
+- Compilación de producción y arquitectura aprobadas. Playwright CLI comprobó etiquetas sin recortes, contracción/expansión sincronizada, persistencia, ausencia de scroll exterior y menú móvil con respuestas HTTP controladas. Se revisaron 1920×1080, 1366×768, 1100×768, 900×640, 390×640 y 320×568, más 1366×768 con movimiento reducido. Evidencia en `output/large-navbar-build.log`, `output/large-navbar-browser.log` y las capturas `output/playwright/large-navbar-*.png`.
+
+## Marca compacta y navegación sincronizada · 17 de noviembre de 2026
+
+- El símbolo contraído se ajustó de 64 a 56 px de ancho. La imagen conserva sus proporciones y la transición sincronizada. Compilación aprobada; se revisaron contracción, expansión, persistencia y ausencia de scroll exterior en 1366×768 y 390×640 con respuestas HTTP controladas. Evidencia en `output/compact-logo-56-build.log`, `output/compact-logo-56-browser.log` y las capturas `output/playwright/compact-logo-56-*.png`.
+- Al contraer la lista en escritorio, la identidad deja solo el símbolo ILSAN y oculta la bienvenida. La cabecera, la lista y el contenido comparten una transición de 220 ms y la misma curva. Al expandir se restauran los textos y el espacio original. En móvil se conserva la cabecera completa y el menú superpuesto, incluso si la preferencia guardada de escritorio estaba contraída.
+- Compilación de producción, arquitectura y lint aprobados. Las 13 pruebas de aplicación y workspace aprobaron. Evidencia en `output/compact-brand-build.log` y `output/compact-brand-tests.log`.
+- Playwright CLI comprobó contracción, expansión, persistencia al recargar, ausencia de scroll exterior, menú móvil y movimiento reducido con respuestas HTTP controladas. Se revisaron 1920×1080, 1366×768, 1100×768, 390×640 y 320×568, además de 1366×768 con movimiento reducido. Las muestras por fotograma comprobaron el progreso sincronizado de marca, lista y contenido. Evidencia en `output/compact-brand-browser.log` y las capturas `output/playwright/compact-brand-*.png`.
+
+## Ancho adaptable de planes · 17 de noviembre de 2026
+
+- ASSY, IMT y SMT distribuyen las columnas sobre el espacio de la tabla, con un mínimo común de 1000 px. Los encabezados se acortan con puntos suspensivos cuando el contenedor mide 1200 px o menos; `DataTable` compartida conserva el nombre completo al pasar el cursor. Se mantiene el filtro a la derecha.
+- Compilación de producción, arquitectura y lint aprobados. Las 109 pruebas de tablas compartidas y Control de proceso aprobaron en 13 archivos. Evidencia en `output/plan-fit-build.log` y `output/plan-fit-tests.log`.
+- Playwright CLI comprobó los tres procesos en 1920×1080, 1717×900, 1366×768 y 390×640, con respuestas HTTP controladas. En escritorio no hubo desbordamiento horizontal con la barra lateral abierta ni oculta. En móvil se conservó el desplazamiento interno. Las 21 combinaciones mantuvieron el tamaño del documento y permitieron abrir el filtro de FIN. Se revisaron capturas de escritorio y móvil bajo `output/playwright/plan-fit-*.png`. Evidencia en `output/plan-fit-browser.log`.
+
+## Edición desde la fila y cancelación de planes · 17 de noviembre de 2026
+
+- ASSY, IMT y SMT comparten la tabla sin columna ACCIONES. Doble clic o Enter sobre la fila enfocada abre la edición. En Chromium táctil, dos toques abren el mismo editor. El ancho mínimo se redujo al retirar las acciones; las columnas restantes ocupan el ancho disponible.
+- Cancelar plan y Reactivar plan se encuentran en el modal de edición. La confirmación envía únicamente `lot_no` y `status`, conserva el historial y avisa que descarta campos sin guardar. Desistir mantiene la captura. Las pruebas de los tres procesos comprueban errores, reintento explícito, bloqueo de envíos duplicados y refresco de la tabla.
+- El arrastre entre filas y hacia grupos ASSY mantiene el orden local hasta Guardar orden. La edición queda bloqueada mientras haya cambios de orden; durante el guardado también se bloquean nuevos arrastres. Se retiraron las acciones y diálogos de fila que dejaron de tener entrada.
+- `npm run check` aprobó: 749 pruebas en 75 archivos, 11 pruebas de herramientas, TypeScript, lint, arquitectura y compilación de la plantilla. Las 70 pruebas del módulo aprobaron. Evidencia en `output/plan-row-edit-check.log` y `output/plan-row-edit-tests.log`.
+- `npm run test:browser` compiló producción y aprobó 39 recorridos en 1366×768, 390×640 y 320×568, con respuestas HTTP controladas. Se comprobó doble clic/toque, Enter, conservación de la captura al desistir, cancelación/reactivación, límites del modal y arrastre real de ASSY en escritorio con guardado explícito. Se revisaron las capturas `plan-rows.png` y `plan-cancellation.png` en `output/browser-results/`. Evidencia en `output/plan-row-edit-browser.log`. No se ejecutaron escrituras en la planta.
+
 ## Color de la secuencia de ASSY · 13 de noviembre de 2026
 
 - Se retiró la regla roja específica de la columna SEC. de ASSY. Los tres procesos utilizan la regla común con `var(--mes-accent)` para el fondo habitual de sus números de orden.

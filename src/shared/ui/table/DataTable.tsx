@@ -363,7 +363,10 @@ export function DataTable<T>({
                             })
                           }
                         >
-                          <span className="table-column-title">
+                          <span
+                            className="table-column-title"
+                            title={column.header}
+                          >
                             {column.header}
                           </span>
                           {active ? (
@@ -378,7 +381,10 @@ export function DataTable<T>({
                           )}
                         </Button>
                       ) : (
-                        <span className="table-column-title">
+                        <span
+                          className="table-column-title"
+                          title={column.header}
+                        >
                           {column.header}
                         </span>
                       )}
