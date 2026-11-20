@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { focusableControls } from "../../lib/focus";
 
 export interface GridAnchor {
   x: number;
@@ -10,11 +11,14 @@ export function GridPopup({
   anchor,
   title,
   onClose,
+  onSubmit,
   children,
 }: {
   anchor: GridAnchor;
   title: string;
   onClose: () => void;
+  /** Enter in any field of the popup applies it, as in Excel's filter list. */
+  onSubmit?: () => void;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -61,6 +65,32 @@ export function GridPopup({
       aria-labelledby={id}
       popover="manual"
       className="grid-popup"
+      onKeyDown={(event) => {
+        const controls = focusableControls(event.currentTarget);
+        const index = controls.indexOf(event.target as HTMLElement);
+        if (index < 0) return;
+        const { key, shiftKey } = event;
+        // Tab stays inside the popup until it is applied or closed.
+        if (key === "Tab") {
+          const edge = shiftKey ? 0 : controls.length - 1;
+          if (index !== edge) return;
+          event.preventDefault();
+          controls[shiftKey ? controls.length - 1 : 0].focus();
+        } else if (key === "ArrowDown" || key === "ArrowUp") {
+          // Up/Down walk the search box, the values and the actions.
+          const next = controls[index + (key === "ArrowDown" ? 1 : -1)];
+          if (!next) return;
+          event.preventDefault();
+          next.focus();
+        } else if (
+          key === "Enter" &&
+          onSubmit &&
+          (event.target as HTMLElement).matches("input")
+        ) {
+          event.preventDefault();
+          onSubmit();
+        }
+      }}
       style={{
         left: Math.max(8, Math.min(anchor.x, window.innerWidth - 292)),
         top: Math.max(8, Math.min(anchor.y, window.innerHeight - 438)),

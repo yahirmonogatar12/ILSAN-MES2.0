@@ -120,6 +120,29 @@ describe("integración del módulo con la base compartida", () => {
       within(navigation).getByRole("button", { name: "Control de material" }),
     ).toHaveAttribute("aria-pressed", "true");
   });
+  it("las flechas de la barra superior cambian de sección y muestran su lista", async () => {
+    localStorage.setItem("mes-v2:mode", JSON.stringify("demo"));
+    mount();
+    await screen.findByRole("table", { name: "Materiales registrados" });
+    const navigation = screen.getByRole("navigation", {
+      name: "Secciones del MES",
+    });
+    const material = within(navigation).getByRole("button", {
+      name: "Control de material",
+    });
+    const sidebar = screen.getByRole("complementary", {
+      name: "Navegación principal",
+    });
+    const before = sidebar.textContent;
+    material.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    const next = within(navigation).getByRole("button", {
+      name: "Control de producción",
+    });
+    expect(next).toHaveFocus();
+    expect(next).toHaveAttribute("aria-pressed", "true");
+    expect(sidebar.textContent).not.toBe(before);
+  });
   it("un permiso denegado impide montar el módulo y sus acciones", async () => {
     vi.stubGlobal(
       "fetch",

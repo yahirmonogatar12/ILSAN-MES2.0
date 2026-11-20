@@ -216,4 +216,31 @@ describe("filtros de columna tipo Excel, conservando la tabla", () => {
       screen.queryByLabelText("Filtros de columna activos"),
     ).not.toBeInTheDocument();
   });
+  it("el filtro se maneja con teclado: flechas en la lista, Enter aplica y Tab no se sale", async () => {
+    mount();
+    const dialog = await openFilter("Área");
+    const search = within(dialog).getByRole("searchbox");
+    expect(search).toHaveFocus();
+    await userEvent.keyboard("{ArrowDown}");
+    expect(
+      within(dialog).getByRole("checkbox", {
+        name: "Seleccionar todos los resultados",
+      }),
+    ).toHaveFocus();
+    await userEvent.keyboard("{ArrowDown}");
+    expect(within(dialog).getByRole("checkbox", { name: "IMD" })).toHaveFocus();
+    await userEvent.keyboard(" ");
+    expect(
+      within(dialog).getByRole("checkbox", { name: "IMD" }),
+    ).not.toBeChecked();
+    // Tab past the last action wraps to the first control instead of leaving the popup.
+    within(dialog).getByRole("button", { name: "Aplicar" }).focus();
+    await userEvent.tab();
+    expect(search).toHaveFocus();
+    await userEvent.type(search, "SMD{Enter}");
+    expect(
+      screen.queryByRole("dialog", { name: "Filtrar Área" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Filtros de tabla/)).toBeInTheDocument();
+  });
 });

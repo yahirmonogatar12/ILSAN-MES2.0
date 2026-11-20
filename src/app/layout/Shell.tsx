@@ -30,7 +30,10 @@ import {
   SelectField,
   TabBar,
 } from "@/shared/ui";
+import { moveFocusWithArrows } from "@/shared/lib/focus";
 import { Brand } from "./Brand";
+import { KeyboardShortcuts } from "./KeyboardShortcuts";
+import { focusRegion } from "./keyboard";
 
 /** Second open tab shown beside the active one; rows = stacked top/bottom. */
 export interface WorkspaceSplit {
@@ -140,7 +143,21 @@ export function Shell({
             }}
           />
         </div>
-        <nav className="section-navigation" aria-label="Secciones del MES">
+        <nav
+          className="section-navigation"
+          aria-label="Secciones del MES"
+          onKeyDown={(event) => {
+            // Arrows browse sections and show each one's list; Down enters that list.
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              return focusRegion("2");
+            }
+            moveFocusWithArrows(event, "ArrowLeft", "ArrowRight");
+            const id = (document.activeElement as HTMLElement | null)?.dataset
+              .section;
+            if (event.defaultPrevented && id) pickSection(id);
+          }}
+        >
           {sections.map((section) => {
             const hasModules = modules.some(
               (module) => module.sectionId === section.id,
@@ -164,6 +181,7 @@ export function Shell({
                 variant="plain"
                 className={`section-tile ${selected ? "active" : ""}`}
                 aria-pressed={selected}
+                data-section={section.id}
                 key={section.id}
                 onClick={() => pickSection(section.id)}
               >
@@ -260,7 +278,12 @@ export function Shell({
               onChange={(event) => pickSection(event.target.value)}
             />
           )}
-          <div className="sidebar-navigation">
+          <div
+            className="sidebar-navigation"
+            onKeyDown={(event) =>
+              moveFocusWithArrows(event, "ArrowUp", "ArrowDown")
+            }
+          >
             {groups.map((group) => (
               <div key={group} className="nav-group">
                 <Button
@@ -300,7 +323,13 @@ export function Shell({
           </div>
         </div>
         {compactIdentity && (
-          <nav className="sidebar-rail" aria-label="Accesos de módulos">
+          <nav
+            className="sidebar-rail"
+            aria-label="Accesos de módulos"
+            onKeyDown={(event) =>
+              moveFocusWithArrows(event, "ArrowUp", "ArrowDown")
+            }
+          >
             {/* One button per group; its modules open in a flyout on hover/click. */}
             {groups.map((group) => {
               const items = sectionModules.filter(
@@ -427,6 +456,7 @@ export function Shell({
         <main id="main-content" tabIndex={-1}>
           {children}
         </main>
+        <KeyboardShortcuts />
       </div>
     </div>
   );

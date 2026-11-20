@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type HTMLAttributes,
   type Key,
+  type KeyboardEvent,
   type PointerEvent,
   type ReactNode,
 } from "react";
@@ -29,6 +30,7 @@ import { cellText, distinctValues } from "./tableFilters";
 import "./filters.css";
 import type { WorksheetView } from "../../lib/worksheet";
 import { readStorage, writeStorage } from "../../lib/storage";
+import { focusableControls, isTextEntry } from "../../lib/focus";
 import { TableStorageScope } from "./tableConfig";
 
 interface StoredWidths {
@@ -46,6 +48,21 @@ function decodeWidths(value: unknown): StoredWidths | null {
     )
     ? (stored as StoredWidths)
     : null;
+}
+/** Buttons and fields a Tab can reach inside a cell, header sort and filter included. */
+function tabbableControls(cell: HTMLElement) {
+  return focusableControls(cell).filter((control) => control.tabIndex >= 0);
+}
+/** Cell at a grid position; a position covered by a row or column span resolves to the spanning cell. */
+function cellAt(table: HTMLTableElement, row: number, col: number) {
+  for (let r = row; r >= Math.max(-1, row - 50); r--)
+    for (let c = col; c >= 0; c--) {
+      const cell = table.querySelector<HTMLTableCellElement>(
+        `[data-row="${r}"][data-col="${c}"]`,
+      );
+      if (cell && r + cell.rowSpan > row && c + cell.colSpan > col) return cell;
+    }
+  return null;
 }
 
 /** Workbook layout renderer; deliberately has no sorting/filtering that could move original cells. */
@@ -304,26 +321,33 @@ export function DataTable<T>({
     setResized(null);
     writeStorage(storageKey, null);
   }
-  function startResize(event: PointerEvent<HTMLSpanElement>, id: string) {
-    event.preventDefault();
-    const cells = [...event.currentTarget.closest("tr")!.children];
-    // Freeze every column at its rendered width so only the dragged one changes.
-    const base = Object.fromEntries(
+  /** Freeze every column at its rendered width so only the changed one moves. */
+  function measuredWidths(headerRow: Element) {
+    const cells = [...headerRow.children] as HTMLElement[];
+    return Object.fromEntries(
       columns.map((column, index) => [
         column.id,
-        widths?.[column.id] ?? (cells[index] as HTMLElement).offsetWidth,
+        widths?.[column.id] ?? cells[index].offsetWidth,
       ]),
     );
+  }
+  function withWidth(
+    base: Record<string, number>,
+    id: string,
+    width: number,
+  ): StoredWidths {
+    return {
+      key: storageKey + "\n" + columnKey,
+      widths: { ...base, [id]: Math.max(40, Math.round(width)) },
+    };
+  }
+  function startResize(event: PointerEvent<HTMLSpanElement>, id: string) {
+    event.preventDefault();
+    const base = measuredWidths(event.currentTarget.closest("tr")!);
     const startX = event.clientX;
     let latest: StoredWidths | null = null;
     const move = (moveEvent: globalThis.PointerEvent) => {
-      latest = {
-        key: storageKey + "\n" + columnKey,
-        widths: {
-          ...base,
-          [id]: Math.max(40, Math.round(base[id] + moveEvent.clientX - startX)),
-        },
-      };
+      latest = withWidth(base, id, base[id] + moveEvent.clientX - startX);
       setResized(latest);
     };
     const stop = () => {
@@ -339,6 +363,207 @@ export function DataTable<T>({
   const resizedWidth = widths
     ? Object.values(widths).reduce((sum, width) => sum + width, 0)
     : 0;
+
+  // Excel-style keyboard: one Tab stop per table and arrows/Tab move between cells.
+  // The stop is set in the DOM after each render, so moving it never re-renders rows,
+  // and rows that come and go (queries, filters, virtual scrolling) never leave the table without one.
+  const tableRef = useRef<HTMLTableElement>(null);
+  const activeCell = useRef({ row: 0, col: 0 });
+  const pendingFocus = useRef(false);
+  function setTabStop(cell: HTMLElement) {
+    for (const other of tableRef.current!.querySelectorAll<HTMLElement>(
+      '[data-row][tabindex="0"]',
+    ))
+      if (other !== cell) other.tabIndex = -1;
+    cell.tabIndex = 0;
+  }
+  function markCell(cell: HTMLElement) {
+    setTabStop(cell);
+    activeCell.current = {
+      row: Number(cell.dataset.row),
+      col: Number(cell.dataset.col),
+    };
+  }
+  /** Focus a cell; `into` lands on its first or last button instead, as Tab does. */
+  function goTo(row: number, col: number, into?: "first" | "last") {
+    const table = tableRef.current!;
+    const selection = window.getSelection();
+    if (selection?.anchorNode && table.contains(selection.anchorNode))
+      selection.removeAllRanges();
+    const cell = cellAt(table, row, col);
+    if (cell) {
+      markCell(cell);
+      const controls = into ? tabbableControls(cell) : [];
+      ((into === "last" ? controls.at(-1) : controls[0]) ?? cell).focus();
+    } else if (windowed) {
+      // Virtual rows are drawn on scroll; the effect below focuses the cell once it exists.
+      activeCell.current = { row, col };
+      pendingFocus.current = true;
+      const element = overflowRef.current!;
+      element.scrollTop = Math.max(
+        0,
+        row * rowHeight - element.clientHeight / 2,
+      );
+    }
+  }
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!table) return;
+    const { row, col } = activeCell.current;
+    const cell = cellAt(table, row, col);
+    if (cell && pendingFocus.current) {
+      pendingFocus.current = false;
+      markCell(cell);
+      cell.focus();
+      return;
+    }
+    const stop =
+      cell ??
+      table.querySelector<HTMLElement>(
+        `th[data-row="-1"][data-col="${Math.min(col, columns.length - 1)}"]`,
+      );
+    if (stop) setTabStop(stop);
+  });
+  function onGridKeyDown(event: KeyboardEvent<HTMLTableElement>) {
+    if (event.defaultPrevented || isTextEntry(event.target)) return;
+    const table = event.currentTarget;
+    const cell = (event.target as HTMLElement).closest<HTMLTableCellElement>(
+      "[data-row]",
+    );
+    if (!cell || !table.contains(cell)) return;
+    const row = Number(cell.dataset.row);
+    const col = Number(cell.dataset.col);
+    const onCell = event.target === cell;
+    const { key, altKey, shiftKey } = event;
+    const ctrl = event.ctrlKey || event.metaKey;
+    if (altKey && key === "ArrowDown") {
+      event.preventDefault();
+      table
+        .querySelector<HTMLElement>(
+          `th[data-row="-1"][data-col="${col}"] .table-column-filter`,
+        )
+        ?.click();
+      return;
+    }
+    if (row === -1 && shiftKey && /^Arrow(Left|Right)$/.test(key)) {
+      event.preventDefault();
+      const base = measuredWidths(cell.parentElement!);
+      const id = columns[col].id;
+      const next = withWidth(
+        base,
+        id,
+        base[id] + (key === "ArrowLeft" ? -10 : 10),
+      );
+      setResized(next);
+      writeStorage(storageKey, next);
+      return;
+    }
+    if (onCell && (key === "Enter" || key === "F2")) {
+      event.preventDefault();
+      if (row === -1)
+        return void cell.querySelector<HTMLElement>(".sort-button")?.click();
+      const [control] = focusableControls(cell);
+      // No control inside: Enter opens the row the same way a double click does.
+      if (control) control.focus();
+      else
+        cell.parentElement?.dispatchEvent(
+          new MouseEvent("dblclick", { bubbles: true }),
+        );
+      return;
+    }
+    if (ctrl && key.toLowerCase() === "c") {
+      // Select the cell so the browser's own copy takes its text.
+      if (onCell && !window.getSelection()?.toString())
+        window.getSelection()?.selectAllChildren(cell);
+      return;
+    }
+    const tab = key === "Tab" && !altKey && !ctrl;
+    if (
+      !tab &&
+      (altKey || shiftKey || (ctrl && key !== "Home" && key !== "End"))
+    )
+      return;
+    const last = columns.length - 1;
+    // Header first, then body rows in screen order (grouping may reorder them).
+    const order = windowed
+      ? null
+      : [
+          -1,
+          ...[...table.tBodies].flatMap((body) =>
+            [...body.rows]
+              .map((tableRow) =>
+                tableRow.querySelector("[data-row]")?.getAttribute("data-row"),
+              )
+              .filter((value) => value != null)
+              .map(Number),
+          ),
+        ];
+    const position = (value: number) => (order ? order.indexOf(value) : value);
+    const rowAt = (index: number) => (order ? order[index] : index);
+    const lowest = order ? 0 : -1;
+    const highest = order ? order.length - 1 : rows.length - 1;
+    const vertical = (delta: number) => {
+      let index = Math.min(highest, Math.max(lowest, position(row) + delta));
+      // Skip positions covered by the current cell's own row span.
+      while (index !== position(row)) {
+        const next = cellAt(table, rowAt(index), col);
+        if (!next || next !== cell) return goTo(rowAt(index), col);
+        index += Math.sign(delta);
+        if (index < lowest || index > highest) return;
+      }
+    };
+    const sideways = (delta: number) => {
+      for (let next = col + delta; next >= 0 && next <= last; next += delta)
+        if (cellAt(table, row, next) !== cell) return goTo(row, next);
+    };
+    const page = Math.max(
+      1,
+      Math.floor(
+        (overflowRef.current?.clientHeight || 400) /
+          Math.max(cell.offsetHeight, 24),
+      ) - 1,
+    );
+    if (tab) {
+      const step = shiftKey ? -1 : 1;
+      const into = shiftKey ? "last" : "first";
+      const controls = tabbableControls(cell);
+      const index = controls.indexOf(event.target as HTMLElement);
+      // A cell's own buttons come first; from the cell itself Tab enters them.
+      if (controls[index + step] && (index >= 0 || !shiftKey)) return;
+      const inRow = (value: number) => [
+        ...table.querySelectorAll<HTMLElement>(`[data-row="${value}"]`),
+      ];
+      const sibling = inRow(row)[inRow(row).indexOf(cell) + step];
+      if (sibling) {
+        event.preventDefault();
+        return goTo(row, Number(sibling.dataset.col), into);
+      }
+      const next = position(row) + step;
+      // Past the first or last cell, Tab leaves the table as usual.
+      if (next < lowest || next > highest) return;
+      event.preventDefault();
+      const cells = inRow(rowAt(next));
+      const edge = shiftKey ? cells.at(-1) : cells[0];
+      return goTo(
+        rowAt(next),
+        edge ? Number(edge.dataset.col) : shiftKey ? last : 0,
+        into,
+      );
+    }
+    const moves: Record<string, () => void> = {
+      ArrowLeft: () => sideways(-1),
+      ArrowRight: () => sideways(1),
+      ArrowUp: () => vertical(-1),
+      ArrowDown: () => vertical(1),
+      PageUp: () => vertical(-page),
+      PageDown: () => vertical(page),
+      Home: () => goTo(ctrl ? rowAt(Math.min(highest, lowest + 1)) : row, 0),
+      End: () => goTo(ctrl ? rowAt(highest) : row, last),
+    };
+    if (!moves[key]) return;
+    event.preventDefault();
+    moves[key]();
+  }
   function renderRow(row: T, index: number) {
     return (
       <tr
@@ -346,12 +571,15 @@ export function DataTable<T>({
         key={rowKey(row, index)}
         aria-rowindex={windowed ? index + 2 : undefined}
       >
-        {columns.map((column) => {
+        {columns.map((column, colIndex) => {
           const span = column.cellSpan?.(row, index);
           if (span?.rowSpan === 0 || span?.colSpan === 0) return null;
           return (
             <td
               key={column.id}
+              data-row={index}
+              data-col={colIndex}
+              tabIndex={-1}
               rowSpan={span?.rowSpan}
               colSpan={span?.colSpan}
               className={column.className}
@@ -389,6 +617,14 @@ export function DataTable<T>({
         aria-busy={fetching || undefined}
       >
         <table
+          ref={tableRef}
+          onKeyDown={onGridKeyDown}
+          onFocus={(event) => {
+            const cell = (event.target as HTMLElement).closest<HTMLElement>(
+              "[data-row]",
+            );
+            if (cell && event.currentTarget.contains(cell)) markCell(cell);
+          }}
           className={`ui-data-table${layout === "fixed" ? " ui-data-table-fixed" : ""}${widths ? " ui-data-table-resized" : ""}`}
           aria-label={label}
           aria-rowcount={windowed ? rows.length + 1 : undefined}
@@ -400,11 +636,14 @@ export function DataTable<T>({
         >
           <thead>
             <tr>
-              {columns.map((column) => {
+              {columns.map((column, colIndex) => {
                 const active = sorting?.columnId === column.id;
                 return (
                   <th
                     key={column.id}
+                    data-row={-1}
+                    data-col={colIndex}
+                    tabIndex={-1}
                     style={{
                       textAlign: column.align,
                       minWidth: widths ? undefined : column.minWidth,

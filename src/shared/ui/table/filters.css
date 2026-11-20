@@ -199,3 +199,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Keyboard grid: the active cell shows an inset ring; focus scrolling clears the sticky header. */
+.ui-data-table :is(td, th)[data-row]:focus-visible {
+  outline: 2px solid #69b9f5;
+  outline-offset: -2px;
+}
+.table-overflow {
+  scroll-padding-top: 40px;
+}
+/* The filter list row under the keyboard is highlighted, not just its small checkbox. */
+.grid-popup .ui-field:has(input[type="checkbox"]:focus-visible) {
+  background: #3498db2e;
+  box-shadow: inset 2px 0 #69b9f5;
+}
+.grid-popup input[type="checkbox"]:focus-visible {
+  outline: none;
+}

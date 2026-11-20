@@ -131,6 +131,10 @@
 .section-tile:disabled {
   opacity: 0.5;
 }
+/* The bar scrolls sideways and would clip an outside ring. */
+.section-tile:focus-visible {
+  outline-offset: -3px;
+}
 .header-session {
   display: flex;
   flex-shrink: 0;
@@ -342,6 +346,12 @@
 }
 .nav-children a.active:hover {
   background: #4284d2;
+}
+/* The sidebar and rail clip sideways overflow, so their rings sit inside. */
+.nav-children a:focus-visible,
+.sidebar-rail-link:focus-visible,
+.sidebar-rail-panel a:focus-visible {
+  outline-offset: -2px;
 }
 .mobile-close {
   display: none;
@@ -739,4 +749,39 @@
   :root {
     --header-height: 68px;
   }
+}
+.keyboard-help {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px 24px;
+  font-size: 12px;
+}
+.keyboard-help h3 {
+  margin-bottom: 8px;
+  color: var(--mes-accent);
+  font-size: 13px;
+}
+.keyboard-help dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+.keyboard-help dl > div {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) 1fr;
+  gap: 10px;
+  align-items: baseline;
+}
+.keyboard-help dd {
+  margin: 0;
+  color: var(--mes-muted);
+}
+.keyboard-help kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid #ffffff2e;
+  border-radius: 4px;
+  background: #ffffff0f;
+  font: inherit;
+  white-space: nowrap;
 }

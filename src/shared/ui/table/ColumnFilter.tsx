@@ -35,8 +35,15 @@ export function ColumnFilter({
   if (query && append)
     (current || values).forEach((value) => chosen.add(value));
   const checkedCount = visible.filter((value) => checked.has(value)).length;
+  const apply = () =>
+    onApply(values.every((value) => chosen.has(value)) ? null : [...chosen]);
   return (
-    <GridPopup anchor={anchor} title={`Filtrar ${title}`} onClose={onClose}>
+    <GridPopup
+      anchor={anchor}
+      title={`Filtrar ${title}`}
+      onClose={onClose}
+      onSubmit={() => chosen.size && apply()}
+    >
       {current && (
         <Button
           variant="plain"
@@ -124,11 +131,7 @@ export function ColumnFilter({
           size="sm"
           variant="primary"
           disabled={!chosen.size}
-          onClick={() =>
-            onApply(
-              values.every((value) => chosen.has(value)) ? null : [...chosen],
-            )
-          }
+          onClick={apply}
         >
           Aplicar
         </Button>

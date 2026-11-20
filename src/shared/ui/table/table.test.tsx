@@ -228,4 +228,64 @@ describe("tabla compartida con modelos ajenos a Materiales", () => {
     render(<Example />);
     expect(screen.getByRole("table")).not.toHaveClass("ui-data-table-resized");
   });
+  it("se recorre con el teclado como una hoja: una parada de Tab, flechas y Enter para ordenar", () => {
+    render(<Example />);
+    const table = screen.getByRole("table", { name: "Clientes" });
+    const press = (key: string) =>
+      fireEvent.keyDown(document.activeElement!, { key });
+    const stops = () => table.querySelectorAll('[tabindex="0"]');
+    expect(stops()).toHaveLength(1);
+    expect(
+      within(table).getByRole("button", { name: "Cantidad" }),
+    ).not.toHaveAttribute("tabindex");
+    (stops()[0] as HTMLElement).focus();
+    expect(document.activeElement).toHaveTextContent("Cliente 10");
+    press("ArrowRight");
+    expect(document.activeElement).toHaveTextContent("100");
+    press("ArrowDown");
+    expect(document.activeElement).toHaveTextContent("2");
+    press("ArrowUp");
+    press("ArrowUp");
+    expect(document.activeElement).toHaveAttribute("data-row", "-1");
+    press("Enter");
+    expect(
+      screen.getByRole("columnheader", { name: /Cantidad/ }),
+    ).toHaveAttribute("aria-sort", "ascending");
+    press("Home");
+    expect(document.activeElement).toHaveTextContent("Nombre");
+    press("End");
+    press("ArrowDown");
+    expect(document.activeElement).toHaveAttribute("data-col", "1");
+    expect(stops()).toHaveLength(1);
+    // Tab walks cells like a sheet and only leaves past the last one.
+    press("Home");
+    press("Tab");
+    expect(document.activeElement).toHaveAttribute("data-col", "1");
+    press("Tab");
+    expect(document.activeElement).toHaveAttribute("data-row", "1");
+    expect(document.activeElement).toHaveAttribute("data-col", "0");
+    fireEvent.keyDown(document.activeElement!, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toHaveAttribute("data-row", "0");
+    press("Tab");
+    press("Tab");
+    expect(fireEvent.keyDown(document.activeElement!, { key: "Tab" })).toBe(
+      true,
+    );
+  });
+  it("conserva una parada de Tab cuando la fila activa desaparece", async () => {
+    render(<Example />);
+    const table = screen.getByRole("table", { name: "Clientes" });
+    (table.querySelector('[tabindex="0"]') as HTMLElement).focus();
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+    expect(document.activeElement).toHaveAttribute("data-row", "1");
+    // The second page has a single row, so row 1 no longer exists.
+    await userEvent.click(
+      screen.getByRole("button", { name: "Página siguiente" }),
+    );
+    const stops = screen
+      .getByRole("table", { name: "Clientes" })
+      .querySelectorAll('[tabindex="0"]');
+    expect(stops).toHaveLength(1);
+    expect(stops[0]).toHaveAttribute("data-row", "-1");
+  });
 });
