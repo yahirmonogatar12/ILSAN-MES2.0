@@ -5,6 +5,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePersistentState } from "@/shared/hooks/usePersistentState";
+import { TableStorageScope } from "@/shared/ui/table/tableConfig";
 import { SESSION_EXPIRED_EVENT, userScope, type RuntimeMode } from "../runtime";
 import { createAuthGateway } from "./api";
 import type { Profile, ProfileUpdate } from "./types";
@@ -71,12 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (current?.username === updated.username)
       client.setQueryData(sessionKey, updated);
   }
+  const scope = userScope(mode, session.data?.username || "anonymous");
   return (
     <AuthContext.Provider
       value={{
         mode,
         profile: session.data || null,
-        scope: userScope(mode, session.data?.username || "anonymous"),
+        scope,
         checking: session.isPending,
         error: session.error,
         gateway,
@@ -87,7 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         retry: () => session.refetch(),
       }}
     >
-      {children}
+      <TableStorageScope.Provider value={scope}>
+        {children}
+      </TableStorageScope.Provider>
     </AuthContext.Provider>
   );
 }

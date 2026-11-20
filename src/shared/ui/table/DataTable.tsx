@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUpDown, Filter, LoaderCircle } from "lucide-react";
 import {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -8,6 +9,7 @@ import {
   type CSSProperties,
   type HTMLAttributes,
   type Key,
+  type PointerEvent,
   type ReactNode,
 } from "react";
 import { Button, IconButton } from "../Button";
@@ -26,6 +28,25 @@ import { groupTableRows } from "./tableGroups";
 import { cellText, distinctValues } from "./tableFilters";
 import "./filters.css";
 import type { WorksheetView } from "../../lib/worksheet";
+import { readStorage, writeStorage } from "../../lib/storage";
+import { TableStorageScope } from "./tableConfig";
+
+interface StoredWidths {
+  key: string;
+  widths: Record<string, number>;
+}
+/** Persisted input is untrusted: keep it only when every width is a non-negative number. */
+function decodeWidths(value: unknown): StoredWidths | null {
+  const stored = value as Partial<StoredWidths> | null;
+  return typeof stored?.key === "string" &&
+    stored.widths &&
+    typeof stored.widths === "object" &&
+    Object.values(stored.widths).every(
+      (width) => typeof width === "number" && width >= 0,
+    )
+    ? (stored as StoredWidths)
+    : null;
+}
 
 /** Workbook layout renderer; deliberately has no sorting/filtering that could move original cells. */
 export function WorksheetTable({
@@ -271,6 +292,53 @@ export function DataTable<T>({
     () => new Map(rows.map((row, index) => [row, index])),
     [rows],
   );
+  // Widths are remembered per user and table label in this browser; a column change discards them.
+  const storageKey = `mes-v2:table-widths:${useContext(TableStorageScope)}:${label}`;
+  const columnKey = columns.map((column) => column.id).join("\n");
+  const [resized, setResized] = useState(() =>
+    decodeWidths(readStorage<unknown>(storageKey, null)),
+  );
+  const widths =
+    resized?.key === storageKey + "\n" + columnKey ? resized.widths : null;
+  function resetWidths() {
+    setResized(null);
+    writeStorage(storageKey, null);
+  }
+  function startResize(event: PointerEvent<HTMLSpanElement>, id: string) {
+    event.preventDefault();
+    const cells = [...event.currentTarget.closest("tr")!.children];
+    // Freeze every column at its rendered width so only the dragged one changes.
+    const base = Object.fromEntries(
+      columns.map((column, index) => [
+        column.id,
+        widths?.[column.id] ?? (cells[index] as HTMLElement).offsetWidth,
+      ]),
+    );
+    const startX = event.clientX;
+    let latest: StoredWidths | null = null;
+    const move = (moveEvent: globalThis.PointerEvent) => {
+      latest = {
+        key: storageKey + "\n" + columnKey,
+        widths: {
+          ...base,
+          [id]: Math.max(40, Math.round(base[id] + moveEvent.clientX - startX)),
+        },
+      };
+      setResized(latest);
+    };
+    const stop = () => {
+      if (latest) writeStorage(storageKey, latest);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+  }
+  const resizedWidth = widths
+    ? Object.values(widths).reduce((sum, width) => sum + width, 0)
+    : 0;
   function renderRow(row: T, index: number) {
     return (
       <tr
@@ -321,10 +389,14 @@ export function DataTable<T>({
         aria-busy={fetching || undefined}
       >
         <table
-          className={`ui-data-table${layout === "fixed" ? " ui-data-table-fixed" : ""}`}
+          className={`ui-data-table${layout === "fixed" ? " ui-data-table-fixed" : ""}${widths ? " ui-data-table-resized" : ""}`}
           aria-label={label}
           aria-rowcount={windowed ? rows.length + 1 : undefined}
-          style={{ minWidth }}
+          style={
+            widths
+              ? { width: resizedWidth, minWidth: resizedWidth }
+              : { minWidth }
+          }
         >
           <thead>
             <tr>
@@ -335,8 +407,8 @@ export function DataTable<T>({
                     key={column.id}
                     style={{
                       textAlign: column.align,
-                      minWidth: column.minWidth,
-                      width: column.width,
+                      minWidth: widths ? undefined : column.minWidth,
+                      width: widths?.[column.id] ?? column.width,
                     }}
                     aria-sort={
                       column.sortValue && onSortChange
@@ -411,6 +483,13 @@ export function DataTable<T>({
                           />
                         )}
                     </div>
+                    <span
+                      className="table-column-resizer"
+                      aria-hidden="true"
+                      title="Arrastra para cambiar el ancho · doble clic restablece"
+                      onPointerDown={(event) => startResize(event, column.id)}
+                      onDoubleClick={resetWidths}
+                    />
                   </th>
                 );
               })}

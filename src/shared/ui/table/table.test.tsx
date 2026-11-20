@@ -1,5 +1,7 @@
 import {
   act,
+  cleanup,
+  fireEvent,
   render,
   renderHook,
   screen,
@@ -205,5 +207,25 @@ describe("tabla compartida con modelos ajenos a Materiales", () => {
         { columnId: "fecha", direction: "asc" },
       ).map((row) => row.id),
     ).toEqual([3, 1, 2]);
+  });
+  it("cambia el ancho de una columna al arrastrar su borde, lo recuerda y lo restablece con doble clic", () => {
+    const { unmount } = render(<Example />);
+    const header = screen.getByRole("columnheader", { name: /Cantidad/ });
+    const handle = header.querySelector(".table-column-resizer")!;
+    fireEvent.pointerDown(handle, { clientX: 100 });
+    fireEvent.pointerMove(window, { clientX: 250 });
+    fireEvent.pointerUp(window);
+    fireEvent.pointerMove(window, { clientX: 400 });
+    expect(header).toHaveStyle({ width: "150px" });
+    // Remembered in this browser: a new mount restores the dragged width.
+    unmount();
+    render(<Example />);
+    const restored = screen.getByRole("columnheader", { name: /Cantidad/ });
+    expect(restored).toHaveStyle({ width: "150px" });
+    fireEvent.doubleClick(restored.querySelector(".table-column-resizer")!);
+    expect(screen.getByRole("table")).not.toHaveClass("ui-data-table-resized");
+    cleanup();
+    render(<Example />);
+    expect(screen.getByRole("table")).not.toHaveClass("ui-data-table-resized");
   });
 });

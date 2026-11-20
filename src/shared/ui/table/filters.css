@@ -178,3 +178,24 @@
   background: #3498db33;
   color: #b9e0ff;
 }
+/* Column resize: the sticky th anchors the handle; resized tables use the dragged pixel widths. */
+.table-column-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+}
+.table-column-resizer:hover {
+  background: var(--mes-accent);
+}
+.ui-data-table-resized {
+  table-layout: fixed;
+}
+.ui-data-table-resized th,
+.ui-data-table-resized td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
