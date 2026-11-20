@@ -2,12 +2,14 @@ import { request, requestFile, saveDownload } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import {
   batchResult,
+  costParam,
+  costResult,
   pieceResult,
   traceParams,
   traceResult,
   validateFile,
 } from "./model";
-import type { Filters, TraceView } from "./types";
+import type { CostView, Filters, TraceView } from "./types";
 
 function fileBody(file: File, excel = false) {
   const issue = validateFile(file);
@@ -63,6 +65,29 @@ export function createTrackingApi(mode: RuntimeMode) {
             }),
           { signal },
         ),
+      );
+    },
+    /** Real cost by default; the estimate comes in separate fields and is never added to it. */
+    async cost(
+      view: CostView,
+      value: string,
+      estimated: boolean,
+      signal?: AbortSignal,
+    ) {
+      return costResult(
+        view,
+        mode === "demo"
+          ? (await import("./demo")).cost(view, estimated, signal)
+          : await request(
+              "/api/trazabilidad_pcb/v2/" +
+                view +
+                "?" +
+                new URLSearchParams({
+                  [costParam[view]]: value.trim(),
+                  estimado: estimated ? "1" : "",
+                }),
+              { signal },
+            ),
       );
     },
     async exportLookup(codigo: string) {

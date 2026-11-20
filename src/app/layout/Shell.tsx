@@ -321,15 +321,15 @@ export function Shell({
                     if (event.key === "Escape") setRailGroup(null);
                   }}
                 >
-                  <button
-                    type="button"
+                  <Button
+                    variant="plain"
                     className={`sidebar-rail-link ${items.some((module) => matchPath(module.path, location.pathname)) ? "active" : ""}`}
                     aria-label={group}
                     aria-expanded={open}
                     onClick={() => setRailGroup(group)}
                   >
                     <ListOrdered size={20} aria-hidden="true" />
-                  </button>
+                  </Button>
                   {open && (
                     <div className="sidebar-rail-flyout">
                       <div className="sidebar-rail-panel">

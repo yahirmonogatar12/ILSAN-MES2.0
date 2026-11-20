@@ -38,12 +38,14 @@ export function SearchBar({
   pending,
   refresh,
   actions,
+  title,
 }: {
   kind: ListKind | "qa";
   state: FilterState;
   pending?: boolean;
   refresh?: () => void;
   actions?: ReactNode;
+  title?: string;
 }) {
   const fields: FilterField<Filters>[] = [
     {
@@ -105,6 +107,7 @@ export function SearchBar({
   return (
     <>
       <FilterBar
+        title={title}
         actions={actions}
         fields={fields}
         values={state.draft}

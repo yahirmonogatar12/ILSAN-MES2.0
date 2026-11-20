@@ -3,6 +3,7 @@ import * as http from "@/core/http";
 import { createTrackingApi } from "./api";
 import {
   batchResult,
+  costResult,
   pieceNotice,
   pieceResult,
   traceParams,
@@ -216,5 +217,49 @@ describe("Contratos de Product Tracking", () => {
       validateFile({ name: "grande.xlsx", size: 10 * 1024 * 1024 + 1 } as File),
     ).toContain("10 MB");
     expect(validateFile(new File(["x"], "datos.XLSM"))).toBe("");
+  });
+});
+describe("Verificación BOM 2.0", () => {
+  it("envía el parámetro de cada búsqueda y aplana las etapas de una PCB", async () => {
+    const etapas = [
+      {
+        etapa: "SMT",
+        estado: "VINCULADA",
+        items: [{ etapa: "SMT", costo: 0.5 }],
+      },
+      { etapa: "IMD", estado: "PENDIENTE", lot_no: "", linea: "", items: [] },
+    ];
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        status: "success",
+        etapas,
+        totales: { costo_real: 0.5 },
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+    const result = await createTrackingApi("live").cost("pcb", " QR&1 ", true);
+    const [path] = fetcher.mock.calls[0] as unknown as [string];
+    const url = new URL(path, "http://mes");
+    expect(url.pathname).toBe("/backend/api/trazabilidad_pcb/v2/pcb");
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      qr: "QR&1",
+      estimado: "1",
+    });
+    expect(
+      result.items.map((row) => [row.etapa, row.estado, row.item_no]),
+    ).toEqual([
+      ["SMT", "VINCULADA", undefined],
+      ["IMD", "PENDIENTE", "Sin material vinculado"],
+    ]);
+    expect(
+      costResult("lote", { status: "success", items: [], totales: {} })
+        .costoEstimado,
+    ).toBeNull();
+    expect(() =>
+      costResult("etiqueta", {
+        status: "error",
+        message: "bolsa es obligatoria",
+      }),
+    ).toThrow("bolsa es obligatoria");
   });
 });

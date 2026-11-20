@@ -47,6 +47,8 @@ La vista por lote de producción consulta automáticamente al abrirla. La fecha 
 | Lote de proveedor  | /api/trazabilidad_pcb/por_proveedor | 5000           | 50000            |
 | Verificaciones     | /api/trazabilidad_pcb/historial_pcb | 200            | —                |
 
+La vista Verificación BOM 2.0 (costo), en `CostPanel.tsx`, consulta las tablas vb2\_ por PCB (`/api/trazabilidad_pcb/v2/pcb?qr=`), lote (`/v2/lote?lot_no=`) o etiqueta (`/v2/etiqueta?bolsa=`). Muestra el costo real; con `estimado=1` agrega la columna Costo estimado y su total aparte, sin sumarlos. Por PCB, una etapa sin material aparece como una fila "Sin material vinculado". No tiene exportación, igual que la pantalla original.
+
 Las tres exportaciones usan la ruta de consulta seguida de /export. Los filtros conservan los nombres pcb, proceso, lot_no, part_no, material, fecha_inicio y fecha_fin según la vista. El historial recibe input_main_id y proceso. Las respuestas de negocio con status=error se presentan como errores.
 
 ## Tablas y comprobaciones

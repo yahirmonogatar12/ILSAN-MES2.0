@@ -4,6 +4,7 @@ import { number as numeric, record } from "@/shared/lib/parse";
 
 import type {
   BatchResult,
+  CostView,
   Filters,
   ListResult,
   Piece,
@@ -131,6 +132,42 @@ export function batchResult(value: unknown): BatchResult {
     total: numeric(data.total),
     encontrados: numeric(data.encontrados),
     no_encontrados: numeric(data.no_encontrados),
+  };
+}
+export const costParam: Record<CostView, string> = {
+  pcb: "qr",
+  lote: "lot_no",
+  etiqueta: "bolsa",
+};
+export const money = (value: unknown) =>
+  value == null || value === "" ? "—" : "$" + numeric(value).toFixed(4);
+export function costResult(view: CostView, value: unknown) {
+  const data = record(value);
+  if (data.status === "error")
+    throw new Error(text(data.message) || "No se pudo completar la consulta.");
+  const groups: Record<string, unknown>[] =
+    view === "pcb" ? list(data.etapas, record) : [{ items: data.items }];
+  // The PCB lookup groups rows by stage; a stage without material keeps one row, as in the legacy screen.
+  const items = groups.flatMap((group) => {
+    const rows = list(group.items, traceRow);
+    if (!rows.length && view === "pcb")
+      return [
+        traceRow({
+          etapa: group.etapa,
+          estado: group.estado,
+          lot_no: group.lot_no,
+          linea: group.linea,
+          item_no: "Sin material vinculado",
+        }),
+      ];
+    return rows.map((row) => ({ ...row, estado: string(group, "estado") }));
+  });
+  const totals = record(data.totales);
+  return {
+    items,
+    costoReal: numeric(totals.costo_real),
+    costoEstimado: totals.costo_estimado ?? null,
+    sinCostoReal: numeric(totals.filas_sin_costo_real),
   };
 }
 export function traceParams(view: TraceView, filters: Filters) {

@@ -1,4 +1,6 @@
 export type TraceView = "por_pcb" | "materiales" | "por_proveedor";
+/** Verificación BOM 2.0 lookups: /api/trazabilidad_pcb/v2/{pcb|lote|etiqueta}. */
+export type CostView = "pcb" | "lote" | "etiqueta";
 export type Filters = Record<string, string>;
 export type TraceRow = Record<string, string | number | boolean | null>;
 

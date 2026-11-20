@@ -2,6 +2,7 @@ import { exportSpreadsheet, spreadsheetEngine } from "@/shared/lib/spreadsheet";
 import { stageNames, today, validateFile } from "./model";
 import type {
   BatchResult,
+  CostView,
   Filters,
   ListResult,
   Piece,
@@ -273,4 +274,67 @@ export async function exportTrace(view: TraceView, filters: Filters) {
       rows: [keys, ...data.items.map((row) => keys.map((key) => row[key]))],
     },
   ]);
+}
+/** Raw /api/trazabilidad_pcb/v2 shape: one row with real cost, one that only has an estimate. */
+export function cost(view: CostView, estimated: boolean, signal?: AbortSignal) {
+  signal?.throwIfAborted();
+  const lot = {
+    linea: "1",
+    lot_no: "SMT-" + today().slice(2).replaceAll("-", "") + "-001",
+  };
+  const items = [
+    {
+      etapa: "SMT",
+      ...lot,
+      item_no: "0010",
+      material: "EAH61515501",
+      bolsa: "20261111B001!001",
+      certeza: "EXACTA",
+      pcbs: 1,
+      cantidad: 2,
+      costo: 0.0248,
+      fuente_costo: "INVOICE",
+    },
+    {
+      etapa: "SMT",
+      ...lot,
+      item_no: "0020",
+      material: "EAE62822101",
+      bolsa: "",
+      certeza: "LOTE",
+      pcbs: 1,
+      cantidad: 1,
+      costo: null,
+      fuente_costo: "",
+      ...(estimated && {
+        costo_estimado: 0.0031,
+        fuente_estimado: "MATERIAL_COSTOS",
+      }),
+    },
+  ];
+  const totales = {
+    costo_real: 0.0248,
+    filas_sin_costo_real: 1,
+    ...(estimated && { costo_estimado: 0.0031 }),
+  };
+  if (view !== "pcb") return { status: "success", items, totales };
+  const stage = (etapa: string, estado: string) => ({
+    etapa,
+    estado,
+    linea: "",
+    lot_no: "",
+    items: [],
+  });
+  return {
+    status: "success",
+    etapas: [
+      { etapa: "SMT", estado: "VINCULADA", ...lot, items },
+      stage("IMD", "PENDIENTE"),
+      stage("ASSY", "PENDIENTE"),
+    ],
+    totales: {
+      costo_real: totales.costo_real,
+      ...(estimated && { costo_estimado: 0.0031 }),
+    },
+  };
 }

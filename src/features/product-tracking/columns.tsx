@@ -1,5 +1,5 @@
 import type { TableColumn } from "@/shared/ui";
-import { numeric, text } from "./model";
+import { money, numeric, text } from "./model";
 import { StatusBadge } from "./components";
 import type { Piece, PieceStage, Stage, TraceRow, TraceView } from "./types";
 export const stageColumns: TableColumn<PieceStage>[] = [
@@ -197,6 +197,48 @@ export const traceColumns: Record<TraceView, TableColumn<TraceRow>[]> = {
   por_pcb: proportional(pcbColumns),
   materiales: proportional(materialColumns),
   por_proveedor: proportional(supplierColumns),
+};
+/** Fixed-decimal cell, as in the legacy screen; `source` names the field shown as tooltip. */
+function fixed(
+  key: string,
+  header: string,
+  format: (value: unknown) => string,
+  source = "",
+): TableColumn<TraceRow> {
+  return {
+    id: key,
+    header,
+    width: 105,
+    sortValue: (row) => (row[key] == null ? null : numeric(row[key])),
+    textValue: (row) => format(row[key]),
+    cell: (row) => (
+      <span className="product-tracking-cell" title={text(row[source])}>
+        {format(row[key])}
+      </span>
+    ),
+  };
+}
+const costBase = [
+  column("etapa", "Etapa", 70),
+  column("estado", "Estado", 110),
+  column("lot_no", "Lote", 150),
+  column("linea", "Línea", 65),
+  column("item_no", "Partida BOM", 150),
+  column("material", "Material", 130),
+  column("bolsa", "Etiqueta", 180),
+  column("certeza", "Certeza", 90),
+  column("pcbs", "PCBs", 70, true),
+  fixed("cantidad", "Cantidad", (value) =>
+    value == null ? "—" : numeric(value).toFixed(4),
+  ),
+  fixed("costo", "Costo real", money, "fuente_costo"),
+];
+export const costColumns = {
+  real: proportional(costBase),
+  estimated: proportional([
+    ...costBase,
+    fixed("costo_estimado", "Costo estimado", money, "fuente_estimado"),
+  ]),
 };
 export const historyColumns = proportional([
   column("hora", "Hora", 90),

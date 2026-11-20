@@ -14,20 +14,13 @@ import {
   FormMessages,
   Modal,
   Page,
+  SelectField,
+  TableToolbar,
+  TextField,
   type TableColumn,
 } from "@/shared/ui";
-import {
-  ExportAction,
-  MutationDialog,
-  SearchBar,
-  Stats,
-} from "./components";
-import {
-  useFilters,
-  useListing,
-  useWarehouse,
-  type Warehouse,
-} from "./hooks";
+import { ExportAction, SearchBar, Stats } from "./components";
+import { useFilters, useListing, useWarehouse, type Warehouse } from "./hooks";
 import { columnsFor, type Field } from "./warehouseModel";
 import { DualLists } from "./DualLists";
 import { integer, number, returnRows, rowKey, text } from "./model";
@@ -260,11 +253,105 @@ function ReturnPrint({
   );
 }
 
+/** Inline capture, as in the legacy returns screen: registering does not hide the tables. */
+function ReturnCapture({ warehouse }: { warehouse: Warehouse }) {
+  const form = useForm<Row>({
+    initialValues: {
+      movement: "entry",
+      reason: "Exceso",
+      part: "",
+      quantity: "",
+    },
+    validate: (draft) => [
+      ...capture
+        .filter((field) => field.required && !text(draft[field.key]).trim())
+        .map((field) => field.label + " es obligatorio."),
+      ...(integer(draft.quantity) === null
+        ? ["La cantidad debe ser un entero mayor a cero."]
+        : []),
+    ],
+    onSubmit: async (draft) => {
+      const exit = draft.movement === "exit",
+        qty = integer(draft.quantity)!;
+      const result = await warehouse.api.registerReturn({
+        partNumber: text(draft.part).trim().toUpperCase(),
+        returnQty: exit ? 0 : qty,
+        lossQty: exit ? qty : 0,
+        movementType: exit ? "exit" : "entry",
+        reason: text(draft.reason) + (exit ? " / Salida retorno" : ""),
+        location: "",
+        remarks: "",
+        registeredBy:
+          warehouse.profile?.nombre_completo ||
+          warehouse.profile?.username ||
+          "Sistema",
+      });
+      warehouse.saved(
+        result,
+        exit
+          ? "Salida de retorno registrada."
+          : "Entrada de retorno registrada.",
+      );
+      // Movement and type stay selected for consecutive captures of the same kind.
+      form.setValues((previous) => ({ ...previous, part: "", quantity: "" }));
+    },
+  });
+  return (
+    <TableToolbar
+      title="Registro de retorno"
+      footer={<FormMessages errors={form.errors} error={form.error} />}
+    >
+      <form
+        className="filter-bar"
+        aria-label="Registro de retorno"
+        onSubmit={form.handleSubmit}
+      >
+        {capture.map((field) => {
+          const props = {
+            label: field.label,
+            value: text(form.values[field.key]),
+            required: field.required,
+            disabled: form.pending,
+            onChange: (
+              event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+            ) => form.setField(field.key, event.target.value),
+          };
+          return (
+            <div
+              key={field.key}
+              className={`filter-field filter-${field.options ? "select" : (field.type ?? "text")}`}
+            >
+              {field.options ? (
+                <SelectField {...props} options={field.options} />
+              ) : (
+                <TextField
+                  {...props}
+                  type={field.type}
+                  min={field.min}
+                  step={field.step}
+                />
+              )}
+            </div>
+          );
+        })}
+        <Button
+          size="sm"
+          variant="success"
+          type="submit"
+          loading={form.pending}
+        >
+          Registrar
+        </Button>
+      </form>
+    </TableToolbar>
+  );
+}
+
 export default function ReturnsPage() {
   const warehouse = useWarehouse();
   const state = useListing(warehouse, "returns");
   const { query, filters } = state;
-  const [dialog, setDialog] = useState<"capture" | "print" | null>(null);
+  const [printing, setPrinting] = useState(false);
   const entries = useMemo(
     () => returnRows(query.data?.rows ?? [], false),
     [query.data],
@@ -273,130 +360,87 @@ export default function ReturnsPage() {
     () => returnRows(query.data?.rows ?? [], true),
     [query.data],
   );
-  const close = () => setDialog(null);
   function list(exit: boolean) {
     const rows = exit ? exits : entries;
     const title = exit ? "Salidas de retorno" : "Entradas de retorno";
     return (
-      <>
-        <Card fill label={title}>
-          <DataGrid
-            label={title}
-            rows={rows}
-            columns={exit ? exitColumns : entryColumns}
-            rowKey={rowKey}
-            layout="fixed"
-            minWidth={820}
-            loading={query.isPending}
-            error={query.error}
-            onRetry={() => void query.refetch()}
-            resetKey={JSON.stringify(filters.applied)}
-            summary={(items) => (
-              <Stats
-                items={[
-                  ["Movimientos", items.length],
-                  [
-                    "Piezas",
-                    items.reduce(
-                      (sum, row) =>
-                        sum +
-                        number(exit ? row.loss_quantity : row.return_quantity),
-                      0,
-                    ),
-                  ],
-                ]}
-              />
+      <Card
+        fill
+        title={title}
+        actions={
+          <>
+            {exit && (
+              <Button size="sm" onClick={() => setPrinting(true)}>
+                Imprimir
+              </Button>
             )}
-          />
-        </Card>
-      </>
+            <ExportAction
+              run={() =>
+                warehouse.api.exportList(
+                  "returns",
+                  filters.applied,
+                  exit ? "exit" : "entry",
+                )
+              }
+              disabled={query.isFetching || !rows.length}
+            />
+          </>
+        }
+      >
+        <DataGrid
+          label={title}
+          rows={rows}
+          columns={exit ? exitColumns : entryColumns}
+          rowKey={rowKey}
+          layout="fixed"
+          minWidth={820}
+          loading={query.isPending}
+          error={query.error}
+          onRetry={() => void query.refetch()}
+          resetKey={JSON.stringify(filters.applied)}
+          summary={(items) => (
+            <Stats
+              items={[
+                ["Movimientos", items.length],
+                [
+                  "Piezas",
+                  items.reduce(
+                    (sum, row) =>
+                      sum +
+                      number(exit ? row.loss_quantity : row.return_quantity),
+                    0,
+                  ),
+                ],
+              ]}
+            />
+          )}
+        />
+      </Card>
     );
   }
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
-      <SearchBar
-        actions={
-          <>
-            <Button
-              size="sm"
-              variant="success"
-              onClick={() => setDialog("capture")}
-            >
-              Registrar retorno
-            </Button>
-            <Button size="sm" onClick={() => setDialog("print")}>
-              Imprimir salidas
-            </Button>
-            <ExportAction
-              label="Exportar entradas"
-              run={() =>
-                warehouse.api.exportList("returns", filters.applied, "entry")
-              }
-              disabled={query.isFetching || !entries.length}
-            />
-            <ExportAction
-              label="Exportar salidas"
-              run={() =>
-                warehouse.api.exportList("returns", filters.applied, "exit")
-              }
-              disabled={query.isFetching || !exits.length}
-            />
-          </>
-        }
-        kind="returns"
-        state={filters}
-        pending={query.isFetching}
-        refresh={() => void query.refetch()}
-      />
+      <div className="shipping-warehouse-return-top">
+        <ReturnCapture warehouse={warehouse} />
+        {/* Wrapper keeps the filter warning inside this column. */}
+        <div>
+          <SearchBar
+            title="Consulta de retorno"
+            kind="returns"
+            state={filters}
+            pending={query.isFetching}
+            refresh={() => void query.refetch()}
+          />
+        </div>
+      </div>
       <DualLists
+        columns
         label="Movimientos de retorno"
         left={{ label: "Entradas de retorno", content: list(false) }}
         right={{ label: "Salidas de retorno", content: list(true) }}
       />
-      {dialog === "capture" && (
-        <MutationDialog
-          title="Registrar retorno"
-          fields={capture}
-          close={close}
-          label="Registrar"
-          initial={{
-            movement: "entry",
-            reason: "Exceso",
-            part: "",
-            quantity: "",
-          }}
-          validate={(draft) =>
-            integer(draft.quantity) === null
-              ? ["La cantidad debe ser un entero mayor a cero."]
-              : []
-          }
-          run={async (draft) => {
-            const exit = draft.movement === "exit",
-              qty = integer(draft.quantity)!;
-            const result = await warehouse.api.registerReturn({
-              partNumber: text(draft.part).trim().toUpperCase(),
-              returnQty: exit ? 0 : qty,
-              lossQty: exit ? qty : 0,
-              movementType: exit ? "exit" : "entry",
-              reason: text(draft.reason) + (exit ? " / Salida retorno" : ""),
-              location: "",
-              remarks: "",
-              registeredBy:
-                warehouse.profile?.nombre_completo ||
-                warehouse.profile?.username ||
-                "Sistema",
-            });
-            warehouse.saved(
-              result,
-              exit
-                ? "Salida de retorno registrada."
-                : "Entrada de retorno registrada.",
-            );
-          }}
-        />
-      )}
-      {dialog === "print" && (
-        <ReturnPrint warehouse={warehouse} close={close} />
+      {printing && (
+        <ReturnPrint warehouse={warehouse} close={() => setPrinting(false)} />
       )}
     </Page>
   );

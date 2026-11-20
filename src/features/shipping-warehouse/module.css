@@ -44,6 +44,21 @@
   min-height: 0;
   gap: 10px;
 }
+.shipping-warehouse-return-top {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+}
+/* Same breakpoint as the side-by-side DualLists. */
+@media (max-width: 1100px) {
+  .shipping-warehouse-return-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.shipping-warehouse-dual-columns {
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .shipping-warehouse-dual-compact {
   display: flex;
   flex-direction: column;
