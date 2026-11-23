@@ -11,6 +11,7 @@ export function TabBar({
   activeId,
   onChange,
   onClose,
+  onDragOut,
 }: {
   id: string;
   label: string;
@@ -18,6 +19,8 @@ export function TabBar({
   activeId: string | null;
   onChange: (id: string) => void;
   onClose?: (id: string) => void;
+  /** A tab dragged away from the bar and released where nothing accepts it; `at` is the screen point. */
+  onDragOut?: (id: string, at: { x: number; y: number }) => void;
 }) {
   const strip = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -81,6 +84,28 @@ export function TabBar({
               className="ui-tab"
               title={item.title || item.label}
               onClick={() => onChange(item.id)}
+              draggable={!!onDragOut}
+              onDragStart={(event) => {
+                // A private type only: drop targets that read text/plain ignore a tab.
+                event.dataTransfer.setData("application/x-ui-tab", item.id);
+                event.dataTransfer.effectAllowed = "move";
+              }}
+              onDragEnd={(event) => {
+                const bar = strip.current?.getBoundingClientRect();
+                if (
+                  !onDragOut ||
+                  !bar ||
+                  event.dataTransfer.dropEffect !== "none"
+                )
+                  return;
+                // Released on or next to the bar counts as a cancelled drag.
+                if (
+                  event.clientY > bar.top - 40 &&
+                  event.clientY < bar.bottom + 40
+                )
+                  return;
+                onDragOut(item.id, { x: event.screenX, y: event.screenY });
+              }}
               onKeyDown={(event) => {
                 if (event.key === "ArrowRight") {
                   event.preventDefault();

@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import {
+  AppWindow,
   ChevronDown,
   Columns2,
   FlaskConical,
@@ -50,6 +51,8 @@ interface Props {
   onSplit?: (split: WorkspaceSplit | null) => void;
   onActivateTab: (id: string) => void;
   onCloseTab: (id: string) => void;
+  /** Opens a tab's module in its own window; `at` is where a dragged tab was released. */
+  onPopOut?: (id: string, at?: { x: number; y: number }) => void;
 }
 /** Application layout depends on descriptors, never on a business feature. */
 export function Shell({
@@ -62,6 +65,7 @@ export function Shell({
   onSplit,
   onActivateTab,
   onCloseTab,
+  onPopOut,
 }: Props) {
   const { mode, profile, logout } = useAuth();
   const location = useLocation();
@@ -399,7 +403,17 @@ export function Shell({
             activeId={activeTabId}
             onChange={onActivateTab}
             onClose={onCloseTab}
+            onDragOut={onPopOut}
           />
+          {onPopOut && activeTabId && (
+            <div className="workspace-split-controls">
+              <IconButton
+                label="Abrir en ventana (o arrastra la pestaña fuera de la barra)"
+                icon={<AppWindow size={15} />}
+                onClick={() => onPopOut(activeTabId)}
+              />
+            </div>
+          )}
           {onSplit && tabs.length > 1 && (
             <div className="workspace-split-controls">
               {split ? (

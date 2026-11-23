@@ -1,16 +1,16 @@
 # Comprobaciones
 
-| Comando                      | Qué verifica                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| `npm run typecheck`          | TypeScript estricto y variables/parámetros sin uso.                                 |
-| `npm test`                   | Contratos HTTP, reglas del módulo, UI compartida y flujo de Materiales.             |
-| `npm run test:tools`         | Generación sin sobrescrituras/traversal y detección de dependencias indebidas.      |
-| `npm run check:architecture` | Límites entre capas, componentes nativos duplicados, estilos de módulo y metadatos. |
-| `npm run check:scaffold`     | Generar, registrar y compilar un módulo independiente con la plantilla actual.      |
-| `npm run check`              | Todas las comprobaciones anteriores.                                                |
-| `npm run build`              | Comprobación de estructura, TypeScript y build de producción.                       |
-| `npm run test:browser`       | Compilación y recorridos Chromium en escritorio y móvil.                            |
-| `npm run format`             | Formato uniforme del código y documentación.                                        |
+| Comando                      | Qué verifica                                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `npm run typecheck`          | TypeScript estricto y variables/parámetros sin uso.                                                             |
+| `npm test`                   | Contratos HTTP, reglas del módulo, UI compartida y flujo de Materiales.                                         |
+| `npm run test:tools`         | Generación sin sobrescrituras/traversal y detección de dependencias indebidas.                                  |
+| `npm run check:architecture` | Límites entre capas, componentes nativos duplicados, estilos de módulo, metadatos y uso de `crypto.randomUUID`. |
+| `npm run check:scaffold`     | Generar, registrar y compilar un módulo independiente con la plantilla actual.                                  |
+| `npm run check`              | Todas las comprobaciones anteriores.                                                                            |
+| `npm run build`              | Comprobación de estructura, TypeScript y build de producción.                                                   |
+| `npm run test:browser`       | Compilación y recorridos Chromium en escritorio y móvil.                                                        |
+| `npm run format`             | Formato uniforme del código y documentación.                                                                    |
 
 ## Pruebas incluidas
 

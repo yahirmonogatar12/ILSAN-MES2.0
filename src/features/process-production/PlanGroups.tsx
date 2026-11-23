@@ -58,8 +58,11 @@ export function planGrouping({
     onDrop: (event: React.DragEvent<HTMLTableRowElement>) => {
       if (!canDrop) return;
       event.preventDefault();
+      const lot = event.dataTransfer.getData("text/plain");
+      // Other drags (a workspace tab) carry no lot and change nothing.
+      if (!lot) return;
       const [day, group] = key.split(":");
-      onMove(event.dataTransfer.getData("text/plain"), Number(group), day);
+      onMove(lot, Number(group), day);
     },
   });
   return {

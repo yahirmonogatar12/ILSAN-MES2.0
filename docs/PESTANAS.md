@@ -31,7 +31,19 @@ Se guarda `mes-v2:tabs:<scope>` con `{ ids, activeId }`. Se validan IDs contra l
 
 La barra usa `tablist`, `tab`, `tabpanel`, selección y referencias accesibles. Flechas cambian entre pestañas; Inicio/Fin seleccionan los extremos; Suprimir cierra la seleccionada. El botón de cierre es un control separado, sin botones anidados. El título completo permanece en el tooltip aunque el texto visible se recorte.
 
+`app/layout/KeyboardShortcuts.tsx` agrega atajos globales: Alt+1 secciones, Alt+2 lista de módulos, Alt+3 pestañas abiertas, Alt+4 primer campo del panel activo (fuera de tablas) y Alt+5 tabla del panel activo. `?` fuera de un campo de texto abre la ayuda con todos los atajos. Se ignoran con un diálogo abierto y con AltGr, que llega como Ctrl+Alt y escribe caracteres como @ o #. Con la vista dividida se usa el panel que tiene el foco.
+
+En la barra de secciones, ←/→ cambian de sección y muestran su lista en el menú lateral; ↓ entra a esa lista. En el menú lateral y en el menú compacto, ↑/↓ recorren grupos y módulos, y Enter abre el módulo. `app/layout/keyboard.ts` localiza cada destino con las clases del layout; si cambian esas clases, actualizar sus selectores. Los anillos de foco de la barra y del menú se dibujan hacia dentro porque ambos recortan su desbordamiento.
+
 La barra se desplaza horizontalmente cuando falta ancho. El documento conserva su tamaño y la tabla su scroll interno. En móvil, el selector **Sección** del menú permite abrir módulos de otras secciones aunque los botones grandes de la cabecera estén ocultos.
+
+## Módulo en ventana propia
+
+Una pestaña se abre en su propia ventana del navegador de dos formas: arrastrándola fuera de la barra de pestañas o con el botón **Abrir en ventana** junto a **Dividir**. La ventana carga la ruta del módulo con `?ventana` y `App` presenta solo `ModuleWindow`, sin cabecera, menús, pestañas, atajos ni asistente. Usa la misma sesión, el mismo modo y los mismos permisos (`ModuleAccess`), y el título de la ventana es el del módulo.
+
+`Workspace.popOut` abre `window.open(ruta?ventana, "mes-<id>", "popup,…")` en el punto donde se soltó la pestaña y cierra la pestaña en el workspace. El nombre de la ventana hace que volver a sacar el mismo módulo reutilice su ventana. Si el navegador bloquea la ventana emergente, la pestaña se conserva y un aviso pide permitir las ventanas emergentes del sitio.
+
+La ventana empieza con el módulo recién cargado: no hereda capturas, filtros ni páginas de la pestaña. Al cerrar la ventana el módulo regresa al MES como pestaña activa (también recién cargado): `popOut` revisa `window.closed` cada medio segundo. Si la página principal se recargó mientras la ventana seguía abierta, ese seguimiento se pierde y la ventana solo se cierra; el módulo se vuelve a abrir desde el menú.
 
 ## Al ampliar módulos
 

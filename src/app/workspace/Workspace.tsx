@@ -1,6 +1,7 @@
 import {
   Activity,
   Suspense,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -8,7 +9,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { PanelsTopLeft } from "lucide-react";
 import { ModuleAccess } from "@/core/modules/ModuleAccess";
 import { ActiveModuleContext } from "@/core/modules/ActiveModule";
@@ -28,8 +29,10 @@ import {
   LoadingPending,
   ModuleSkeleton,
   tabIds,
+  useToast,
 } from "@/shared/ui";
 import { Shell, type WorkspaceSplit } from "../layout/Shell";
+import { WINDOW_FLAG } from "./ModuleWindow";
 import { EMPTY_WORKSPACE } from "./tabs";
 import { useWorkspaceTabs } from "./useWorkspaceTabs";
 
@@ -86,6 +89,44 @@ function AuthorizedWorkspace({
   children,
 }: Props & { available: readonly ModuleDefinition[] }) {
   const tabs = useWorkspaceTabs(available, scope);
+  const toast = useToast();
+  const navigate = useNavigate();
+  const watching = useRef(new Set<number>());
+  useEffect(() => {
+    const timers = watching.current;
+    return () => timers.forEach((timer) => window.clearInterval(timer));
+  }, []);
+  /** Moves a tab to its own browser window (same session); the tab closes here. */
+  function popOut(id: string, at?: { x: number; y: number }) {
+    const module = tabs.opened.find((item) => item.id === id);
+    if (!module) return;
+    const width = Math.min(1400, window.screen.availWidth - 80);
+    const height = Math.min(900, window.screen.availHeight - 80);
+    const place = at
+      ? `,left=${Math.max(0, at.x - 120)},top=${Math.max(0, at.y - 20)}`
+      : "";
+    // The window name reuses an already open window of the same module.
+    const opened = window.open(
+      `${module.path}?${WINDOW_FLAG}`,
+      `mes-${module.id}`,
+      `popup,width=${width},height=${height}${place}`,
+    );
+    if (!opened)
+      return toast(
+        "El navegador bloqueó la ventana. Permite las ventanas emergentes de este sitio.",
+      );
+    if (split?.id === id) setSplit(null);
+    tabs.close(id);
+    // Closing the window brings the module back here as the active tab.
+    // ponytail: polls window.closed; lost if this page reloads (the window then just closes).
+    const timer = window.setInterval(() => {
+      if (!opened.closed) return;
+      window.clearInterval(timer);
+      watching.current.delete(timer);
+      void navigate(module.path);
+    }, 500);
+    watching.current.add(timer);
+  }
   // Split view: the active tab (route-driven) plus one more open tab beside it.
   // ponytail: not persisted across reloads; store it with the tabs if asked.
   const [split, setSplit] = useState<WorkspaceSplit | null>(null);
@@ -147,6 +188,7 @@ function AuthorizedWorkspace({
           tabs.activate(id);
         }}
         onCloseTab={tabs.close}
+        onPopOut={popOut}
       >
         <div
           ref={panels}

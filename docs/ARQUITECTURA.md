@@ -52,7 +52,7 @@ Reglas:
 - `app/registry.ts` es el único lugar de `app` que registra módulos de negocio.
 - El layout recibe descriptores; no conoce los campos, APIs ni reglas de Materiales.
 
-`npm run check:architecture` inspecciona imports y JSX con un parser, comprueba namespaces CSS, rutas/IDs duplicados y componentes nativos repetidos. Un módulo real con `permission: null` se rechaza; ese valor solo se admite en ejemplos `demoOnly`. Es una comprobación de estructura, no una auditoría de seguridad del backend.
+`npm run check:architecture` inspecciona imports y JSX con un parser, comprueba namespaces CSS, rutas/IDs duplicados y componentes nativos repetidos. Un módulo real con `permission: null` se rechaza; ese valor solo se admite en ejemplos `demoOnly`. También rechaza `crypto.randomUUID` fuera de `shared/lib/id.ts`, porque esa función solo existe en páginas https o localhost y la planta usa http en la red local. Es una comprobación de estructura, no una auditoría de seguridad del backend.
 
 ## Utilidades compartidas
 
@@ -63,6 +63,10 @@ Reglas:
 `isNumericValue` e `isNullableText` comprueban valores del JSON original sin convertirlos. `requiredText` y `requiredNumber` comprueban y convierten capturas obligatorias. `positiveIntegerList` comprueba listas de identificadores y recibe el mensaje del dominio. Las interfaces de cada módulo describen los campos estables y los decodificadores comprueban esa forma antes de entregar datos a la pantalla.
 
 `requiredInteger(value, field, minimum = 0)` comprueba enteros seguros y rechaza valores vacíos, booleanos, objetos, valores no finitos y cantidades inferiores al mínimo. Admite cadenas numéricas históricas. Los decodificadores del asistente usan mínimo cero para cuotas, consumo, tamaños y filas, y mínimo uno para identificadores. Las cuotas nulas conservan la herencia y los contadores ausentes conservan su valor predeterminado.
+
+`shared/lib/id.ts` expone `clientId()`, un UUID v4 que usa `crypto.randomUUID` cuando existe y `crypto.getRandomValues` en páginas http de la intranet. Usarlo para claves de envío, identificadores de progreso o filas locales.
+
+`shared/lib/focus.ts` ofrece `focusableControls(raíz)`, `isTextEntry(destino)` y `moveFocusWithArrows(evento, anterior, siguiente)`. Los usan la navegación por teclado de las tablas, los filtros de columna y los menús del layout.
 
 `shared/lib/text.ts` ofrece `text` para conversión simple, `jsonText` para serializar objetos, `containsText(value, search, locale?)` para coincidencias que conservan acentos y `normalizeSearch` para búsquedas sin acentos. Los consumidores deciden el recorte de espacios y la serialización previa. Los modelos mantienen sus exportaciones públicas mediante reexportaciones de estas utilidades. Las copias profundas usan `structuredClone` directamente.
 

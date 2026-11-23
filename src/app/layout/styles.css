@@ -573,6 +573,16 @@
 .sidebar-collapsed .main-shell {
   margin-left: var(--sidebar-rail-width);
 }
+/* A module opened in its own window: the same column the workspace panel gives it. */
+.module-window {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--mes-background);
+}
 #main-content {
   flex: 1;
   min-height: 0;

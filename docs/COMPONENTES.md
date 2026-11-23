@@ -140,6 +140,27 @@ Para filas agrupadas, `TableColumn.cellSpan(row, index)` puede devolver `rowSpan
 
 `layout="fixed"` permite ajustar todas las columnas al ancho disponible. Cada columna puede declarar `width` en porcentaje (sumar 100%) o píxeles; sin anchos declarados se distribuyen por igual. Los textos se acomodan completos en varias líneas y los controles de orden/filtro permanecen a la derecha del texto, centrados verticalmente y sin saltar abajo. `minWidth` define el ancho mínimo legible: por debajo, el desplazamiento horizontal permanece dentro de `.table-overflow`. `DataGrid` recibe estas mismas propiedades. El modo predeterminado sigue siendo `auto`, para los catálogos que necesitan dimensionar sus columnas por contenido.
 
+### Ancho de columnas
+
+Cada encabezado de `DataTable`, y por tanto de `DataGrid`, tiene un borde derecho que se arrastra para cambiar el ancho de esa columna. Doble clic en el borde restablece los anchos declarados. Al cambiar un ancho, las demás columnas quedan fijas en su ancho actual y la tabla toma la suma; si supera el contenedor, el desplazamiento horizontal sigue dentro de `.table-overflow`. Las celdas que no caben recortan su contenido.
+
+Los anchos se guardan en `localStorage` con la clave `mes-v2:table-widths:<scope>:<label>`. `TableStorageScope` (en `tableConfig.ts`) recibe el `scope` de sesión desde `AuthProvider`, así que cada usuario conserva los suyos en su navegador. `label` identifica la tabla: dos tablas con el mismo `label` y las mismas columnas comparten anchos. Si cambian los `id` de las columnas, los anchos guardados se ignoran.
+
+### Teclado en tablas
+
+`DataTable` se recorre como una hoja de cálculo:
+
+- Entrar: Tab llega a los botones de ordenar y filtrar del encabezado y después a la última celda activa. Si esa fila ya no existe por paginar, filtrar, consultar o desplazar `virtualRows`, la parada pasa al encabezado de la misma columna.
+- Moverse: flechas entre celdas; Inicio/Fin a la primera o última columna; Ctrl+Inicio/Ctrl+Fin a la primera o última fila; Re Pág/Av Pág una pantalla. En `virtualRows`, la tabla se desplaza hasta la fila antes de enfocarla.
+- Tab y Mayús+Tab avanzan celda por celda y entran a los botones de cada celda; después de la última celda salen de la tabla.
+- Encabezado: Enter ordena, Alt+↓ abre el filtro de la columna y Mayús+←/→ ajusta su ancho.
+- Celda: Enter o F2 enfoca su primer control. Si la celda no tiene controles, emite `dblclick` sobre la fila, de modo que una fila que abre su detalle con `rowProps.onDoubleClick` también responde a Enter. Ctrl+C copia el texto de la celda.
+- Los campos de texto dentro de celdas, como `EditableCell`, conservan sus propias teclas.
+
+La celda activa se guarda en el DOM mediante `data-row`, `data-col` y `tabindex`, sin volver a renderizar las filas. Los consumidores no deben usar esos atributos.
+
+El filtro de columna (`ColumnFilter` sobre `GridPopup`) enfoca su búsqueda al abrir. ↑/↓ recorren búsqueda, valores y botones; Espacio marca un valor; Enter en la búsqueda o en una casilla aplica mediante `GridPopup.onSubmit`; Tab permanece dentro del filtro; Escape cancela y devuelve el foco al embudo.
+
 `TableRowActions` recibe acciones con `id`, `label`, `icon`, `onClick`, `disabled` y `tone`. Permite mostrar la carga de una fila sin copiar botones de editar/eliminar en cada tabla.
 
 `DataGrid.summary(filas)` compone un resumen sobre todas las filas filtradas, antes de paginar, y lo oculta durante carga/error. Sirve para contadores por estado sin replicar los filtros de la tabla. `DataTable.rowProps(fila, índice)` entrega atributos y eventos HTML a la fila del renderizador compartido, por ejemplo `draggable`, eventos de arrastre y una clase. `DataGrid` lo transmite. El consumidor conserva el orden en datos, impide mezclas inválidas y decide cuándo persistir; no debe deducir registros leyendo el DOM.
@@ -201,7 +222,7 @@ El layout de la sesión está limitado a `100dvh`; `Page` y `Card fill` transmit
 
 `FilePreview` recibe `{blob: Blob, name: string}`. No conoce APIs ni permisos; el consumidor obtiene el archivo autenticado. Muestra HTML/HTM en un iframe aislado sin scripts, PDF con el visor nativo y PPTX con el visor local opcional cargado bajo demanda. PPT informa que debe descargarse/convertirse. Libera los object URLs y el contenido al desmontarse, muestra carga/errores y limita el scroll al visor. Ver [papelería de ECO](CATALOGOS_PRODUCCION.md#papelería).
 
-`TabBar` es una barra de pestañas controlada: `id` prefija IDs accesibles, `label` nombra la lista, `items` aporta `{id, label, title?, icon?}`, `activeId` indica la selección y `onChange`/`onClose` ejecutan acciones del consumidor. `tabIds(id, item.id)` genera las referencias del botón y su panel. Incluye teclado, truncamiento, tooltips y desplazamiento horizontal; no monta contenidos ni almacena estado de negocio. [Ejemplo aplicado al workspace](PESTANAS.md).
+`TabBar` es una barra de pestañas controlada: `id` prefija IDs accesibles, `label` nombra la lista, `items` aporta `{id, label, title?, icon?}`, `activeId` indica la selección y `onChange`/`onClose` ejecutan acciones del consumidor. `tabIds(id, item.id)` genera las referencias del botón y su panel. Incluye teclado, truncamiento, tooltips y desplazamiento horizontal; no monta contenidos ni almacena estado de negocio. Con `onDragOut(id, {x, y})` las pestañas se pueden arrastrar: se llama al soltar una pestaña a más de 40 px de la barra donde ningún destino acepta el arrastre, con el punto de pantalla donde se soltó. Soltarla sobre la barra o junto a ella cancela. El arrastre usa un tipo de datos propio, así que los destinos que leen `text/plain` reciben un texto vacío y no deben actuar. [Ejemplo aplicado al workspace](PESTANAS.md).
 
 Si dos módulos necesitan la misma interacción, ampliar una pieza compartida o agregar otra con contrato tipado. Si cambia únicamente la regla, los campos o los datos de un negocio, resolverlo dentro de su módulo. No agregar condiciones como `if (modulo === "materiales")` a los componentes compartidos.
 

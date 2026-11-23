@@ -1,5 +1,12 @@
 import { lazy, useEffect, useMemo, useState } from "react";
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -473,5 +480,95 @@ describe("pestañas del workspace", () => {
     expect(
       screen.queryByRole("table", { hidden: true }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("módulo en ventana propia", () => {
+  it("abre la pestaña activa en una ventana y la quita del workspace", async () => {
+    const { modules } = sampleModules();
+    const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    await userEvent.click(
+      screen.getByRole("button", { name: /Abrir en ventana/ }),
+    );
+    expect(open).toHaveBeenCalledWith(
+      "/informacion-basica/a?ventana",
+      "mes-a",
+      expect.stringContaining("popup"),
+    );
+    expect(screen.queryByRole("tab", { name: "A" })).not.toBeInTheDocument();
+    open.mockRestore();
+  });
+  it("al cerrar la ventana el módulo regresa como pestaña", async () => {
+    const { modules } = sampleModules();
+    const popup = { closed: false };
+    const open = vi
+      .spyOn(window, "open")
+      .mockReturnValue(popup as unknown as Window);
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    await userEvent.click(
+      screen.getByRole("button", { name: /Abrir en ventana/ }),
+    );
+    expect(screen.queryByRole("tab", { name: "A" })).not.toBeInTheDocument();
+    popup.closed = true;
+    expect(
+      await screen.findByRole("tab", { name: "A" }, { timeout: 2000 }),
+    ).toHaveAttribute("aria-selected", "true");
+    open.mockRestore();
+  });
+  it("si el navegador bloquea la ventana conserva la pestaña y avisa", async () => {
+    const { modules } = sampleModules();
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    await userEvent.click(
+      screen.getByRole("button", { name: /Abrir en ventana/ }),
+    );
+    expect(await screen.findByText(/bloqueó la ventana/)).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "A" })).toBeInTheDocument();
+    open.mockRestore();
+  });
+  it("soltar la pestaña lejos de la barra la abre donde se soltó", async () => {
+    const { modules } = sampleModules();
+    const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    const tab = screen.getByRole("tab", { name: "A" });
+    // jsdom has no DragEvent; a MouseEvent carries the coordinates React reads.
+    const dragEnd = (init: MouseEventInit, dropEffect: string) => {
+      const event = new MouseEvent("dragend", { bubbles: true, ...init });
+      Object.defineProperty(event, "dataTransfer", { value: { dropEffect } });
+      fireEvent(tab, event);
+    };
+    // Released next to the bar: a cancelled drag.
+    dragEnd({ clientY: 10 }, "none");
+    // Taken by a drop target: not a pop-out either.
+    dragEnd({ clientY: 400 }, "move");
+    expect(open).not.toHaveBeenCalled();
+    dragEnd({ clientY: 400, screenX: 300, screenY: 200 }, "none");
+    expect(open).toHaveBeenCalledWith(
+      "/informacion-basica/a?ventana",
+      "mes-a",
+      expect.stringContaining("left=180,top=180"),
+    );
+    open.mockRestore();
+  });
+  it("una ventana muestra solo el módulo, sin cabecera, menús ni pestañas", async () => {
+    localStorage.setItem("mes-v2:mode", JSON.stringify("demo"));
+    render(
+      <MemoryRouter initialEntries={["/material/materiales?ventana"]}>
+        <AppProviders>
+          <App />
+        </AppProviders>
+      </MemoryRouter>,
+    );
+    await screen.findByRole("table", { name: "Materiales registrados" });
+    expect(
+      screen.queryByRole("navigation", { name: "Secciones del MES" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(document.title).toMatch(/ILSAN MES$/);
   });
 });

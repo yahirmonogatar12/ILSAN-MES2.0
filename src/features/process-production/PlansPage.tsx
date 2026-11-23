@@ -133,11 +133,9 @@ export function PlansPage({ kind }: { kind: Kind }) {
             },
             onDrop: (event) => {
               event.preventDefault();
-              if (canMove)
-                reorder(
-                  event.dataTransfer.getData("text/plain"),
-                  text(row.lot_no),
-                );
+              // Other drags (a workspace tab) carry no lot and change nothing.
+              const lot = event.dataTransfer.getData("text/plain");
+              if (canMove && lot) reorder(lot, text(row.lot_no));
             },
             className:
               row.status === "CANCELADO"

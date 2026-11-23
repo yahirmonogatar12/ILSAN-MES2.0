@@ -24,6 +24,7 @@ Este es un frontend independiente. Trabajar dentro de esta carpeta; el backend F
 ## Datos y permisos
 
 - Todas las solicitudes pasan por `@/core/http`; no copiar login, cookies ni manejo de 401 a un módulo.
+- Generar identificadores del cliente con `clientId()` de `@/shared/lib/id`. La planta abre el MES por http en la red local, donde `crypto.randomUUID` no existe; `check:architecture` lo rechaza fuera de ese archivo.
 - Consultas privadas deben incluir `useAuth().scope` en sus claves. Conservar abortos y no repetir mutaciones automáticamente.
 - La autorización del frontend no reemplaza la del servidor. Antes de habilitar un módulo real, configurar el permiso exacto del backend.
 - El generador crea ejemplos con `demoOnly: true`. Mantener esa protección hasta integrar y verificar la API real.

@@ -1,5 +1,21 @@
 # Validación local
 
+## Módulo en ventana propia · 23 de noviembre de 2026
+
+- Una pestaña se abre en su propia ventana del navegador, solo con el módulo, al arrastrarla fuera de la barra o con el botón **Abrir en ventana**. Detalle en `docs/PESTANAS.md`. Al soltar una pestaña sobre una fila de planes ya no se modifica el orden, porque esos destinos ignoran un arrastre sin lote.
+- Al cerrar la ventana, el módulo regresa al MES como pestaña activa. Prueba nueva: «al cerrar la ventana el módulo regresa como pestaña». `npm run check` (salvo la falla previa de `panel.test.tsx`) y build aprobados.
+- Pruebas nuevas en `src/test/workspace.test.tsx`: botón, ventana bloqueada, soltar cerca de la barra, soltar sobre un destino y la vista de la ventana sin cabecera ni pestañas. En el navegador, en demostración, se comprobaron la vista `?ventana` (sin desplazamiento exterior), el arrastre fuera de la barra (una sola ventana, en el punto donde se soltó) y el botón. `npm run check` (salvo la falla previa de `panel.test.tsx`), `test:tools`, `check:scaffold` y build aprobados.
+
+## Identificadores en http de la intranet · 23 de noviembre de 2026
+
+- En `http://192.168.1.10`, Historial de máquina ICT fallaba con `crypto.randomUUID is not a function`, porque esa función solo existe en https o localhost. Los cinco usos en módulos y la plantilla de módulo nuevo pasaron a `clientId()` de `shared/lib/id`. `check:architecture` rechaza nuevos usos y tiene su prueba en `tools/check-architecture.test.mjs`.
+- En el navegador se retiró `crypto.randomUUID` para simular el servidor y Historial de máquina ICT cargó en demostración. `npm run check` (salvo la falla previa de `src/features/administration/panel.test.tsx`), `test:tools`, `check:scaffold` y build aprobados.
+
+## Teclado y ancho de columnas en tablas · 20 de noviembre de 2026
+
+- `DataTable` permite arrastrar el borde de cada encabezado para cambiar el ancho; doble clic lo restablece. Los anchos se guardan por usuario y tabla en el navegador. Se agregaron navegación tipo hoja de cálculo, teclado en el filtro de columna y atajos globales Alt+1 a Alt+5 con ayuda en `?`. Detalle en `docs/COMPONENTES.md` y `docs/PESTANAS.md`.
+- Pruebas nuevas en `table.test.tsx`, `filters.test.tsx` y `src/test/app.test.tsx`. En el navegador, en demostración, se comprobaron el arrastre y la persistencia al recargar, las flechas, Tab y Mayús+Tab, ordenar con Enter, el filtro con Alt+↓, ↑/↓, Espacio y Enter, los atajos Alt+1 a Alt+5 y la ayuda. No se probó el salto en una tabla virtual larga porque los datos de demostración son pocos. `npm run check` (salvo la falla previa de `panel.test.tsx`) y build aprobados.
+
 ## Navbar compacto según la referencia visual · 17 de noviembre de 2026
 
 - Se redujo la cabecera de escritorio de 100 a 88 px. Los botones anchos pasan de 120×90 a 108×78 px, con iconos de 34 px y texto de 11 px. Las variantes intermedias usan 90×78 px y las estrechas 80×72 px. Se conservan los títulos en dos líneas, el símbolo contraído de 56 px y la transición sincronizada.
