@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { createWarehouseApi } from "./api";
-import { filtersFor, receiptLines, returnRows } from "./model";
+import {
+  buildMovementReview,
+  captureMovementEdit,
+  filtersFor,
+  receiptLines,
+  returnRows,
+} from "./model";
 import type { Row } from "./types";
 
 function mockServer(...responses: unknown[]) {
@@ -151,6 +157,80 @@ describe("Contratos de Almacén de Embarques", () => {
     expect(payload(calls[2][1])).toEqual({ batchId: 45 });
   });
 
+  it("envía quantity cuando sólo cambia la cantidad visible de una salida", () => {
+    const edit = captureMovementEdit({
+      movement_type: "exit",
+      fecha: "2026-11-23",
+      hora: "12:44:55",
+      display_quantity: 988,
+      zone_code: "Z1",
+      location_value: "Embarques",
+      departure_code: "DEP-01",
+    });
+    edit.values.cantidad = "1000";
+
+    expect(buildMovementReview(edit)).toMatchObject({
+      issue: "",
+      changes: { quantity: 1000 },
+      differences: [{ label: "Cantidad", before: "988", after: "1000" }],
+    });
+  });
+
+  it("traduce fecha, zona, destino y departure al contrato canónico", () => {
+    const edit = captureMovementEdit({
+      movement_type: "exit",
+      fecha: "2026-11-23",
+      hora: "12:44:55",
+      display_quantity: 988,
+      zone_code: "Z1",
+      location_value: "Embarques",
+      departure_code: "DEP-01",
+    });
+    edit.values = {
+      ...edit.values,
+      fecha: "2026-11-24",
+      hora: "13:05:06",
+      zona: "Z2",
+      ubicacion_destino: "Andén 4",
+      departure: "DEP-02",
+    };
+
+    expect(buildMovementReview(edit).changes).toEqual({
+      movement_at: "2026-11-24 13:05:06",
+      zone_code: "Z2",
+      destination_area: "Andén 4",
+      departure_code: "DEP-02",
+    });
+  });
+
+  it("mapea la cantidad y ubicación según el tipo de movimiento", () => {
+    const entry = captureMovementEdit({
+      movement_type: "entry",
+      fecha: "2026-11-23",
+      hora: "08:00:00",
+      display_quantity: 10,
+      location_value: "A-01",
+    });
+    entry.values.cantidad = "12";
+    entry.values.ubicacion_destino = "A-02";
+    expect(buildMovementReview(entry).changes).toEqual({
+      quantity: 12,
+      location_code: "A-02",
+    });
+
+    const returned = captureMovementEdit({
+      movement_type: "return",
+      fecha: "2026-11-23",
+      hora: "08:00:00",
+      display_quantity: 5,
+      return_quantity: 0,
+      loss_quantity: 5,
+      location_value: "R-01",
+    });
+    returned.values.cantidad = "7";
+    expect(buildMovementReview(returned).changes).toEqual({ loss_quantity: 7 });
+  });
+
   it("conserva el folio del remanente y manda motivo y cambios al corregir movimientos", async () => {
     const { api, calls } = mockServer(
       { success: true, splitCreated: true, splitFolio: "SAL-24-2" },
@@ -164,7 +244,7 @@ describe("Contratos de Almacén de Embarques", () => {
     });
     await api.adjustMovement(
       exit,
-      { cantidad: 9, departure: "DEP-0008" },
+      { quantity: 9, departure_code: "DEP-0008" },
       "Conteo",
     );
     await api.deleteCatalog(12, "demo-pass", "Duplicado");
@@ -179,7 +259,10 @@ describe("Contratos de Almacén de Embarques", () => {
       [
         "/backend/api/almacen-embarques/movimientos/exit/24",
         "PATCH",
-        { changes: { cantidad: 9, departure: "DEP-0008" }, notes: "Conteo" },
+        {
+          changes: { quantity: 9, departure_code: "DEP-0008" },
+          notes: "Conteo",
+        },
       ],
       [
         "/backend/api/almacen-embarques/catalogo/12",

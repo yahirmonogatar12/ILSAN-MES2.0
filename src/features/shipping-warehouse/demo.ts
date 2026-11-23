@@ -486,25 +486,23 @@ export async function demoRequest(
     if (action === "delete") movements.splice(movements.indexOf(row), 1);
     else {
       const changes = body.changes as Row;
-      const columns: Record<string, string> = {
-        fecha: "fecha",
-        hora: "hora",
-        cantidad: "cantidad",
-        zona: "zone_code",
-        ubicacion_destino: "location_value",
-        departure: "departure_code",
-      };
       for (const [field, value] of Object.entries(changes)) {
-        if (!columns[field]) continue;
-        row[columns[field]] = value;
-        if (field === "cantidad") {
+        if (field === "movement_at") {
+          const timestamp = text(value);
+          row.fecha = timestamp.slice(0, 10);
+          row.hora = timestamp.slice(11);
+        } else if (field === "quantity") {
+          row.quantity = value;
+          row.cantidad = value;
           row.display_quantity = value;
-          if (row.movement_type === "return")
-            row[
-              number(row.loss_quantity) > 0
-                ? "loss_quantity"
-                : "return_quantity"
-            ] = value;
+        } else if (field === "return_quantity" || field === "loss_quantity") {
+          row[field] = value;
+          row.display_quantity = value;
+        } else if (field === "location_code" || field === "destination_area") {
+          row[field] = value;
+          row.location_value = value;
+        } else if (field === "zone_code" || field === "departure_code") {
+          row[field] = value;
         }
       }
     }

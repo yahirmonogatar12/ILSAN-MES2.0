@@ -76,6 +76,122 @@ export const rowKey = (row: Row, index: number) =>
   text(row.id ?? row.catalog_id ?? row.part_number ?? row.folio) + ":" + index;
 export const movementKey = (row: Row) =>
   text(row.movement_type) + ":" + text(row.record_id ?? row.id);
+
+export const movementEditFields = [
+  { column: "fecha", key: "fecha", label: "Fecha", type: "date" },
+  { column: "hora", key: "hora", label: "Hora", type: "time" },
+  {
+    column: "display_quantity",
+    key: "cantidad",
+    label: "Cantidad",
+    type: "number",
+  },
+  { column: "zone_code", key: "zona", label: "Zona", type: "text" },
+  {
+    column: "location_value",
+    key: "ubicacion_destino",
+    label: "Ubicación / Destino",
+    type: "text",
+  },
+  {
+    column: "departure_code",
+    key: "departure",
+    label: "Departure",
+    type: "text",
+  },
+] as const;
+
+export type MovementEdit = {
+  row: Row;
+  values: Record<string, string>;
+};
+
+export function editableMovementFields(row: Row) {
+  return movementEditFields.filter(
+    (field) => field.key !== "departure" || row.movement_type === "exit",
+  );
+}
+
+export function captureMovementEdit(row: Row): MovementEdit {
+  return {
+    row,
+    values: Object.fromEntries(
+      editableMovementFields(row).map((field) => [
+        field.key,
+        text(row[field.column]),
+      ]),
+    ),
+  };
+}
+
+export function buildMovementReview(edit: MovementEdit): {
+  changes: Row;
+  differences: Row[];
+  issue: string;
+} {
+  const differences: Row[] = [];
+  const changes: Row = {};
+
+  for (const field of editableMovementFields(edit.row)) {
+    const before = text(edit.row[field.column]).trim();
+    const after = text(edit.values[field.key]).trim();
+    if (before === after) continue;
+
+    if ((field.key === "fecha" || field.key === "hora") && !after) {
+      return {
+        changes: {},
+        differences: [],
+        issue: field.label + " es obligatoria.",
+      };
+    }
+
+    if (field.key === "cantidad") {
+      const quantity = integer(after, 0);
+      if (quantity === null) {
+        return {
+          changes: {},
+          differences: [],
+          issue: "Captura una cantidad entera válida.",
+        };
+      }
+      changes[
+        edit.row.movement_type === "return"
+          ? returnIsExit(edit.row)
+            ? "loss_quantity"
+            : "return_quantity"
+          : "quantity"
+      ] = quantity;
+    } else if (field.key === "fecha" || field.key === "hora") {
+      const date = text(edit.values.fecha).trim();
+      const time = text(edit.values.hora).trim();
+      if (!date || !time) {
+        return {
+          changes: {},
+          differences: [],
+          issue: !date ? "Fecha es obligatoria." : "Hora es obligatoria.",
+        };
+      }
+      changes.movement_at = `${date} ${time}`;
+    } else if (field.key === "zona") {
+      changes.zone_code = after;
+    } else if (field.key === "ubicacion_destino") {
+      changes[
+        edit.row.movement_type === "exit" ? "destination_area" : "location_code"
+      ] = after;
+    } else if (field.key === "departure") {
+      changes.departure_code = after;
+    }
+
+    differences.push({ label: field.label, before, after });
+  }
+
+  return {
+    changes,
+    differences,
+    issue: differences.length ? "" : "No hay cambios por guardar.",
+  };
+}
+
 export const returnIsExit = (row: Row) => number(row.loss_quantity) > 0;
 export const returnIsEntry = (row: Row) =>
   !returnIsExit(row) && number(row.return_quantity) > 0;

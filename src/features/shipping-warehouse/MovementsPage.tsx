@@ -22,7 +22,15 @@ import {
 } from "./components";
 import { useListing, useWarehouse, type Warehouse } from "./hooks";
 import { columnsFor, deleteFields } from "./warehouseModel";
-import { integer, movementKey, rowKey, text } from "./model";
+import {
+  buildMovementReview,
+  captureMovementEdit,
+  editableMovementFields,
+  movementKey,
+  rowKey,
+  text,
+  type MovementEdit,
+} from "./model";
 import type { Row } from "./types";
 
 const base = columnsFor([
@@ -51,49 +59,11 @@ const auditColumns = columnsFor([
   ["adjusted_by", "USUARIO", 110],
   ["notes", "MOTIVO", 160],
 ]);
-const editFields = [
-  { column: "fecha", key: "fecha", label: "Fecha", type: "date" },
-  { column: "hora", key: "hora", label: "Hora", type: "time" },
-  {
-    column: "display_quantity",
-    key: "cantidad",
-    label: "Cantidad",
-    type: "number",
-  },
-  { column: "zone_code", key: "zona", label: "Zona", type: "text" },
-  {
-    column: "location_value",
-    key: "ubicacion_destino",
-    label: "Ubicación / Destino",
-    type: "text",
-  },
-  {
-    column: "departure_code",
-    key: "departure",
-    label: "Departure",
-    type: "text",
-  },
-] as const;
-type Edit = { row: Row; values: Record<string, string> };
 const diffColumns = columnsFor([
   ["label", "CAMPO", 160],
   ["before", "ANTES", 210],
   ["after", "DESPUÉS", 210],
 ]);
-function editableFields(row: Row) {
-  return editFields.filter(
-    (field) => field.key !== "departure" || row.movement_type === "exit",
-  );
-}
-function capture(row: Row): Edit {
-  return {
-    row,
-    values: Object.fromEntries(
-      editableFields(row).map((field) => [field.key, text(row[field.column])]),
-    ),
-  };
-}
-
 function Audit({
   warehouse,
   close,
@@ -143,7 +113,7 @@ function Audit({
 export default function MovementsPage() {
   const warehouse = useWarehouse();
   const state = useListing(warehouse, "movements");
-  const [edit, setEdit] = useState<Edit | null>(null);
+  const [edit, setEdit] = useState<MovementEdit | null>(null);
   const [review, setReview] = useState<{
     row: Row;
     changes: Row;
@@ -154,32 +124,17 @@ export default function MovementsPage() {
   const [issue, setIssue] = useState("");
   function reviewEdit() {
     if (!edit) return;
-    const differences: Row[] = [];
-    const changes: Row = {};
-    for (const field of editableFields(edit.row)) {
-      const before = text(edit.row[field.column]).trim();
-      const after = edit.values[field.key].trim();
-      if (before === after) continue;
-      if ((field.key === "fecha" || field.key === "hora") && !after) {
-        setIssue(field.label + " es obligatoria.");
-        return;
-      }
-      if (field.key === "cantidad" && integer(after, 0) === null) {
-        setIssue("Captura una cantidad entera válida.");
-        return;
-      }
-      changes[field.key] = field.key === "cantidad" ? integer(after, 0) : after;
-      differences.push({ label: field.label, before, after });
-    }
-    if (!differences.length) {
-      setIssue("No hay cambios por guardar.");
-      return;
-    }
-    setIssue("");
-    setReview({ row: edit.row, changes, differences });
+    const result = buildMovementReview(edit);
+    setIssue(result.issue);
+    if (result.issue) return;
+    setReview({
+      row: edit.row,
+      changes: result.changes,
+      differences: result.differences,
+    });
   }
   function start(row: Row) {
-    setEdit(capture(row));
+    setEdit(captureMovementEdit(row));
     setIssue("");
   }
   function discard() {
@@ -191,7 +146,7 @@ export default function MovementsPage() {
       ...column,
       width: parseFloat(String(column.width)) * 0.89 + "%",
       cell: (row: Row) => {
-        const field = editableFields(row).find(
+        const field = editableMovementFields(row).find(
           (item) => item.column === column.id,
         );
         if (!edit || !field || movementKey(row) !== movementKey(edit.row))
