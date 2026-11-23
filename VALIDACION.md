@@ -1,5 +1,11 @@
 # Validación local
 
+## Detalle de invoice y recarga tras compilar · 23 de noviembre de 2026
+
+- En el detalle de invoice, **Exportar Excel** pasa a la fila de las pestañas (Líneas, Packing, Links, Recepciones) y exporta la pestaña activa; la tabla gana la fila que ocupaba. En pantallas compactas sigue en el pie del panel. Revisado en el navegador con datos de demostración.
+- Si una pantalla no se puede descargar ("Failed to fetch dynamically imported module", por una página abierta antes de `npm run build` o por perder la conexión), `ErrorState` muestra **Hay que recargar la página** con el botón **Recargar página** en lugar de **Volver a intentar**, que no sirve porque el navegador recuerda la descarga fallida. Avisa que se pierde lo no guardado en otras pestañas. Comprobado en el navegador ocultando el archivo de IMT del build: aparece el aviso y, al restaurarlo, el botón recarga y abre el módulo.
+- `npm run check` (salvo la falla previa de `panel.test.tsx`) y build aprobados.
+
 ## Módulo en ventana propia · 23 de noviembre de 2026
 
 - Una pestaña se abre en su propia ventana del navegador, solo con el módulo, al arrastrarla fuera de la barra o con el botón **Abrir en ventana**. Detalle en `docs/PESTANAS.md`. Al soltar una pestaña sobre una fila de planes ya no se modifica el orden, porque esos destinos ignoran un arrastre sin lote.

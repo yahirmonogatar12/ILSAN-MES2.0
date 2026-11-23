@@ -61,4 +61,25 @@ describe("initial loading boundary", () => {
       screen.getByRole("button", { name: "Volver a intentar" }),
     ).toBeEnabled();
   });
+  it("asks to reload the page when a screen file could not be downloaded", () => {
+    render(
+      <ErrorState
+        error={
+          new TypeError(
+            "Failed to fetch dynamically imported module: http://mes/assets/ImtPage-D7C7_P2o.js",
+          )
+        }
+        onRetry={() => {}}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Hay que recargar la página",
+    );
+    expect(
+      screen.getByRole("button", { name: "Recargar página" }),
+    ).toBeEnabled();
+    expect(
+      screen.queryByRole("button", { name: "Volver a intentar" }),
+    ).toBeNull();
+  });
 });

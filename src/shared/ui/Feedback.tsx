@@ -1,4 +1,4 @@
-import { AlertCircle, LoaderCircle, SearchX } from "lucide-react";
+import { AlertCircle, LoaderCircle, RefreshCw, SearchX } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 import { Button } from "./Button";
 import { useInitialLoading } from "../hooks/useInitialLoading";
@@ -31,6 +31,11 @@ export function Loading({ text = "Cargando…" }: { text?: string }) {
     </div>
   );
 }
+// Chrome, Firefox and Safari wording, plus Vite's CSS preload, for a screen file
+// that could not be downloaded: a page opened before a new build or a lost connection.
+const MISSING_SCREEN_FILE =
+  /dynamically imported module|Importing a module script failed|Unable to preload CSS/i;
+
 export function ErrorState({
   error,
   onRetry,
@@ -40,6 +45,22 @@ export function ErrorState({
   onRetry?: () => void;
   title?: string;
 }) {
+  // The browser remembers a failed download, so retrying in place never works.
+  if (error instanceof Error && MISSING_SCREEN_FILE.test(error.message))
+    return (
+      <div className="state-panel error-state" role="alert">
+        <RefreshCw size={28} />
+        <h3>Hay que recargar la página</h3>
+        <p>
+          No se pudo descargar esta pantalla: el MES se actualizó o se perdió la
+          conexión con el servidor. Recarga la página (F5) para continuar. Lo
+          que no hayas guardado en otras pestañas del MES se perderá.
+        </p>
+        <Button variant="primary" onClick={() => window.location.reload()}>
+          Recargar página
+        </Button>
+      </div>
+    );
   return (
     <div className="state-panel error-state" role="alert">
       <AlertCircle size={28} />

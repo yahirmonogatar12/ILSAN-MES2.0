@@ -221,6 +221,17 @@
   gap: 8px;
   flex-shrink: 0;
 }
+/* Detail tabs share their row with the active tab's export, leaving the grid more height. */
+.invoicing-tab-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.invoicing-tab-row > .ui-tabs {
+  flex: 1;
+}
 .invoicing-grid-panel > .invoicing-toolbar:empty {
   display: none;
 }

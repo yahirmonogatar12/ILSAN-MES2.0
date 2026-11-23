@@ -15,11 +15,7 @@ import {
   TabBar,
   TableRowActions,
 } from "@/shared/ui";
-import {
-  ActionDialog,
-  ExportButton,
-  ResultNotice,
-} from "./components";
+import { ActionDialog, ExportButton, ResultNotice } from "./components";
 import { useInvoicing } from "./useInvoicing";
 import {
   LINES,
@@ -315,16 +311,26 @@ export function InvoiceDetail({
                   />
                 </div>
                 <ResultNotice result={result} />
-                <TabBar
-                  id={`invoice-${scope}-${id}`}
-                  label="Detalle de invoice"
-                  items={panels.map((panel) => ({
-                    id: panel.id,
-                    label: `${panel.label} (${panel.rows.length})`,
-                  }))}
-                  activeId={tab}
-                  onChange={setTab}
-                />
+                <div className="invoicing-tab-row">
+                  <TabBar
+                    id={`invoice-${scope}-${id}`}
+                    label="Detalle de invoice"
+                    items={panels.map((panel) => ({
+                      id: panel.id,
+                      label: `${panel.label} (${panel.rows.length})`,
+                    }))}
+                    activeId={tab}
+                    onChange={setTab}
+                  />
+                  {!compact && activePanel && (
+                    <ExportButton
+                      name={`invoice_${id}_${activePanel.id}`}
+                      specs={activePanel.specs}
+                      rows={activePanel.rows}
+                      extraSheets={packingSheets(activePanel)}
+                    />
+                  )}
+                </div>
                 {panels.map((panel) => (
                   <Activity
                     key={panel.id}
@@ -332,14 +338,6 @@ export function InvoiceDetail({
                   >
                     <div className="invoicing-grid-panel">
                       <div className="invoicing-toolbar">
-                        {!compact && (
-                          <ExportButton
-                            name={`invoice_${id}_${panel.id}`}
-                            specs={panel.specs}
-                            rows={panel.rows}
-                            extraSheets={packingSheets(panel)}
-                          />
-                        )}
                         {panel.id === "links" && panel.rows.length >= 500 && (
                           <span className="invoicing-note">
                             Se muestran los últimos 500 links.
