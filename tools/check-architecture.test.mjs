@@ -30,6 +30,15 @@ test("rechaza imports cruzados entre módulos y controles nativos duplicados", (
   assert(errors.some((x) => x.includes("entre módulos")));
   assert(errors.some((x) => x.includes("<button>")));
 });
+test("rechaza crypto.randomUUID, que no existe en http de la intranet", () => {
+  const p = fixture();
+  p.write(
+    "src/features/clientes/Page.tsx",
+    "export const id = () => crypto.randomUUID();",
+  );
+  const errors = checkArchitecture(p.root).errors;
+  assert(errors.some((x) => x.includes("clientId()")));
+});
 test("rechaza estilos globales en features y permite namespaces propios", () => {
   const p = fixture();
   p.write(

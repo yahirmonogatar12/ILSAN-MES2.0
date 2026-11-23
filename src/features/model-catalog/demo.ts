@@ -1,3 +1,4 @@
+import { clientId } from "@/shared/lib/id";
 import { normalizeSearch } from "@/shared/lib/text";
 import { cleanDraft, rowKey } from "./model";
 import type { CatalogData, CatalogKind, ModelRow } from "./types";
@@ -88,7 +89,7 @@ export function save(
     ...(original || {}),
     ...cleanDraft(values, columns, kind),
     ...(kind === "smt"
-      ? { __rowhash: crypto.randomUUID() }
+      ? { __rowhash: clientId() }
       : original
         ? {}
         : { id: Math.max(0, ...data.rows.map((item) => Number(item.id))) + 1 }),

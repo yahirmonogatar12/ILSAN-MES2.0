@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { List, Plus } from "lucide-react";
 import { useForm } from "@/shared/hooks/useForm";
+import { clientId } from "@/shared/lib/id";
 import {
   Alert,
   Button,
@@ -106,7 +107,7 @@ function ExampleForm({
     initialValues: { nombre: "" },
     validate: (values) => (values.nombre.trim() ? [] : ["Escribe un nombre."]),
     onSubmit: async (values) =>
-      onSave({ id: crypto.randomUUID(), nombre: values.nombre.trim() }),
+      onSave({ id: clientId(), nombre: values.nombre.trim() }),
   });
   return (
     <Modal title="Nuevo registro" onClose={onClose} busy={form.pending}>

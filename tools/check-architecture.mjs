@@ -134,6 +134,17 @@ export function checkArchitecture(root = process.cwd()) {
         relative !== "core/http.ts"
       )
         report("las solicitudes deben pasar por core/http");
+      // The plant opens the app over plain http on the LAN, where randomUUID does not exist.
+      if (
+        node.type === "MemberExpression" &&
+        node.object.type === "Identifier" &&
+        node.object.name === "crypto" &&
+        node.property.name === "randomUUID" &&
+        relative !== "shared/lib/id.ts"
+      )
+        report(
+          "usar clientId() de shared/lib/id en lugar de crypto.randomUUID",
+        );
       if (
         /^features\/[^/]+\/module\.ts$/.test(relative) &&
         node.type === "ObjectExpression"

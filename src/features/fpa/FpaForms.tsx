@@ -1,3 +1,4 @@
+import { clientId } from "@/shared/lib/id";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
@@ -55,7 +56,7 @@ export function NewRequest({
       const payload = requestPayload(values);
       const signature = JSON.stringify(payload);
       if (submission.current.signature !== signature)
-        submission.current = { signature, key: crypto.randomUUID() };
+        submission.current = { signature, key: clientId() };
       const record = await api.create(payload, submission.current.key);
       onSaved(`Solicitud ${record.folio} creada.`);
     },

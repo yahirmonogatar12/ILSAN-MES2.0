@@ -1,3 +1,4 @@
+import { clientId } from "@/shared/lib/id";
 import {
   useEffect,
   useMemo,
@@ -71,7 +72,7 @@ export function ResultsTable({
   const [searches, setSearches] = useState<Filters>({});
   const [error, setError] = useState("");
   const [queried, setQueried] = useState(!spec.manual);
-  const [progressId, setProgressId] = useState(() => crypto.randomUUID());
+  const [progressId, setProgressId] = useState(() => clientId());
   const filters = { ...applied, ...extra };
   const criteria = JSON.stringify([
     spec.path,
@@ -221,7 +222,7 @@ export function ResultsTable({
             page === 1
           )
             void query.refetch();
-          setProgressId(crypto.randomUUID());
+          setProgressId(clientId());
           setQueried(true);
           setApplied({ ...draft });
           setPage(1);

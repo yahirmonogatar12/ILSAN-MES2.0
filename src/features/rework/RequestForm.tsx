@@ -1,3 +1,4 @@
+import { clientId } from "@/shared/lib/id";
 import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
@@ -61,7 +62,7 @@ export function RequestForm({
         signature = JSON.stringify(payload);
       let key = attempts.current.get(signature);
       if (!key) {
-        key = crypto.randomUUID();
+        key = clientId();
         attempts.current.set(signature, key);
       }
       onCreated(await api.create(payload, key));
@@ -388,7 +389,7 @@ export function RequestForm({
                   form.setField("componentes", [
                     ...form.values.componentes,
                     {
-                      key: crypto.randomUUID(),
+                      key: clientId(),
                       tipo: "ASSY",
                       ubicacion: "",
                       np_anterior: "",

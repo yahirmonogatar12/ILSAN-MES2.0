@@ -1,3 +1,4 @@
+import { clientId } from "@/shared/lib/id";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
@@ -81,7 +82,7 @@ export function BatchPanel({ active }: { active: boolean }) {
             const error = validateFile(file);
             setIssue(error);
             if (!error && file) {
-              setApplied({ file, id: crypto.randomUUID() });
+              setApplied({ file, id: clientId() });
               setEditingFile(false);
             }
           }}
