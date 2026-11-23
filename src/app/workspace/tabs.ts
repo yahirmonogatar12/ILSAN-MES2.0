@@ -72,6 +72,19 @@ export function reconcileTabs(
     ? state
     : { ids, visited, activeId };
 }
+/** Moves a tab so it ends at `index`; the active tab and mounted screens stay as they are. */
+export function moveTab(
+  state: WorkspaceState,
+  id: string,
+  index: number,
+): WorkspaceState {
+  const from = state.ids.indexOf(id);
+  const to = Math.max(0, Math.min(index, state.ids.length - 1));
+  if (from < 0 || from === to) return state;
+  const ids = state.ids.filter((value) => value !== id);
+  ids.splice(to, 0, id);
+  return { ...state, ids };
+}
 export function removeTab(state: WorkspaceState, id: string): WorkspaceState {
   const index = state.ids.indexOf(id);
   if (index < 0) return state;

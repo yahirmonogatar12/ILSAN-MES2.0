@@ -52,6 +52,7 @@ const groups: [string, [string, string][]][] = [
       ["↓ en secciones", "Entrar a la lista de módulos"],
       ["↑ / ↓ en la lista", "Moverse entre módulos; Enter abre"],
       ["Flechas en pestañas", "Cambiar de pestaña"],
+      ["Ctrl+Mayús+← / → en una pestaña", "Moverla a la izquierda o derecha"],
       ["Supr en una pestaña", "Cerrar la pestaña"],
       ["Enter en un filtro", "Consultar"],
       ["Esc", "Cerrar filtro, menú o ventana"],

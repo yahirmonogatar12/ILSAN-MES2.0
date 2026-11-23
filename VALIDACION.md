@@ -1,5 +1,10 @@
 # Validación local
 
+## Reacomodar pestañas · 23 de noviembre de 2026
+
+- Las pestañas del workspace se arrastran dentro de la barra para ponerlas al principio, en medio o al final; una línea azul marca dónde caerá. Ctrl+Mayús+←/→ mueve la pestaña con foco. El orden se guarda por usuario. Soltar fuera de la barra sigue abriendo el módulo en su propia ventana.
+- Prueba nueva en `src/test/workspace.test.tsx`: «arrastra una pestaña a otra posición o la mueve con Ctrl+Mayús+flechas, y guarda el orden». En el navegador, en demostración, con eventos de arrastre reales sobre la barra: al principio y en medio, línea azul visible, orden guardado; Ctrl+Mayús+→ con el teclado mueve la pestaña y conserva el foco. `npm run check` (salvo la falla previa de `panel.test.tsx`) y build aprobados.
+
 ## Detalle de invoice y recarga tras compilar · 23 de noviembre de 2026
 
 - En el detalle de invoice, **Exportar Excel** pasa a la fila de las pestañas (Líneas, Packing, Links, Recepciones) y exporta la pestaña activa; la tabla gana la fila que ocupaba. En pantallas compactas sigue en el pie del panel. Revisado en el navegador con datos de demostración.

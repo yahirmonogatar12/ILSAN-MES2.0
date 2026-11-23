@@ -51,6 +51,8 @@ interface Props {
   onSplit?: (split: WorkspaceSplit | null) => void;
   onActivateTab: (id: string) => void;
   onCloseTab: (id: string) => void;
+  /** Moves a tab to `index` (drag within the bar or Ctrl+Shift+arrows). */
+  onReorderTab?: (id: string, index: number) => void;
   /** Opens a tab's module in its own window; `at` is where a dragged tab was released. */
   onPopOut?: (id: string, at?: { x: number; y: number }) => void;
 }
@@ -65,6 +67,7 @@ export function Shell({
   onSplit,
   onActivateTab,
   onCloseTab,
+  onReorderTab,
   onPopOut,
 }: Props) {
   const { mode, profile, logout } = useAuth();
@@ -403,6 +406,7 @@ export function Shell({
             activeId={activeTabId}
             onChange={onActivateTab}
             onClose={onCloseTab}
+            onReorder={onReorderTab}
             onDragOut={onPopOut}
           />
           {onPopOut && activeTabId && (

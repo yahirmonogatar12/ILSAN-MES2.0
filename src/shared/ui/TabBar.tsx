@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { X } from "lucide-react";
 import { Button, IconButton } from "./Button";
 import { tabIds, type TabItem } from "./tabs";
@@ -11,6 +11,7 @@ export function TabBar({
   activeId,
   onChange,
   onClose,
+  onReorder,
   onDragOut,
 }: {
   id: string;
@@ -19,10 +20,16 @@ export function TabBar({
   activeId: string | null;
   onChange: (id: string) => void;
   onClose?: (id: string) => void;
+  /** Moves a tab so it ends at `index`: dragged within the bar, like browser tabs, or Ctrl+Shift+arrows. */
+  onReorder?: (id: string, index: number) => void;
   /** A tab dragged away from the bar and released where nothing accepts it; `at` is the screen point. */
   onDragOut?: (id: string, at: { x: number; y: number }) => void;
 }) {
   const strip = useRef<HTMLDivElement>(null);
+  // Tab being dragged from this bar; other bars and outside drags are ignored.
+  const dragged = useRef<string | null>(null);
+  // Insertion slot (0..items.length) under the pointer while dragging.
+  const [slot, setSlot] = useState<number | null>(null);
   useEffect(() => {
     const element = strip.current;
     if (!element) return;
@@ -49,6 +56,20 @@ export function TabBar({
       return () => observer.disconnect();
     }
   }, [activeId, items.length]);
+  function slotAt(event: DragEvent<HTMLElement>) {
+    const chips = [
+      ...event.currentTarget.querySelectorAll<HTMLElement>(".ui-tab-item"),
+    ];
+    const index = chips.findIndex((chip) => {
+      const box = chip.getBoundingClientRect();
+      return event.clientX < box.left + box.width / 2;
+    });
+    return index < 0 ? chips.length : index;
+  }
+  const from = items.findIndex((item) => item.id === dragged.current);
+  // Dropping right before or after the dragged tab leaves it where it is.
+  const marker =
+    slot === null || slot === from || slot === from + 1 ? null : slot;
   function move(index: number) {
     const target = items[(index + items.length) % items.length];
     if (!target) return;
@@ -64,6 +85,25 @@ export function TabBar({
       role={items.length ? "tablist" : undefined}
       aria-label={items.length ? label : undefined}
       aria-orientation={items.length ? "horizontal" : undefined}
+      onDragOver={(event) => {
+        if (!onReorder || !dragged.current) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        setSlot(slotAt(event));
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+          setSlot(null);
+      }}
+      onDrop={(event) => {
+        const id = dragged.current;
+        if (!onReorder || !id) return;
+        event.preventDefault();
+        const target = slotAt(event);
+        const index = items.findIndex((item) => item.id === id);
+        setSlot(null);
+        onReorder(id, target > index ? target - 1 : target);
+      }}
     >
       {items.map((item, index) => {
         const selected = item.id === activeId;
@@ -71,7 +111,13 @@ export function TabBar({
         return (
           <div
             role="presentation"
-            className={`ui-tab-item ${selected ? "ui-tab-active" : ""}`}
+            className={`ui-tab-item ${selected ? "ui-tab-active" : ""} ${
+              marker === index
+                ? "ui-tab-drop-before"
+                : marker === items.length && index === items.length - 1
+                  ? "ui-tab-drop-after"
+                  : ""
+            }`}
             key={item.id}
           >
             <Button
@@ -84,13 +130,16 @@ export function TabBar({
               className="ui-tab"
               title={item.title || item.label}
               onClick={() => onChange(item.id)}
-              draggable={!!onDragOut}
+              draggable={!!(onDragOut || onReorder)}
               onDragStart={(event) => {
+                dragged.current = item.id;
                 // A private type only: drop targets that read text/plain ignore a tab.
                 event.dataTransfer.setData("application/x-ui-tab", item.id);
                 event.dataTransfer.effectAllowed = "move";
               }}
               onDragEnd={(event) => {
+                dragged.current = null;
+                setSlot(null);
                 const bar = strip.current?.getBoundingClientRect();
                 if (
                   !onDragOut ||
@@ -107,7 +156,13 @@ export function TabBar({
                 onDragOut(item.id, { x: event.screenX, y: event.screenY });
               }}
               onKeyDown={(event) => {
-                if (event.key === "ArrowRight") {
+                const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+                if (step && event.ctrlKey && event.shiftKey) {
+                  event.preventDefault();
+                  const target = index + step;
+                  if (onReorder && target >= 0 && target < items.length)
+                    onReorder(item.id, target);
+                } else if (event.key === "ArrowRight") {
                   event.preventDefault();
                   move(index + 1);
                 } else if (event.key === "ArrowLeft") {

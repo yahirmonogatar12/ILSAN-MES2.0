@@ -29,7 +29,7 @@ Se guarda `mes-v2:tabs:<scope>` con `{ ids, activeId }`. Se validan IDs contra l
 
 ## Teclado y móvil
 
-La barra usa `tablist`, `tab`, `tabpanel`, selección y referencias accesibles. Flechas cambian entre pestañas; Inicio/Fin seleccionan los extremos; Suprimir cierra la seleccionada. El botón de cierre es un control separado, sin botones anidados. El título completo permanece en el tooltip aunque el texto visible se recorte.
+La barra usa `tablist`, `tab`, `tabpanel`, selección y referencias accesibles. Flechas cambian entre pestañas; Inicio/Fin seleccionan los extremos; Suprimir cierra la seleccionada. Las pestañas se reacomodan arrastrándolas dentro de la barra, como en el navegador, o con Ctrl+Mayús+←/→; el orden se guarda con los demás datos de pestañas de cada usuario (`moveTab` en `tabs.ts`). El botón de cierre es un control separado, sin botones anidados. El título completo permanece en el tooltip aunque el texto visible se recorte.
 
 `app/layout/KeyboardShortcuts.tsx` agrega atajos globales: Alt+1 secciones, Alt+2 lista de módulos, Alt+3 pestañas abiertas, Alt+4 primer campo del panel activo (fuera de tablas) y Alt+5 tabla del panel activo. `?` fuera de un campo de texto abre la ayuda con todos los atajos. Se ignoran con un diálogo abierto y con AltGr, que llega como Ctrl+Alt y escribe caracteres como @ o #. Con la vista dividida se usa el panel que tiene el foco.
 

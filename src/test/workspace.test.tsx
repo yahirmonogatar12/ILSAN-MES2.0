@@ -483,6 +483,53 @@ describe("pestañas del workspace", () => {
   });
 });
 
+describe("reacomodar pestañas", () => {
+  it("arrastra una pestaña a otra posición o la mueve con Ctrl+Mayús+flechas, y guarda el orden", async () => {
+    const { modules } = sampleModules();
+    localStorage.setItem(
+      `mes-v2:tabs:${scope}`,
+      JSON.stringify({ ids: ["a", "b", "c"], activeId: "a" }),
+    );
+    mount(modules);
+    await screen.findByRole("table", { name: "Tabla A" });
+    const order = () =>
+      screen.getAllByRole("tab").map((tab) => tab.textContent);
+    // jsdom has no DragEvent; a MouseEvent with a stub dataTransfer reaches React.
+    const drag = (target: Element, type: string, clientX = 0) => {
+      const event = new MouseEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        clientX,
+      });
+      Object.defineProperty(event, "dataTransfer", {
+        value: { setData: () => {}, effectAllowed: "", dropEffect: "" },
+      });
+      fireEvent(target, event);
+    };
+    const bar = screen.getByRole("tablist", { name: "Módulos abiertos" });
+    // jsdom boxes are empty, so any pointer lands after the last tab.
+    drag(screen.getByRole("tab", { name: "A" }), "dragstart");
+    drag(bar, "dragover", 999);
+    expect(bar.querySelector(".ui-tab-drop-after")).not.toBeNull();
+    drag(bar, "drop", 999);
+    drag(screen.getByRole("tab", { name: "A" }), "dragend");
+    expect(order()).toEqual(["B", "C", "A"]);
+    expect(screen.getByRole("tab", { name: "A" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), {
+      key: "ArrowLeft",
+      ctrlKey: true,
+      shiftKey: true,
+    });
+    expect(order()).toEqual(["B", "A", "C"]);
+    expect(
+      JSON.parse(localStorage.getItem(`mes-v2:tabs:${scope}`)!).ids,
+    ).toEqual(["b", "a", "c"]);
+  });
+});
+
 describe("módulo en ventana propia", () => {
   it("abre la pestaña activa en una ventana y la quita del workspace", async () => {
     const { modules } = sampleModules();

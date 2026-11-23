@@ -188,6 +188,7 @@ function AuthorizedWorkspace({
           tabs.activate(id);
         }}
         onCloseTab={tabs.close}
+        onReorderTab={tabs.reorder}
         onPopOut={popOut}
       >
         <div

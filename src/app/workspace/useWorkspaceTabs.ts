@@ -6,6 +6,7 @@ import {
   activateTab,
   decodeTabs,
   EMPTY_WORKSPACE,
+  moveTab,
   reconcileTabs,
   removeTab,
 } from "./tabs";
@@ -64,6 +65,9 @@ export function useWorkspaceTabs(
       );
     }
   }
+  function reorder(id: string, index: number) {
+    setState(moveTab(current, id, index));
+  }
   return {
     opened,
     activeModule,
@@ -71,5 +75,6 @@ export function useWorkspaceTabs(
     lastActiveId: current.activeId,
     activate,
     close,
+    reorder,
   };
 }

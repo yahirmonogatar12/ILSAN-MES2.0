@@ -23,6 +23,13 @@
 .ui-tab-item:hover {
   background: #505361;
 }
+/* Where a dragged tab will land. */
+.ui-tab-item.ui-tab-drop-before {
+  box-shadow: inset 3px 0 #69b9f5;
+}
+.ui-tab-item.ui-tab-drop-after {
+  box-shadow: inset -3px 0 #69b9f5;
+}
 .ui-tab-item.ui-tab-active {
   background: #4a90e2;
   color: #fff;
