@@ -67,13 +67,13 @@ export function Pagination({
         <nav className="page-buttons" aria-label="Paginación">
           <IconButton
             label="Primera página"
-            icon={<ChevronsLeft size={15} />}
+            icon={<ChevronsLeft size={14} />}
             disabled={disabled || current === 1}
             onClick={() => onPageChange(1)}
           />
           <IconButton
             label="Página anterior"
-            icon={<ChevronLeft size={16} />}
+            icon={<ChevronLeft size={14} />}
             disabled={disabled || current === 1}
             onClick={() => onPageChange(current - 1)}
           />
@@ -83,13 +83,13 @@ export function Pagination({
           <span className="page-of">de {pages}</span>
           <IconButton
             label="Página siguiente"
-            icon={<ChevronRight size={16} />}
+            icon={<ChevronRight size={14} />}
             disabled={disabled || current === pages}
             onClick={() => onPageChange(current + 1)}
           />
           <IconButton
             label="Última página"
-            icon={<ChevronsRight size={15} />}
+            icon={<ChevronsRight size={14} />}
             disabled={disabled || current === pages}
             onClick={() => onPageChange(pages)}
           />

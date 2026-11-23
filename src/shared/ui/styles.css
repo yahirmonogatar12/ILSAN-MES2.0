@@ -629,13 +629,14 @@ table {
 .table-refreshing {
   opacity: 0.5;
 }
+/* Compact footer: every table gives this height back to its rows. */
 .table-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 3px 10px;
   border-top: 1px solid #ffffff0d;
 }
 .results-count {
@@ -652,7 +653,7 @@ table {
 .pagination {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 .pagination label {
   display: flex;
@@ -663,26 +664,31 @@ table {
   font-weight: 400;
   color: #bcc5d4;
 }
+/* Specific enough to beat module field themes (e.g. invoicing's 30 px fields). */
+.table-footer .pagination .pagination-size > select,
 .pagination select {
-  padding: 4px 5px;
+  height: 22px;
+  padding: 0 4px;
   font-size: 11px;
+  line-height: normal;
 }
 .page-buttons {
   display: flex;
   align-items: center;
-  gap: 3px;
+  /* 22 px buttons 2 px apart keep the 24 px minimum target spacing. */
+  gap: 2px;
 }
 .page-buttons .icon-button {
-  min-width: 25px;
-  min-height: 25px;
-  padding: 4px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 2px;
 }
 .page-number {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 25px;
-  height: 25px;
+  min-width: 22px;
+  height: 22px;
   background: #3498db33;
   border: 1px solid #3498db66;
   color: #b5dcfc;
@@ -692,7 +698,7 @@ table {
 .page-of {
   font-size: 11px;
   color: #aab6c9;
-  margin: 0 5px;
+  margin: 0 3px;
 }
 .page-footnote {
   display: flex;
@@ -1020,7 +1026,7 @@ table {
   .table-footer {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px;
+    padding: 6px 10px;
   }
   .pagination {
     justify-content: space-between;
@@ -1229,7 +1235,7 @@ table {
 .pagination-size.ui-field {
   flex-direction: row;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
 }
 .pagination-size.ui-field > select {
   width: auto;
@@ -1349,7 +1355,7 @@ table {
     gap: 6px;
   }
   .table-footer {
-    padding: 6px 8px;
+    padding: 2px 8px;
     gap: 5px;
   }
   .ui-data-table td {

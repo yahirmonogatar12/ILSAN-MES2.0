@@ -1,5 +1,10 @@
 # Validación local
 
+## Pie de tablas compacto · 23 de noviembre de 2026
+
+- El pie compartido de las tablas (Filas, páginas y «Mostrando…») baja de unos 50 px a 29 px en escritorio: menos relleno, selector de filas de 22 px y botones de página de 22 px con 2 px de separación, que respetan el mínimo de 24 px de objetivo táctil. Se quitaron los rellenos propios de Invoices y del cierre de Almacén de Embarques para que usen el mismo pie; el selector ya no toma los 30 px de los campos de Invoices.
+- Medido en el navegador, en demostración: 29 px en Invoice Almacén y Control de material; a 390 px de ancho, 54 px en dos renglones, sin desplazamiento horizontal. `npm run check` (salvo la falla previa de `panel.test.tsx`) y build aprobados.
+
 ## Reacomodar pestañas · 23 de noviembre de 2026
 
 - Las pestañas del workspace se arrastran dentro de la barra para ponerlas al principio, en medio o al final; una línea azul marca dónde caerá. Ctrl+Mayús+←/→ mueve la pestaña con foco. El orden se guarda por usuario. Soltar fuera de la barra sigue abriendo el módulo en su propia ventana.

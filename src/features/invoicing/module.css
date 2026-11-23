@@ -95,10 +95,6 @@
 .invoicing-original .row-actions {
   min-width: 0;
 }
-.invoicing-original .table-footer {
-  padding: 6px 10px;
-  gap: 6px;
-}
 .invoicing-original .text-link {
   color: #9fd4ff;
   background: none;
