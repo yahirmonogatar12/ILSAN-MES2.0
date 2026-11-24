@@ -14,12 +14,20 @@ import {
 } from "@/shared/ui";
 import { Fields } from "./components";
 import { useProcess } from "./useProcess";
-import { fieldIssues, planFields, planPayload, text } from "./model";
+import {
+  bottomOptions,
+  fieldIssues,
+  planFields,
+  planPayload,
+  text,
+  withBottomParent,
+} from "./model";
 import type { Kind, Row } from "./types";
 export function PlanForm({
   kind,
   initial,
   editing,
+  plans = [],
   onClose,
   onDone,
   reloadSubAssy,
@@ -27,6 +35,8 @@ export function PlanForm({
   kind: Kind;
   initial: Row;
   editing: boolean;
+  /** Planes cargados: de ahí salen los BOTTOM que puede elegir un TOP. */
+  plans?: readonly Row[];
   onClose: () => void;
   onDone: (result: Row) => void;
   reloadSubAssy?: () => Promise<string | null>;
@@ -36,9 +46,13 @@ export function PlanForm({
   const [confirmingStatus, setConfirmingStatus] = useState(false);
   const reactivating = initial.status === "CANCELADO";
   const statusLabel = reactivating ? "Reactivar plan" : "Cancelar plan";
+  const smtTop = (values: Row) => kind === "SMT" && text(values.lado) === "TOP";
   const form: ReturnType<typeof useForm<Row>> = useForm<Row>({
-    initialValues: initial,
+    initialValues: kind === "SMT" ? withBottomParent(plans, initial) : initial,
     validate: (value): string[] => [
+      ...(smtTop(value) && !text(value.lote_padre).trim()
+        ? ["Elige el lote BOTTOM del que es TOP."]
+        : []),
       ...(subAssyForm.pending
         ? ["Espera a que termine la consulta de sub-assy."]
         : []),
@@ -136,8 +150,26 @@ export function PlanForm({
         readOnly: part !== initialPart,
       });
     }
+    if (kind === "SMT" && text(form.values.lado) === "TOP") {
+      const options = bottomOptions(plans, form.values);
+      fields.push({
+        key: "lote_padre",
+        label: "Lote BOTTOM (padre)",
+        type: "select",
+        required: true,
+        options: [
+          {
+            value: "",
+            label: options.length ? "Elige el BOTTOM" : "Sin BOTTOM",
+          },
+          ...options,
+        ],
+      });
+    }
     return fields;
-  }, [kind, editing, revisions.data, form.values, initialPart, part]);
+  }, [kind, editing, revisions.data, form.values, initialPart, part, plans]);
+  const noBottom =
+    smtTop(form.values) && bottomOptions(plans, form.values).length === 0;
   return (
     <>
       <Modal
@@ -194,6 +226,10 @@ export function PlanForm({
                     part_no: value,
                     assigned_bom_rev: "",
                   }));
+                else if (kind === "SMT")
+                  form.setValues((previous) =>
+                    withBottomParent(plans, { ...previous, [key]: value }),
+                  );
                 else form.setField(key, value);
               }}
             />
@@ -212,10 +248,10 @@ export function PlanForm({
                 array/cantidad.
               </Alert>
             )}
-            {kind === "SMT" && form.values.lado === "TOP" && !editing && (
-              <Alert>
-                Un TOP manual no establece un vínculo con un BOTTOM. Para
-                generar la pareja ligada, crea un BOTTOM.
+            {noBottom && (
+              <Alert tone="warning">
+                No hay un plan BOTTOM de {part || "esta parte"} en las fechas
+                consultadas. Marca primero su BOTTOM o amplía las fechas.
               </Alert>
             )}
             <FormMessages errors={form.errors} error={form.error} />

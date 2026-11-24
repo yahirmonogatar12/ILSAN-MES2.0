@@ -201,6 +201,34 @@ export function planFields(kind: Kind, editing: boolean): Field[] {
     (field) => !(kind === "ASSY" && field.key === "sequence"),
   );
 }
+/** BOTTOM cargados de la misma parte que pueden ser lote padre de un TOP. */
+export function bottomOptions(plans: readonly Row[], values: Row) {
+  const part = text(values.part_no).trim();
+  const options = plans
+    .filter(
+      (plan) =>
+        text(plan.lado) === "BOTTOM" &&
+        text(plan.part_no).trim() === part &&
+        text(plan.lot_no) !== text(values.lot_no),
+    )
+    .map((plan) => ({
+      value: text(plan.lot_no),
+      label: `${text(plan.lot_no)} · ${lineName("SMT", plan.line)} · ${text(plan.plan_count)} pzs`,
+    }));
+  const current = text(values.lote_padre).trim();
+  if (current && !options.some((option) => option.value === current))
+    options.push({ value: current, label: current });
+  return options;
+}
+/** Un TOP sin padre toma el único BOTTOM posible; con varios, decide el usuario. */
+export function withBottomParent(plans: readonly Row[], values: Row): Row {
+  if (text(values.lado) !== "TOP" || text(values.lote_padre).trim())
+    return values;
+  const options = bottomOptions(plans, values);
+  return options.length === 1
+    ? { ...values, lote_padre: options[0].value }
+    : values;
+}
 export function fieldIssues(fields: readonly Field[], values: Row) {
   return fields.flatMap((field) => {
     const raw = text(values[field.key]).trim();
@@ -249,7 +277,7 @@ export function planPayload(
       .filter((field) => !field.readOnly)
       .map((field) => field.key),
   );
-  const payload = Object.fromEntries(
+  const payload: Row = Object.fromEntries(
     Object.entries(values)
       .filter(
         ([key]) =>
@@ -260,6 +288,12 @@ export function planPayload(
         numeric.has(key) ? Number(value ?? 0) : text(value).trim(),
       ]),
   );
+  // Flask exige el BOTTOM de un TOP; en otro lado se limpia el vínculo.
+  if (kind === "SMT")
+    payload.lote_padre =
+      text(values.lado) === "TOP"
+        ? text(values.lote_padre).trim() || null
+        : null;
   if (editing)
     return { ...payload, lot_no: requiredText(payload.lot_no, "lot_no") };
   return {

@@ -27,6 +27,7 @@ export function PlanDialogs({ state }: { state: PlansController }) {
         <PlanForm
           kind={kind}
           editing={dialog.type === "edit"}
+          plans={source}
           initial={
             dialog.type === "edit"
               ? {

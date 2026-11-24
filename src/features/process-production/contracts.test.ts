@@ -3,11 +3,13 @@ import * as http from "@/core/http";
 import { createApi } from "./api";
 import { demoApi } from "./demo";
 import {
+  bottomOptions,
   defaults,
   fieldIssues,
   planFields,
   planPayload,
   reportParams,
+  withBottomParent,
 } from "./model";
 import {
   autoArrange,
@@ -133,6 +135,29 @@ describe("Fork de Control de producción en Control de proceso", () => {
       );
     },
   );
+  it("un TOP SMT envía su BOTTOM como lote_padre y toma el único BOTTOM de su parte", () => {
+    const plans = [
+      { lot_no: "SMT-261124-005", part_no: "EBR1", lado: "BOTTOM", line: "SB" },
+      { lot_no: "SMT-261124-009", part_no: "EBR2", lado: "BOTTOM", line: "SB" },
+      { lot_no: "SMT-261124-007", part_no: "EBR1", lado: "", line: "SB" },
+    ];
+    const top = withBottomParent(plans, {
+      lot_no: "SMT-261124-006",
+      part_no: "EBR1",
+      lado: "TOP",
+    });
+    expect(top.lote_padre).toBe("SMT-261124-005");
+    expect(planPayload("SMT", top, true).lote_padre).toBe("SMT-261124-005");
+    expect(
+      planPayload("SMT", { ...top, lado: "BOTTOM" }, true).lote_padre,
+    ).toBeNull();
+    expect(planPayload("IMT", top, true)).not.toHaveProperty("lote_padre");
+    const dos = [...plans, { ...plans[0], lot_no: "SMT-261124-010" }];
+    expect(
+      withBottomParent(dos, { part_no: "EBR1", lado: "TOP" }).lote_padre,
+    ).toBeUndefined();
+    expect(bottomOptions(dos, { part_no: "EBR1" })).toHaveLength(2);
+  });
   it("conserva QR/array cero, revisiones y partes completas, y no ofrece campos que el update no guarda", () => {
     const values = {
       lot_no: "SMT-01-T",
