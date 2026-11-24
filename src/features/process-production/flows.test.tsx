@@ -344,6 +344,55 @@ describe("Flujos de Control de proceso", () => {
       ),
     );
   });
+  it("un TOP busca su BOTTOM de otra fecha y lo envía como lote_padre", async () => {
+    const base = adapter.createApi("demo"),
+      action = vi.fn(base.action),
+      bottom = {
+        lot_no: "SMT-261119-004",
+        working_date: "2026-11-19",
+        part_no: "EBR32766663",
+        line: "SB",
+        lado: "BOTTOM",
+        plan_count: 152,
+        status: "TERMINADO",
+      },
+      // La lista del día no trae el BOTTOM; solo la búsqueda hacia atrás.
+      plans = vi.fn(async (_kind: unknown, filters: { start: string }) =>
+        filters.start === defaults().start ? [] : [bottom],
+      );
+    vi.spyOn(adapter, "createApi").mockReturnValue({ ...base, action, plans });
+    mount("/proceso/produccion-smt");
+    await screen.findByRole("table", { name: "Planes SMT" });
+    await userEvent.click(screen.getByRole("button", { name: "Nuevo plan" }));
+    const dialog = screen.getByRole("dialog");
+    await userEvent.type(
+      within(dialog).getByLabelText(/^Número de parte/),
+      "EBR32766663",
+    );
+    await userEvent.selectOptions(within(dialog).getByLabelText("Lado"), "TOP");
+    expect(
+      within(dialog).getByLabelText("Buscar BOTTOM desde"),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(within(dialog).getByLabelText(/^Lote BOTTOM/)).toHaveValue(
+        "SMT-261119-004",
+      ),
+    );
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Guardar plan" }),
+    );
+    await waitFor(() =>
+      expect(action).toHaveBeenCalledWith(
+        "SMT",
+        "create",
+        expect.objectContaining({
+          lado: "TOP",
+          lote_padre: "SMT-261119-004",
+        }),
+      ),
+    );
+    expect(action.mock.calls[0][2]).not.toHaveProperty("bottom_desde");
+  }, 20000);
   it("crea BOTTOM/TOP con QR cero, cancela sin borrar y permite reactivar", async () => {
     const base = adapter.createApi("demo"),
       action = vi.fn(base.action);

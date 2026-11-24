@@ -4,6 +4,7 @@ import { createApi } from "./api";
 import { demoApi } from "./demo";
 import {
   bottomOptions,
+  daysBefore,
   defaults,
   fieldIssues,
   planFields,
@@ -152,11 +153,26 @@ describe("Fork de Control de producción en Control de proceso", () => {
       planPayload("SMT", { ...top, lado: "BOTTOM" }, true).lote_padre,
     ).toBeNull();
     expect(planPayload("IMT", top, true)).not.toHaveProperty("lote_padre");
-    const dos = [...plans, { ...plans[0], lot_no: "SMT-261124-010" }];
+    const dos = [
+      ...plans.map((plan) => ({ ...plan, working_date: "2026-11-24" })),
+      { ...plans[0], lot_no: "SMT-261120-003", working_date: "2026-11-20" },
+      { ...plans[0], working_date: "2026-11-24" }, // repetido: cargado y buscado
+    ];
     expect(
       withBottomParent(dos, { part_no: "EBR1", lado: "TOP" }).lote_padre,
     ).toBeUndefined();
-    expect(bottomOptions(dos, { part_no: "EBR1" })).toHaveLength(2);
+    expect(bottomOptions(dos, { part_no: "EBR1" })).toEqual([
+      expect.objectContaining({
+        value: "SMT-261124-005",
+        label: expect.stringContaining("24/11/2026"),
+      }),
+      expect.objectContaining({
+        value: "SMT-261120-003",
+        label: expect.stringContaining("20/11/2026"),
+      }),
+    ]);
+    expect(daysBefore("2026-11-24", 14)).toBe("2026-11-10");
+    expect(daysBefore("2026-03-01", 1)).toBe("2026-02-28");
   });
   it("conserva QR/array cero, revisiones y partes completas, y no ofrece campos que el update no guarda", () => {
     const values = {

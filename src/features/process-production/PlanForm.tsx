@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@/shared/hooks/useForm";
@@ -16,12 +16,18 @@ import { Fields } from "./components";
 import { useProcess } from "./useProcess";
 import {
   bottomOptions,
+  daysBefore,
+  defaults,
   fieldIssues,
   planFields,
   planPayload,
   text,
+  today,
+  validDate,
   withBottomParent,
 } from "./model";
+/** Días hacia atrás en que se buscan BOTTOM al abrir un TOP; el usuario puede ampliar. */
+const BOTTOM_DAYS = 14;
 import type { Kind, Row } from "./types";
 export function PlanForm({
   kind,
@@ -48,7 +54,13 @@ export function PlanForm({
   const statusLabel = reactivating ? "Reactivar plan" : "Cancelar plan";
   const smtTop = (values: Row) => kind === "SMT" && text(values.lado) === "TOP";
   const form: ReturnType<typeof useForm<Row>> = useForm<Row>({
-    initialValues: kind === "SMT" ? withBottomParent(plans, initial) : initial,
+    initialValues:
+      kind === "SMT"
+        ? {
+            ...withBottomParent(plans, initial),
+            bottom_desde: daysBefore(text(initial.working_date), BOTTOM_DAYS),
+          }
+        : initial,
     validate: (value): string[] => [
       ...(smtTop(value) && !text(value.lote_padre).trim()
         ? ["Elige el lote BOTTOM del que es TOP."]
@@ -112,6 +124,30 @@ export function PlanForm({
     queryFn: ({ signal }) => context.api.revisions(part, signal),
     enabled: editing && kind !== "SMT" && !!part,
   });
+  // El BOTTOM pudo producirse otro día: se buscan desde la fecha elegida hasta
+  // la del TOP (u hoy), además de los planes ya cargados.
+  const top = smtTop(form.values);
+  const bottomFrom = text(form.values.bottom_desde);
+  const workDate = text(form.values.working_date);
+  const bottomTo = workDate > today() ? workDate : today();
+  const bottoms = useQuery({
+    queryKey: context.key("bottoms", bottomFrom, bottomTo),
+    queryFn: ({ signal }) =>
+      context.api.plans(
+        "SMT",
+        { ...defaults(), start: bottomFrom, end: bottomTo },
+        signal,
+      ),
+    enabled: top && validDate(bottomFrom) && bottomFrom <= bottomTo,
+  });
+  const candidates = useMemo(
+    () => [...plans, ...(bottoms.data ?? [])],
+    [plans, bottoms.data],
+  );
+  const { setValues } = form;
+  useEffect(() => {
+    setValues((previous) => withBottomParent(candidates, previous));
+  }, [candidates, setValues]);
   const fields = useMemo(() => {
     const fields = planFields(kind, editing).map((field) =>
       field.options &&
@@ -151,25 +187,43 @@ export function PlanForm({
       });
     }
     if (kind === "SMT" && text(form.values.lado) === "TOP") {
-      const options = bottomOptions(plans, form.values);
-      fields.push({
-        key: "lote_padre",
-        label: "Lote BOTTOM (padre)",
-        type: "select",
-        required: true,
-        options: [
-          {
-            value: "",
-            label: options.length ? "Elige el BOTTOM" : "Sin BOTTOM",
-          },
-          ...options,
-        ],
-      });
+      const options = bottomOptions(candidates, form.values);
+      fields.push(
+        { key: "bottom_desde", label: "Buscar BOTTOM desde", type: "date" },
+        {
+          key: "lote_padre",
+          label: "Lote BOTTOM (padre)",
+          type: "select",
+          required: true,
+          options: [
+            {
+              value: "",
+              label: options.length
+                ? "Elige el BOTTOM"
+                : bottoms.isFetching
+                  ? "Buscando BOTTOM…"
+                  : "Sin BOTTOM",
+            },
+            ...options,
+          ],
+        },
+      );
     }
     return fields;
-  }, [kind, editing, revisions.data, form.values, initialPart, part, plans]);
+  }, [
+    kind,
+    editing,
+    revisions.data,
+    form.values,
+    initialPart,
+    part,
+    candidates,
+    bottoms.isFetching,
+  ]);
   const noBottom =
-    smtTop(form.values) && bottomOptions(plans, form.values).length === 0;
+    top &&
+    !bottoms.isFetching &&
+    bottomOptions(candidates, form.values).length === 0;
   return (
     <>
       <Modal
@@ -228,7 +282,7 @@ export function PlanForm({
                   }));
                 else if (kind === "SMT")
                   form.setValues((previous) =>
-                    withBottomParent(plans, { ...previous, [key]: value }),
+                    withBottomParent(candidates, { ...previous, [key]: value }),
                   );
                 else form.setField(key, value);
               }}
@@ -248,10 +302,19 @@ export function PlanForm({
                 array/cantidad.
               </Alert>
             )}
-            {noBottom && (
+            {top && bottoms.isError && (
               <Alert tone="warning">
-                No hay un plan BOTTOM de {part || "esta parte"} en las fechas
-                consultadas. Marca primero su BOTTOM o amplía las fechas.
+                No se pudieron buscar los BOTTOM.{" "}
+                <Button size="sm" onClick={() => void bottoms.refetch()}>
+                  Reintentar
+                </Button>
+              </Alert>
+            )}
+            {noBottom && !bottoms.isError && (
+              <Alert tone="warning">
+                No hay un plan BOTTOM de {part || "esta parte"} desde el{" "}
+                {bottomFrom.split("-").reverse().join("/")}. Elige una fecha
+                anterior en “Buscar BOTTOM desde” o marca primero su BOTTOM.
               </Alert>
             )}
             <FormMessages errors={form.errors} error={form.error} />

@@ -201,19 +201,36 @@ export function planFields(kind: Kind, editing: boolean): Field[] {
     (field) => !(kind === "ASSY" && field.key === "sequence"),
   );
 }
-/** BOTTOM cargados de la misma parte que pueden ser lote padre de un TOP. */
+/** Fecha ISO `days` días antes; para buscar BOTTOM producidos otro día. */
+export function daysBefore(date: string, days: number) {
+  const value = new Date(`${validDate(date) ? date : today()}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() - days);
+  return value.toISOString().slice(0, 10);
+}
+/** BOTTOM de la misma parte que pueden ser lote padre de un TOP, el más reciente primero. */
 export function bottomOptions(plans: readonly Row[], values: Row) {
   const part = text(values.part_no).trim();
-  const options = plans
-    .filter(
-      (plan) =>
-        text(plan.lado) === "BOTTOM" &&
-        text(plan.part_no).trim() === part &&
-        text(plan.lot_no) !== text(values.lot_no),
+  const unique = new Map<string, Row>();
+  plans.forEach((plan) => {
+    if (
+      text(plan.lado) === "BOTTOM" &&
+      text(plan.part_no).trim() === part &&
+      text(plan.lot_no) !== text(values.lot_no)
     )
+      unique.set(text(plan.lot_no), plan);
+  });
+  const options = [...unique.values()]
+    .sort((a, b) => text(b.working_date).localeCompare(text(a.working_date)))
     .map((plan) => ({
       value: text(plan.lot_no),
-      label: `${text(plan.lot_no)} · ${lineName("SMT", plan.line)} · ${text(plan.plan_count)} pzs`,
+      label: [
+        text(plan.lot_no),
+        text(plan.working_date).slice(0, 10).split("-").reverse().join("/"),
+        lineName("SMT", plan.line),
+        plan.plan_count == null ? "" : `${text(plan.plan_count)} pzs`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
     }));
   const current = text(values.lote_padre).trim();
   if (current && !options.some((option) => option.value === current))
