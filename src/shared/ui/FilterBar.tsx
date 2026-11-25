@@ -157,38 +157,7 @@ export function FilterBar<T extends object>({
   );
   return (
     <>
-      <TableToolbar
-        title={compact ? undefined : title}
-        actions={actions}
-        footer={
-          !compact &&
-          active.length > 0 && (
-            <div className="active-filters">
-              <Filter size={13} />
-              <span>Filtros activos</span>
-              {active.map((field) => (
-                <span className="filter-chip" key={field.key}>
-                  {field.type === "checkbox"
-                    ? field.label
-                    : field.options?.find(
-                        (option) => option.value === String(values[field.key]),
-                      )?.label || String(values[field.key])}
-                  <IconButton
-                    label={`Quitar filtro ${field.label}`}
-                    icon={<X size={12} />}
-                    onClick={() =>
-                      update(field.key, String(defaults[field.key] ?? ""))
-                    }
-                  />
-                </span>
-              ))}
-              <Button variant="plain" className="text-button" onClick={onReset}>
-                Limpiar todos
-              </Button>
-            </div>
-          )
-        }
-      >
+      <TableToolbar title={compact ? undefined : title} actions={actions}>
         {!!fields.length &&
           (compact ? (
             <div className="filter-compact-toolbar">

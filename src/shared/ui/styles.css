@@ -435,34 +435,6 @@ label small {
   min-width: 24px;
   padding: 3px;
 }
-.active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 7px;
-  padding: 0 18px 12px;
-  color: #b8c0cf;
-  font-size: 11px;
-}
-.filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 230px;
-  overflow-wrap: anywhere;
-  padding: 4px 6px;
-  border: 1px solid #3498db40;
-  border-radius: 4px;
-  background: #3498db14;
-  color: #abd8fb;
-}
-.filter-chip button {
-  display: flex;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  padding: 0;
-}
 .catalog-heading {
   justify-content: space-between;
   flex-wrap: wrap;
@@ -1018,10 +990,6 @@ table {
   }
   .count-badge {
     margin-left: auto;
-  }
-  .active-filters {
-    padding-left: 12px;
-    padding-right: 12px;
   }
   .table-footer {
     flex-direction: column;

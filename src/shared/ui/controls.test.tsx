@@ -56,10 +56,10 @@ describe("controles compartidos", () => {
     );
     expect(screen.getByRole("checkbox")).toBeChecked();
     expect(
-      screen.getByRole("button", {
+      screen.queryByRole("button", {
         name: "Quitar filtro Incluir detecciones cortas",
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("checkbox")).toHaveAccessibleName(
       "Incluir detecciones cortas",
     );
@@ -204,12 +204,10 @@ describe("controles compartidos", () => {
       "Acme",
     );
     await userEvent.selectOptions(screen.getByLabelText("Estado"), "activo");
-    expect(screen.getByText("Filtros activos")).toBeInTheDocument();
+    expect(screen.queryByText("Filtros activos")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Consultar" }));
     expect(submit).toHaveBeenCalledOnce();
-    await userEvent.click(
-      screen.getByRole("button", { name: "Limpiar todos" }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Limpiar" }));
     expect(screen.getByRole("searchbox", { name: "Cliente" })).toHaveValue("");
     expect(screen.getByLabelText("Estado")).toHaveValue("");
   });
