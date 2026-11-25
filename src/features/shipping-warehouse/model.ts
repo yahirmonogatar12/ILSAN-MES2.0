@@ -2,7 +2,13 @@ import { today, rangeIssue as dateRangeIssue } from "@/shared/lib/date";
 import { number } from "@/shared/lib/parse";
 import { jsonText as text } from "@/shared/lib/text";
 
-import type { Filters, ListKind, MovementType, Row } from "./types";
+import type {
+  Filters,
+  InventoryAuditFilters,
+  ListKind,
+  MovementType,
+  Row,
+} from "./types";
 
 export { today, number, text };
 
@@ -31,6 +37,22 @@ export function filtersFor(kind: ListKind | "qa"): Filters {
 export function rangeError(filters: Filters) {
   return dateRangeIssue(filters.fecha_desde, filters.fecha_hasta);
 }
+
+export function inventoryAuditDefaults(): InventoryAuditFilters {
+  const date = today();
+  return { folio: "", fecha_desde: date, fecha_hasta: date };
+}
+
+export function inventoryAuditFilterParams(filters: InventoryAuditFilters) {
+  const issue = dateRangeIssue(filters.fecha_desde, filters.fecha_hasta);
+  if (issue) throw new Error(issue);
+  const params = new URLSearchParams();
+  if (filters.folio.trim()) params.set("folio", filters.folio.trim());
+  if (filters.fecha_desde) params.set("fecha_desde", filters.fecha_desde);
+  if (filters.fecha_hasta) params.set("fecha_hasta", filters.fecha_hasta);
+  return params;
+}
+
 export function filterParams(kind: ListKind | "qa", filters: Filters) {
   const issue = rangeError(filters);
   if (issue) throw new Error(issue);

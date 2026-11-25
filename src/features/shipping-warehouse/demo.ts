@@ -52,6 +52,66 @@ const catalog: Row[] = [
 ];
 const movements: Row[] = [];
 const audit: Row[] = [];
+const inventoryAudits: Row[] = [
+  {
+    id: 1,
+    audit_folio: "AUD-DEMO-001",
+    status: "closed",
+    started_by: user,
+    started_at: today() + " 08:00:00",
+    closed_by: user,
+    closed_at: today() + " 12:00:00",
+    device_id: "DEMO",
+    notes: "Auditoría de demostración",
+    total_boxes: 2,
+    total_parts: 2,
+    total_quantity: 45,
+  },
+];
+const inventoryAuditParts: Row[] = [
+  {
+    audit_id: 1,
+    part_number: partA,
+    total_boxes: 1,
+    total_quantity: 25,
+    first_scanned_at: today() + " 08:15:00",
+    last_scanned_at: today() + " 08:15:00",
+  },
+  {
+    audit_id: 1,
+    part_number: partB,
+    total_boxes: 1,
+    total_quantity: 20,
+    first_scanned_at: today() + " 08:20:00",
+    last_scanned_at: today() + " 08:20:00",
+  },
+];
+const inventoryAuditBoxes: Row[] = [
+  {
+    id: 1,
+    audit_id: 1,
+    box_code: "BOX-DEMO-001",
+    part_number: partA,
+    quantity: 25,
+    scanned_by: user,
+    scanned_at: today() + " 08:15:00",
+    oqc_folio: "OQC-DEMO-001",
+    entry_folio: "ENT-DEMO-01",
+    exit_folio: "",
+  },
+  {
+    id: 2,
+    audit_id: 1,
+    box_code: "BOX-DEMO-002",
+    part_number: partB,
+    quantity: 20,
+    scanned_by: user,
+    scanned_at: today() + " 08:20:00",
+    oqc_folio: "OQC-DEMO-002",
+    entry_folio: "ENT-DEMO-02",
+    exit_folio: "",
+  },
+];
 const receipts: Row[] = [
   {
     invoice_id: 11,
@@ -469,6 +529,40 @@ export async function demoRequest(
       rows: filtered(catalog.map(stock), params),
       summary: { latest_period_start: periodStart },
     };
+  if (route === "inventario-general/auditorias")
+    return {
+      rows: inventoryAudits.filter((row) => {
+        const folio = params.get("folio")?.toLowerCase() || "";
+        const from = params.get("fecha_desde") || "";
+        const to = params.get("fecha_hasta") || "";
+        const started = text(row.started_at).slice(0, 10);
+        return (
+          (!folio || text(row.audit_folio).toLowerCase().includes(folio)) &&
+          (!from || started >= from) &&
+          (!to || started <= to)
+        );
+      }),
+      summary: {
+        total_audits: inventoryAudits.length,
+        open_audits: inventoryAudits.filter((row) => row.status === "open")
+          .length,
+      },
+    };
+  const inventoryAudit = /^inventario-general\/auditorias\/(\d+)$/.exec(route);
+  if (inventoryAudit) {
+    const id = Number(inventoryAudit[1]);
+    const current = inventoryAudits.find((row) => Number(row.id) === id);
+    if (!current) throw new Error("Auditoría no encontrada.");
+    return {
+      audit: structuredClone(current),
+      parts: structuredClone(
+        inventoryAuditParts.filter((row) => Number(row.audit_id) === id),
+      ),
+      boxes: structuredClone(
+        inventoryAuditBoxes.filter((row) => Number(row.audit_id) === id),
+      ),
+    };
+  }
   if (route === "movimientos")
     return { rows: structuredClone(filtered(movements, params)) };
   if (route === "movimientos/historial")

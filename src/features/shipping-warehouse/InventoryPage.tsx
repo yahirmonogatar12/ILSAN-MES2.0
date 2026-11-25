@@ -5,6 +5,7 @@ import { ListingCard, Stats } from "./components";
 import { useListing, useWarehouse } from "./hooks";
 import { columnsFor } from "./warehouseModel";
 import { InventoryClosure } from "./InventoryClosure";
+import { InventoryAudit } from "./InventoryAudit";
 import { number } from "./model";
 const columns = columnsFor([
   ["part_number", "NO. PARTE", 150],
@@ -20,14 +21,16 @@ const columns = columnsFor([
 export default function InventoryPage() {
   const warehouse = useWarehouse();
   const state = useListing(warehouse, "inventory");
-  const [closure, setClosure] = useState(false);
+  const [view, setView] = useState<"inventory" | "closure" | "audit">(
+    "inventory",
+  );
   const summary = state.query.data?.summary;
   return (
     <Page className="shipping-warehouse-page" banner={<DemoBanner />}>
       <div
         className="shipping-warehouse-panel shipping-warehouse-inventory-panel"
-        hidden={closure}
-        inert={closure}
+        hidden={view !== "inventory"}
+        inert={view !== "inventory"}
       >
         <ListingCard
           warehouse={warehouse}
@@ -40,7 +43,12 @@ export default function InventoryPage() {
             {
               id: "closure",
               label: "Cierre de inventario",
-              onClick: () => setClosure(true),
+              onClick: () => setView("closure"),
+            },
+            {
+              id: "audit",
+              label: "Auditoría",
+              onClick: () => setView("audit"),
             },
           ]}
           summary={(rows) => (
@@ -67,10 +75,16 @@ export default function InventoryPage() {
           )}
         />
       </div>
-      {closure && (
+      {view === "closure" && (
         <InventoryClosure
           warehouse={warehouse}
-          close={() => setClosure(false)}
+          close={() => setView("inventory")}
+        />
+      )}
+      {view === "audit" && (
+        <InventoryAudit
+          warehouse={warehouse}
+          close={() => setView("inventory")}
         />
       )}
     </Page>

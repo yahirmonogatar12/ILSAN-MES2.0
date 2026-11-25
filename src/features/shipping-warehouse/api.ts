@@ -4,6 +4,7 @@ import { request, requestFile, saveDownload } from "@/core/http";
 import type { RuntimeMode } from "@/core/runtime";
 import {
   filterParams,
+  inventoryAuditFilterParams,
   movementType,
   paths,
   recordId,
@@ -15,6 +16,7 @@ import type {
   Attachment,
   BatchPreview,
   Filters,
+  InventoryAuditFilters,
   HistoryKind,
   ListKind,
   Listing,
@@ -68,6 +70,7 @@ const json = (method: string, data: unknown): RequestInit => ({
   body: JSON.stringify(data),
 });
 const closure = ROOT + "/inventario-general/cierre";
+const inventoryAudits = ROOT + "/inventario-general/auditorias";
 const qa = ROOT + "/qa-pendientes";
 const adjust = (kind: "entries" | "exits") =>
   ROOT + "/" + paths[kind] + "/ajustes";
@@ -256,6 +259,27 @@ export function createWarehouseApi(mode: RuntimeMode) {
         closure + "/history/" + recordId(batchId) + "/export",
         "cierre-embarques.xlsx",
       );
+    },
+    async inventoryAuditHistory(
+      filters: InventoryAuditFilters,
+      signal?: AbortSignal,
+    ) {
+      return listing(
+        await get(
+          withParams(inventoryAudits, inventoryAuditFilterParams(filters)),
+          signal,
+        ),
+      );
+    },
+    async inventoryAuditDetail(auditId: number, signal?: AbortSignal) {
+      const data = object(
+        await get(inventoryAudits + "/" + recordId(auditId), signal),
+      );
+      return {
+        audit: optionalObject(data.audit),
+        parts: records(data.parts ?? []),
+        boxes: records(data.boxes ?? []),
+      };
     },
     async qaSummary(filters: Filters, signal?: AbortSignal) {
       const data = object(

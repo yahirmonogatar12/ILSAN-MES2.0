@@ -18,6 +18,23 @@ export interface Listing {
   summary: Row;
   metadata: Row;
 }
+
+export interface InventoryAuditFilters {
+  folio: string;
+  fecha_desde: string;
+  fecha_hasta: string;
+}
+
+export interface InventoryAuditListing {
+  rows: Row[];
+  summary: Row;
+}
+
+export interface InventoryAuditDetail {
+  audit: Row;
+  parts: Row[];
+  boxes: Row[];
+}
 export interface BatchPreview extends Listing {
   valid: boolean;
   batchId: number | null;

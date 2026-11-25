@@ -1,0 +1,107 @@
+.shipping-warehouse-audit {
+  display: grid;
+  flex: 1 1 0;
+  grid-template-rows: auto minmax(220px, 1fr) minmax(190px, 0.85fr);
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.shipping-warehouse-audit .surface {
+  min-width: 0;
+  min-height: 0;
+}
+
+.shipping-warehouse-audit-filters {
+  flex-shrink: 0;
+}
+
+.shipping-warehouse-audit-filters > .table-toolbar {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.shipping-warehouse-audit-filters > .table-toolbar > .catalog-heading {
+  display: none;
+}
+
+.shipping-warehouse-audit-filters .inline-message {
+  margin: 0 14px 10px;
+}
+
+.shipping-warehouse-audit-history {
+  min-height: 0;
+}
+
+.shipping-warehouse-audit-history .table-overflow {
+  max-height: none;
+}
+
+.shipping-warehouse-audit-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.shipping-warehouse-audit-detail-grid > .surface-fill {
+  height: 100%;
+  min-height: 0;
+}
+
+.shipping-warehouse-audit-detail-grid .table-overflow {
+  max-height: none;
+}
+
+.shipping-warehouse-audit-status {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shipping-warehouse-audit-status-neutral {
+  background: #ffffff12;
+  color: #d2d7e1;
+}
+
+.shipping-warehouse-audit-status-positive {
+  background: #27ae6026;
+  color: #76dfa3;
+}
+
+.shipping-warehouse-audit-status-warning {
+  background: #f39c1226;
+  color: #ffd17f;
+}
+
+.shipping-warehouse-audit-row-selected > td {
+  background: #2b6ca622;
+}
+
+@media (max-width: 900px), (max-height: 650px) {
+  .shipping-warehouse-audit {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 3px;
+  }
+
+  .shipping-warehouse-audit-history {
+    flex: 0 0 330px;
+  }
+
+  .shipping-warehouse-audit-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+    flex: 0 0 430px;
+    overflow: visible;
+  }
+}

@@ -4,6 +4,7 @@ import {
   buildMovementReview,
   captureMovementEdit,
   filtersFor,
+  inventoryAuditDefaults,
   receiptLines,
   returnRows,
 } from "./model";
@@ -155,6 +156,41 @@ describe("Contratos de Almacén de Embarques", () => {
       "/backend/api/almacen-embarques/inventario-general/cierre/cancel",
     );
     expect(payload(calls[2][1])).toEqual({ batchId: 45 });
+  });
+
+  it("consulta el historial y detalle de auditorías físicas con sus filtros", async () => {
+    const rows = [{ id: 7, audit_folio: "AUD-007", status: "closed" }];
+    const { api, calls } = mockServer(
+      { rows, summary: { total_audits: 1 } },
+      {
+        audit: rows[0],
+        parts: [{ part_number: "0001/03-C", total_boxes: 1 }],
+        boxes: [{ id: 9, box_code: "BOX-9" }],
+      },
+    );
+    const filters = {
+      ...inventoryAuditDefaults(),
+      folio: "AUD-007",
+      fecha_desde: "2026-11-01",
+      fecha_hasta: "2026-11-10",
+    };
+    const { signal } = new AbortController();
+    expect(await api.inventoryAuditHistory(filters, signal)).toMatchObject({
+      rows,
+      summary: { total_audits: 1 },
+    });
+    expect(await api.inventoryAuditDetail(7, signal)).toMatchObject({
+      audit: rows[0],
+      parts: [{ part_number: "0001/03-C" }],
+      boxes: [{ id: 9, box_code: "BOX-9" }],
+    });
+    expect(calls[0][0]).toBe(
+      "/backend/api/almacen-embarques/inventario-general/auditorias?folio=AUD-007&fecha_desde=2026-11-01&fecha_hasta=2026-11-10",
+    );
+    expect(calls[1][0]).toBe(
+      "/backend/api/almacen-embarques/inventario-general/auditorias/7",
+    );
+    expect(calls.map(([, init]) => init.signal)).toEqual([signal, signal]);
   });
 
   it("envía quantity cuando sólo cambia la cantidad visible de una salida", () => {
