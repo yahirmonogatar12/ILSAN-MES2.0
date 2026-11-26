@@ -200,7 +200,7 @@ La barra muestra y permite retirar filtros activos. La persistencia y el momento
 ## Contenedores y diálogos
 
 - `Page`: título opcional, icono, banner, contenido y pie; ocupa el espacio disponible del módulo. No sabe de sesión ni de API. Omitir `title` evita repetir en el contenido el nombre que ya muestra la navegación, sin dejar espacio de encabezado.
-- `Card`: título, icono, contador opcional, acciones y contenido. Usar `fill` en la tarjeta del listado principal: la tabla toma el alto restante y conserva su scroll interno, con encabezado, filtros y paginación fuera de esa área de desplazamiento. La plantilla de módulos ya usa este patrón.
+- `Card`: título, icono, contador opcional, acciones y contenido. `titleMeta` agrega información junto al título visible. Usar `fill` en la tarjeta del listado principal: la tabla toma el alto restante y conserva su scroll interno, con encabezado, filtros y paginación fuera de esa área de desplazamiento. La plantilla de módulos ya usa este patrón.
 - `Modal`: título, subtítulo, `size="md"|"lg"|"xl"`, `busy`, `onClose` y contenido. Los tamaños limitan el ancho a 490, 780 y 1,400 px respectivamente, siempre dentro del viewport. `xl` sirve para listados con muchas columnas, como el historial ECO. Usa diálogo nativo, IDs únicos y restauración de foco; bloquea cierre durante una escritura.
 - `DialogBody` y `DialogFooter`: zonas comunes de un diálogo.
 - `ConfirmDialog`: confirmación parametrizada, carga y error; no elimina datos por sí mismo. `confirmVariant` permite usar la variante común `success` para aprobaciones; conserva `danger` por defecto.

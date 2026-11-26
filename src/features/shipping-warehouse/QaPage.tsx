@@ -24,6 +24,10 @@ import { DualLists } from "./DualLists";
 import { rowKey, text } from "./model";
 import type { Filters, Listing, QaKind, Row } from "./types";
 
+const sectionTitles = {
+  entrada: "Entrada a almacén",
+  liberacion: "Liberación QA",
+};
 const titles = {
   entrada: "Pendientes de entrada a almacén",
   liberacion: "Pendientes de liberación QA",
@@ -144,16 +148,22 @@ function QaList({
     [open],
   );
   return (
-    <Card fill label={titles[kind]}>
-      {listing && (
-        <Stats
-          items={[
-            ["Partes", listing.summary.pending_parts],
-            ["Cajas", listing.summary.pending_boxes],
-            ["Piezas", listing.summary.pending_quantity],
-          ]}
-        />
-      )}
+    <Card
+      fill
+      className="shipping-warehouse-qa-list"
+      title={sectionTitles[kind]}
+      titleMeta={
+        listing && (
+          <Stats
+            items={[
+              ["Partes", listing.summary.pending_parts],
+              ["Cajas", listing.summary.pending_boxes],
+              ["Piezas", listing.summary.pending_quantity],
+            ]}
+          />
+        )
+      }
+    >
       <DataGrid
         label={titles[kind]}
         rows={listing?.rows ?? []}
@@ -200,8 +210,8 @@ export default function QaPage() {
       />
       <DualLists
         label="Pendientes QA Embarques"
-        left={{ label: "Entrada a almacén", content: list("entrada") }}
-        right={{ label: "Liberación QA", content: list("liberacion") }}
+        left={{ label: sectionTitles.entrada, content: list("entrada") }}
+        right={{ label: sectionTitles.liberacion, content: list("liberacion") }}
       />
       {selection && (
         <Boxes

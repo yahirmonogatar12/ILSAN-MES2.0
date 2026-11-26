@@ -11,6 +11,7 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 
 export function Card({
   title,
+  titleMeta,
   label,
   icon,
   actions,
@@ -20,6 +21,8 @@ export function Card({
   className = "",
 }: {
   title?: string;
+  /** Supporting content beside the visible title. */
+  titleMeta?: ReactNode;
   /** Accessible section name for a table whose visible heading is omitted. */
   label?: string;
   icon?: ReactNode;
@@ -42,6 +45,7 @@ export function Card({
           <div>
             {icon && <span className="catalog-icon">{icon}</span>}
             {title && <h2 id={id}>{title}</h2>}
+            {title && titleMeta}
             {badge !== undefined && (
               <span className="count-badge">{badge}</span>
             )}
