@@ -5,7 +5,6 @@ import {
   lqcDefaults,
   lqcFiltered,
   lqcSummary,
-  lqcUpperPart,
   operationalDate,
   oqcDefaults,
   ppmDefaults,
@@ -141,13 +140,6 @@ describe("Liberaciones y PPM", () => {
     ).toHaveLength(2);
     expect(lqcFiltered(records, "false")).toHaveLength(0);
     expect(lqcFiltered(records, "0001/a")).toHaveLength(3);
-    const mixed = [
-      { ...records[0], part: "ebr76683912" },
-      { ...records[1], part: " EBR76683912" },
-    ].map(lqcUpperPart);
-    expect(lqcSummary(mixed, true)).toEqual([
-      expect.objectContaining({ part: "EBR76683912", total: 2 }),
-    ]);
   });
   it("abre OQC sin acotar fechas y conserva el resumen y aviso de truncamiento del servidor", async () => {
     const record = { id: 1, part_number: "0001/OQC+01-A", quantity: 0 };

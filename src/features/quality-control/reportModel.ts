@@ -106,11 +106,6 @@ export function ppmParams(stage: PpmStage, filters: PpmFilters) {
   if (filters.q.trim()) params.set("q", filters.q.trim());
   return params;
 }
-/** El escáner manda el número de parte en mayúsculas o minúsculas: es la misma parte. */
-export const lqcUpperPart = (row: Row): Row => ({
-  ...row,
-  part: text(row.part).trim().toUpperCase(),
-});
 export function lqcFiltered(records: Row[], search: string) {
   const term = search.trim().toLocaleLowerCase("es");
   const fields = [

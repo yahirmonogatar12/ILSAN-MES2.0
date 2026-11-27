@@ -21,7 +21,6 @@ import {
   lqcDefaults,
   lqcFiltered,
   lqcSummary,
-  lqcUpperPart,
   operationalDate,
   reportDateIssue,
 } from "./reportModel";
@@ -58,7 +57,7 @@ export default function LqcReleasePage() {
     enabled: screen === "records",
   });
   const visible = useMemo(
-    () => lqcFiltered((query.data ?? []).map(lqcUpperPart), filters.search),
+    () => lqcFiltered(query.data ?? [], filters.search),
     [query.data, filters.search],
   );
   const allLines = !filters.linea;
